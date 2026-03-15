@@ -6,34 +6,64 @@
     <title>Brian Prado | Portafolio</title>
     <style>
         :root {
-            --bg: #070b1a;
-            --panel: #11172b;
-            --panel-soft: #1a2340;
-            --accent: #6ee7ff;
-            --accent-strong: #7c5cff;
-            --text: #e9f1ff;
-            --muted: #a5b4d6;
-            --ring: rgba(110, 231, 255, 0.35);
+            --bg: #070a17;
+            --surface-a: rgba(15, 21, 42, 0.9);
+            --surface-b: rgba(22, 31, 61, 0.72);
+            --surface-c: rgba(255, 255, 255, 0.05);
+            --surface-d: rgba(255, 255, 255, 0.02);
+            --topbar-bg: rgba(7, 10, 23, 0.72);
+            --accent: #64d8ff;
+            --accent-strong: #8c73ff;
+            --text: #e7eeff;
+            --muted: #9eb0d8;
+            --ring: rgba(100, 216, 255, 0.35);
+            --border: rgba(255, 255, 255, 0.1);
+            --hover-bg: rgba(255, 255, 255, 0.08);
+            --glow-1: rgba(140, 115, 255, 0.28);
+            --glow-2: rgba(100, 216, 255, 0.22);
             --mx: 15%;
             --my: 20%;
             --mx2: 85%;
             --my2: 10%;
         }
 
+        :root[data-theme="light"] {
+            --bg: #eef3ff;
+            --surface-a: rgba(255, 255, 255, 0.9);
+            --surface-b: rgba(236, 242, 255, 0.95);
+            --surface-c: rgba(255, 255, 255, 0.85);
+            --surface-d: rgba(243, 247, 255, 0.9);
+            --topbar-bg: rgba(238, 243, 255, 0.82);
+            --accent: #0062d6;
+            --accent-strong: #5e35ff;
+            --text: #1b2645;
+            --muted: #4d5f89;
+            --ring: rgba(0, 98, 214, 0.3);
+            --border: rgba(27, 38, 69, 0.16);
+            --hover-bg: rgba(27, 38, 69, 0.08);
+            --glow-1: rgba(94, 53, 255, 0.2);
+            --glow-2: rgba(0, 98, 214, 0.18);
+        }
+
         * {
             box-sizing: border-box;
+        }
+
+        html {
+            scroll-behavior: smooth;
         }
 
         body {
             margin: 0;
             font-family: "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
             background:
-                radial-gradient(circle at var(--mx) var(--my), rgba(124, 92, 255, 0.25), transparent 35%),
-                radial-gradient(circle at var(--mx2) var(--my2), rgba(110, 231, 255, 0.2), transparent 30%),
+                radial-gradient(circle at var(--mx) var(--my), var(--glow-1), transparent 35%),
+                radial-gradient(circle at var(--mx2) var(--my2), var(--glow-2), transparent 30%),
                 var(--bg);
             color: var(--text);
             line-height: 1.6;
-            transition: background-position 0.06s linear;
+            min-height: 100vh;
+            transition: background-position 0.06s linear, background-color 0.2s ease, color 0.2s ease;
         }
 
         .container {
@@ -41,16 +71,83 @@
             margin: 0 auto;
         }
 
+        .topbar {
+            position: sticky;
+            top: 0;
+            z-index: 15;
+            backdrop-filter: blur(8px);
+            background: var(--topbar-bg);
+            border-bottom: 1px solid var(--border);
+        }
+
+        .topbar-inner {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            min-height: 62px;
+            gap: 1rem;
+        }
+
+        .nav-right {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .brand {
+            margin: 0;
+            font-size: 0.95rem;
+            letter-spacing: 0.04em;
+            font-weight: 800;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 0.85rem;
+        }
+
+        .nav-links a {
+            color: var(--muted);
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 0.9rem;
+            padding: 0.28rem 0.55rem;
+            border-radius: 8px;
+            transition: background 0.2s ease, color 0.2s ease;
+        }
+
+        .nav-links a:hover {
+            color: var(--text);
+            background: var(--hover-bg);
+        }
+
+        .theme-toggle {
+            border: 1px solid var(--border);
+            background: var(--surface-c);
+            color: var(--text);
+            border-radius: 10px;
+            padding: 0.34rem 0.65rem;
+            font-size: 0.82rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: transform 0.2s ease, background 0.2s ease;
+        }
+
+        .theme-toggle:hover {
+            transform: translateY(-1px);
+            background: var(--hover-bg);
+        }
+
         header {
-            padding: 5.5rem 0 3rem;
+            padding: 4rem 0 2.5rem;
         }
 
         .hero {
             display: grid;
             gap: 1.5rem;
             padding: 2rem;
-            background: linear-gradient(150deg, rgba(17, 23, 43, 0.88), rgba(26, 35, 64, 0.7));
-            border: 1px solid rgba(255, 255, 255, 0.08);
+            background: linear-gradient(150deg, var(--surface-a), var(--surface-b));
+            border: 1px solid var(--border);
             border-radius: 20px;
             box-shadow: 0 24px 50px -24px rgba(0, 0, 0, 0.75);
             backdrop-filter: blur(6px);
@@ -80,6 +177,22 @@
             font-size: 1.05rem;
         }
 
+        .quick-points {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.55rem;
+        }
+
+        .quick-points span {
+            border: 1px solid var(--border);
+            background: var(--surface-c);
+            color: var(--text);
+            padding: 0.24rem 0.58rem;
+            border-radius: 999px;
+            font-size: 0.8rem;
+            font-weight: 600;
+        }
+
         .cta-row {
             display: flex;
             flex-wrap: wrap;
@@ -103,8 +216,8 @@
 
         .button-secondary {
             color: var(--text);
-            background: rgba(255, 255, 255, 0.06);
-            border: 1px solid rgba(255, 255, 255, 0.12);
+            background: var(--surface-c);
+            border: 1px solid var(--border);
         }
 
         .button:hover {
@@ -137,8 +250,8 @@
         }
 
         .project-card {
-            background: linear-gradient(160deg, rgba(255, 255, 255, 0.05), rgba(255, 255, 255, 0.02));
-            border: 1px solid rgba(255, 255, 255, 0.08);
+            background: linear-gradient(160deg, var(--surface-c), var(--surface-d));
+            border: 1px solid var(--border);
             border-radius: 16px;
             padding: 1rem;
             min-height: 130px;
@@ -154,6 +267,15 @@
         .project-card h3 {
             margin: 0 0 0.55rem;
             font-size: 1.04rem;
+        }
+
+        .project-card h3 a {
+            color: inherit;
+            text-decoration: none;
+        }
+
+        .project-card h3 a:hover {
+            color: var(--accent);
         }
 
         .project-card p {
@@ -227,11 +349,28 @@
             filter: brightness(1.08);
         }
 
+        .tech-chips {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.45rem;
+            margin-top: 0.75rem;
+        }
+
+        .tech-chips span {
+            padding: 0.2rem 0.45rem;
+            font-size: 0.75rem;
+            font-weight: 700;
+            border-radius: 8px;
+            color: var(--muted);
+            border: 1px solid var(--border);
+            background: var(--surface-c);
+        }
+
         .contact-card {
             margin-top: 2rem;
             padding: 1.2rem;
-            background: linear-gradient(160deg, rgba(255, 255, 255, 0.05), rgba(255, 255, 255, 0.02));
-            border: 1px solid rgba(255, 255, 255, 0.08);
+            background: linear-gradient(160deg, var(--surface-c), var(--surface-d));
+            border: 1px solid var(--border);
             border-radius: 16px;
         }
 
@@ -256,11 +395,11 @@
             display: inline-flex;
             align-items: center;
             justify-content: center;
-            background: rgba(110, 231, 255, 0.14);
+            background: color-mix(in srgb, var(--accent) 18%, transparent);
             color: var(--accent);
             font-weight: 800;
             font-size: 1rem;
-            border: 1px solid rgba(110, 231, 255, 0.25);
+            border: 1px solid color-mix(in srgb, var(--accent) 32%, transparent);
         }
 
         .contact-label {
@@ -306,7 +445,7 @@
         }
 
         footer {
-            border-top: 1px solid rgba(255, 255, 255, 0.08);
+            border-top: 1px solid var(--border);
             color: var(--muted);
             text-align: center;
             padding: 1.25rem 0 2rem;
@@ -314,6 +453,16 @@
         }
 
         @media (max-width: 640px) {
+            .topbar-inner {
+                min-height: 56px;
+            }
+            .nav-links {
+                gap: 0.45rem;
+            }
+            .theme-toggle {
+                padding: 0.3rem 0.5rem;
+                font-size: 0.76rem;
+            }
             header {
                 padding-top: 4rem;
             }
@@ -337,14 +486,32 @@
     </style>
 </head>
 <body>
+    <nav class="topbar">
+        <div class="container topbar-inner">
+            <p class="brand">Brian Prado</p>
+            <div class="nav-right">
+                <div class="nav-links">
+                    <a href="#inicio">Inicio</a>
+                    <a href="#proyectos">Proyectos</a>
+                    <a href="#contacto">Contacto</a>
+                </div>
+                <button class="theme-toggle" id="themeToggle" type="button" aria-label="Cambiar tema">Modo claro</button>
+            </div>
+        </div>
+    </nav>
     <header class="container">
-        <section class="hero">
+        <section class="hero" id="inicio">
             <span class="eyebrow">Portafolio personal</span>
             <h1>Hola, soy Brian Prado</h1>
-            <p class="subtitle">Soy estudiante de Ingeniería Mecatronica, apasionado por la programación y el desarrollo de software. En esta pagina comparto mis proyectos y experiencias.</p>
+            <p class="subtitle">Soy estudiante de Ingeniería Mecatrónica, apasionado por la programación y el desarrollo de software. Aquí comparto proyectos reales y mi evolución técnica.</p>
+            <div class="quick-points">
+                <span>C++</span>
+                <span>Python</span>
+                <span>Problem Solving</span>
+            </div>
             <div class="cta-row">
                 <a class="button button-primary" href="#proyectos">Ver proyectos</a>
-                <a class="button button-secondary" href="mailto:contacto@ejemplo.com">Contactar</a>
+                <a class="button button-secondary" href="#contacto">Contactar</a>
             </div>
         </section>
     </header>
@@ -354,27 +521,41 @@
         <p class="section-copy">Estos son algunos de los trabajos que mejor representan mi perfil técnico y mi enfoque práctico.</p>
         <ul class="project-grid">
             <li class="project-card with-preview">
-                <h3>Sistema de Punto de Venta</h3>
+                <h3><a href="https://github.com/BrianPrado-Dev/TortasAhogadas" target="_blank" rel="noopener noreferrer">Sistema de Punto de Venta</a></h3>
                 <p>Aplicación en Python para tomar pedidos a domicilio de un restaurante familiar</p>
+                <div class="tech-chips">
+                    <span>Python</span>
+                    <span>Inventario</span>
+                    <span>Pedidos</span>
+                </div>
                 <div class="project-actions">
-                    <a class="external-link-btn" href="https://github.com/BrianPrado-Dev/TortasAhogadas" target="_blank" rel="noopener noreferrer">↗ link</a>
+                    <a class="external-link-btn" href="https://github.com/BrianPrado-Dev/TortasAhogadas" target="_blank" rel="noopener noreferrer">↗ Ver repositorio</a>
                 </div>
                 <div class="project-preview">
                     <img src="tortas.webp" alt="Vista previa del Sistema de Punto de Venta">
                 </div>
             </li>
             <li class="project-card">
-                <h3>Método de Jacobi</h3>
+                <h3><a href="https://github.com/BrianPrado-Dev/JacobiMetodo" target="_blank" rel="noopener noreferrer">Método de Jacobi</a></h3>
                 <p>Herramienta en C++ para resolver sistemas de ecuaciones con visualización iterativa.</p>
+                <div class="tech-chips">
+                    <span>C++</span>
+                    <span>Métodos Numéricos</span>
+                </div>
                 <div class="project-actions">
-                    <a class="external-link-btn" href="https://github.com/BrianPrado-Dev/JacobiMetodo" target="_blank" rel="noopener noreferrer">↗ link</a>
+                    <a class="external-link-btn" href="https://github.com/BrianPrado-Dev/JacobiMetodo" target="_blank" rel="noopener noreferrer">↗ Ver repositorio</a>
                 </div>
             </li>
             <li class="project-card">
-                <h3>Juego estilo Tetris</h3>
+                <h3><a href="https://github.com/BrianPrado-Dev/JacobiMetodo" target="_blank" rel="noopener noreferrer">Juego estilo Tetris</a></h3>
                 <p>Desarrollado en C++ con SFML, enfocado en jugabilidad fluida y arquitectura modular.</p>
+                <div class="tech-chips">
+                    <span>C++</span>
+                    <span>SFML</span>
+                    <span>Game Dev</span>
+                </div>
                 <div class="project-actions">
-                    <a class="external-link-btn" href="https://github.com/BrianPrado-Dev/JacobiMetodo" target="_blank" rel="noopener noreferrer">↗ link</a>
+                    <a class="external-link-btn" href="https://github.com/BrianPrado-Dev/JacobiMetodo" target="_blank" rel="noopener noreferrer">↗ Ver repositorio</a>
                 </div>
             </li>
             <li class="project-card">
@@ -383,7 +564,7 @@
             </li>
         </ul>
 
-        <section class="contact-card">
+        <section class="contact-card" id="contacto">
             <h2 class="section-title">Contacto</h2>
             <p class="section-copy">¿Te interesa colaborar o tienes una propuesta? Puedes escribirme directamente.</p>
             <div class="contact-layout">
@@ -403,6 +584,25 @@
         <div class="container">© 2026 Brian Prado</div>
     </footer>
     <script>
+        (function () {
+            var root = document.documentElement;
+            var toggle = document.getElementById("themeToggle");
+            var savedTheme = localStorage.getItem("theme");
+            var currentTheme = savedTheme === "light" ? "light" : "dark";
+
+            function applyTheme(theme) {
+                root.setAttribute("data-theme", theme);
+                toggle.textContent = theme === "dark" ? "Modo claro" : "Modo oscuro";
+                localStorage.setItem("theme", theme);
+            }
+
+            applyTheme(currentTheme);
+            toggle.addEventListener("click", function () {
+                currentTheme = root.getAttribute("data-theme") === "dark" ? "light" : "dark";
+                applyTheme(currentTheme);
+            });
+        })();
+
         document.addEventListener("mousemove", function (event) {
             var x = (event.clientX / window.innerWidth) * 100;
             var y = (event.clientY / window.innerHeight) * 100;
