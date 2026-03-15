@@ -14,6 +14,10 @@
             --text: #e9f1ff;
             --muted: #a5b4d6;
             --ring: rgba(110, 231, 255, 0.35);
+            --mx: 15%;
+            --my: 20%;
+            --mx2: 85%;
+            --my2: 10%;
         }
 
         * {
@@ -24,11 +28,12 @@
             margin: 0;
             font-family: "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
             background:
-                radial-gradient(circle at 15% 20%, rgba(124, 92, 255, 0.25), transparent 35%),
-                radial-gradient(circle at 85% 10%, rgba(110, 231, 255, 0.2), transparent 30%),
+                radial-gradient(circle at var(--mx) var(--my), rgba(124, 92, 255, 0.25), transparent 35%),
+                radial-gradient(circle at var(--mx2) var(--my2), rgba(110, 231, 255, 0.2), transparent 30%),
                 var(--bg);
             color: var(--text);
             line-height: 1.6;
+            transition: background-position 0.06s linear;
         }
 
         .container {
@@ -125,6 +130,7 @@
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
             gap: 1rem;
+            align-items: start;
             list-style: none;
             margin: 0;
             padding: 0;
@@ -156,6 +162,149 @@
             font-size: 0.95rem;
         }
 
+        .project-actions {
+            margin-top: 0.85rem;
+        }
+
+        .project-card.with-preview {
+            overflow: visible;
+            position: relative;
+            z-index: 1;
+        }
+
+        .project-preview {
+            max-height: 0;
+            opacity: 0;
+            transform: scale(0.98);
+            margin-top: 0;
+            border-radius: 12px;
+            overflow: hidden;
+            transition: max-height 0.35s ease, opacity 0.25s ease, transform 0.25s ease, margin-top 0.25s ease;
+        }
+
+        .project-preview img {
+            display: block;
+            width: auto;
+            height: auto;
+            max-width: none;
+        }
+
+        .project-card.with-preview:hover {
+            transform: translateY(-8px) scale(1.06);
+            z-index: 6;
+            box-shadow: 0 30px 60px -30px rgba(0, 0, 0, 0.85);
+        }
+
+        .project-card.with-preview:hover .project-preview {
+            max-height: 1000px;
+            opacity: 1;
+            transform: scale(1);
+            margin-top: 0.85rem;
+            overflow: visible;
+        }
+
+        .project-card.with-preview:hover .project-preview img {
+            max-width: min(92vw, 1400px);
+        }
+
+        .external-link-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.3rem;
+            padding: 0.4rem 0.65rem;
+            border-radius: 10px;
+            border: 1px solid rgba(255, 255, 255, 0.12);
+            background: #16a34a;
+            color: #ecfdf3;
+            text-decoration: none;
+            font-size: 0.82rem;
+            font-weight: 700;
+            transition: transform 0.2s ease, filter 0.2s ease;
+        }
+
+        .external-link-btn:hover {
+            transform: translateY(-1px);
+            filter: brightness(1.08);
+        }
+
+        .contact-card {
+            margin-top: 2rem;
+            padding: 1.2rem;
+            background: linear-gradient(160deg, rgba(255, 255, 255, 0.05), rgba(255, 255, 255, 0.02));
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 16px;
+        }
+
+        .contact-layout {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 1rem;
+            flex-wrap: wrap;
+        }
+
+        .contact-meta {
+            display: flex;
+            align-items: center;
+            gap: 0.85rem;
+        }
+
+        .contact-icon {
+            width: 46px;
+            height: 46px;
+            border-radius: 12px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            background: rgba(110, 231, 255, 0.14);
+            color: var(--accent);
+            font-weight: 800;
+            font-size: 1rem;
+            border: 1px solid rgba(110, 231, 255, 0.25);
+        }
+
+        .contact-label {
+            margin: 0;
+            color: var(--muted);
+            font-size: 0.85rem;
+            text-transform: uppercase;
+            letter-spacing: 0.06em;
+        }
+
+        .contact-email {
+            margin: 0.1rem 0 0;
+            font-size: 1.06rem;
+            font-weight: 700;
+        }
+
+        .contact-email a {
+            color: var(--text);
+            text-decoration: none;
+        }
+
+        .contact-email a:hover {
+            color: var(--accent);
+        }
+
+        .contact-action {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.45rem;
+            padding: 0.62rem 0.95rem;
+            border-radius: 12px;
+            border: 1px solid rgba(110, 231, 255, 0.28);
+            background: linear-gradient(120deg, rgba(110, 231, 255, 0.2), rgba(124, 92, 255, 0.2));
+            color: var(--text);
+            font-weight: 700;
+            text-decoration: none;
+            transition: transform 0.2s ease, border-color 0.2s ease;
+        }
+
+        .contact-action:hover {
+            transform: translateY(-2px);
+            border-color: rgba(110, 231, 255, 0.5);
+        }
+
         footer {
             border-top: 1px solid rgba(255, 255, 255, 0.08);
             color: var(--muted);
@@ -171,6 +320,19 @@
             .hero {
                 padding: 1.4rem;
             }
+            .contact-action {
+                width: 100%;
+                justify-content: center;
+            }
+            .project-card.with-preview:hover {
+                transform: translateY(-6px) scale(1.02);
+            }
+            .project-card.with-preview:hover .project-preview {
+                max-height: 38vh;
+            }
+            .project-card.with-preview:hover .project-preview img {
+                max-width: 92vw;
+            }
         }
     </style>
 </head>
@@ -179,7 +341,7 @@
         <section class="hero">
             <span class="eyebrow">Portafolio personal</span>
             <h1>Hola, soy Brian Prado</h1>
-            <p class="subtitle">Construyo soluciones de software enfocadas en utilidad real: desde herramientas matemáticas y sistemas de escritorio hasta proyectos interactivos.</p>
+            <p class="subtitle">Soy estudiante de Ingeniería Mecatronica, apasionado por la programación y el desarrollo de software. En esta pagina comparto mis proyectos y experiencias.</p>
             <div class="cta-row">
                 <a class="button button-primary" href="#proyectos">Ver proyectos</a>
                 <a class="button button-secondary" href="mailto:contacto@ejemplo.com">Contactar</a>
@@ -191,27 +353,64 @@
         <h2 class="section-title">Mis proyectos destacados</h2>
         <p class="section-copy">Estos son algunos de los trabajos que mejor representan mi perfil técnico y mi enfoque práctico.</p>
         <ul class="project-grid">
-            <li class="project-card">
+            <li class="project-card with-preview">
                 <h3>Sistema de Punto de Venta</h3>
-                <p>Aplicación en Python para registrar ventas, productos e inventario con flujo de uso claro.</p>
+                <p>Aplicación en Python para tomar pedidos a domicilio de un restaurante familiar</p>
+                <div class="project-actions">
+                    <a class="external-link-btn" href="https://github.com/BrianPrado-Dev/TortasAhogadas" target="_blank" rel="noopener noreferrer">↗ link</a>
+                </div>
+                <div class="project-preview">
+                    <img src="tortas.webp" alt="Vista previa del Sistema de Punto de Venta">
+                </div>
             </li>
             <li class="project-card">
                 <h3>Método de Jacobi</h3>
                 <p>Herramienta en C++ para resolver sistemas de ecuaciones con visualización iterativa.</p>
+                <div class="project-actions">
+                    <a class="external-link-btn" href="https://github.com/BrianPrado-Dev/JacobiMetodo" target="_blank" rel="noopener noreferrer">↗ link</a>
+                </div>
             </li>
             <li class="project-card">
                 <h3>Juego estilo Tetris</h3>
                 <p>Desarrollado en C++ con SFML, enfocado en jugabilidad fluida y arquitectura modular.</p>
+                <div class="project-actions">
+                    <a class="external-link-btn" href="https://github.com/BrianPrado-Dev/JacobiMetodo" target="_blank" rel="noopener noreferrer">↗ link</a>
+                </div>
             </li>
             <li class="project-card">
                 <h3>Próximamente</h3>
                 <p>Nuevos proyectos en camino orientados a automatización y experiencia de usuario.</p>
             </li>
         </ul>
+
+        <section class="contact-card">
+            <h2 class="section-title">Contacto</h2>
+            <p class="section-copy">¿Te interesa colaborar o tienes una propuesta? Puedes escribirme directamente.</p>
+            <div class="contact-layout">
+                <div class="contact-meta">
+                    <span class="contact-icon">✉</span>
+                    <div>
+                        <p class="contact-label">Correo electrónico</p>
+                        <p class="contact-email"><a href="mailto:a23310366@ceti.mx">a23310366@ceti.mx</a></p>
+                    </div>
+                </div>
+                <a class="contact-action" href="mailto:a23310366@ceti.mx">Enviar correo ↗</a>
+            </div>
+        </section>
     </main>
 
     <footer>
-        <div class="container">© 2026 Brian Prado · Hecho con HTML y CSS</div>
+        <div class="container">© 2026 Brian Prado</div>
     </footer>
+    <script>
+        document.addEventListener("mousemove", function (event) {
+            var x = (event.clientX / window.innerWidth) * 100;
+            var y = (event.clientY / window.innerHeight) * 100;
+            document.documentElement.style.setProperty("--mx", x.toFixed(2) + "%");
+            document.documentElement.style.setProperty("--my", y.toFixed(2) + "%");
+            document.documentElement.style.setProperty("--mx2", (100 - x).toFixed(2) + "%");
+            document.documentElement.style.setProperty("--my2", (100 - y).toFixed(2) + "%");
+        });
+    </script>
 </body>
 </html>
