@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Brian Prado | Portafolio</title>
+    <style>
+        :root {
+            --bg: #070b1a;
+            --panel: #11172b;
+            --panel-soft: #1a2340;
+            --accent: #6ee7ff;
+            --accent-strong: #7c5cff;
+            --text: #e9f1ff;
+            --muted: #a5b4d6;
+            --ring: rgba(110, 231, 255, 0.35);
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            font-family: "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background:
+                radial-gradient(circle at 15% 20%, rgba(124, 92, 255, 0.25), transparent 35%),
+                radial-gradient(circle at 85% 10%, rgba(110, 231, 255, 0.2), transparent 30%),
+                var(--bg);
+            color: var(--text);
+            line-height: 1.6;
+        }
+
+        .container {
+            width: min(1000px, 92%);
+            margin: 0 auto;
+        }
+
+        header {
+            padding: 5.5rem 0 3rem;
+        }
+
+        .hero {
+            display: grid;
+            gap: 1.5rem;
+            padding: 2rem;
+            background: linear-gradient(150deg, rgba(17, 23, 43, 0.88), rgba(26, 35, 64, 0.7));
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 20px;
+            box-shadow: 0 24px 50px -24px rgba(0, 0, 0, 0.75);
+            backdrop-filter: blur(6px);
+        }
+
+        .eyebrow {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.4rem;
+            font-size: 0.82rem;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            color: var(--accent);
+            font-weight: 700;
+        }
+
+        h1 {
+            margin: 0;
+            font-size: clamp(1.9rem, 4.4vw, 3.2rem);
+            line-height: 1.2;
+        }
+
+        .subtitle {
+            margin: 0;
+            max-width: 62ch;
+            color: var(--muted);
+            font-size: 1.05rem;
+        }
+
+        .cta-row {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.8rem;
+        }
+
+        .button {
+            display: inline-block;
+            padding: 0.72rem 1.1rem;
+            border-radius: 999px;
+            text-decoration: none;
+            font-weight: 700;
+            transition: transform 0.2s ease, box-shadow 0.2s ease, opacity 0.2s ease;
+        }
+
+        .button-primary {
+            color: #03111f;
+            background: linear-gradient(120deg, var(--accent), #9ef5ff);
+            box-shadow: 0 14px 24px -16px var(--ring);
+        }
+
+        .button-secondary {
+            color: var(--text);
+            background: rgba(255, 255, 255, 0.06);
+            border: 1px solid rgba(255, 255, 255, 0.12);
+        }
+
+        .button:hover {
+            transform: translateY(-2px);
+            opacity: 0.95;
+        }
+
+        main {
+            padding-bottom: 3.5rem;
+        }
+
+        .section-title {
+            margin: 0 0 0.9rem;
+            font-size: 1.5rem;
+        }
+
+        .section-copy {
+            margin: 0 0 1.6rem;
+            color: var(--muted);
+        }
+
+        .project-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 1rem;
+            list-style: none;
+            margin: 0;
+            padding: 0;
+        }
+
+        .project-card {
+            background: linear-gradient(160deg, rgba(255, 255, 255, 0.05), rgba(255, 255, 255, 0.02));
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 16px;
+            padding: 1rem;
+            min-height: 130px;
+            transition: border-color 0.2s ease, transform 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        .project-card:hover {
+            transform: translateY(-4px);
+            border-color: rgba(110, 231, 255, 0.45);
+            box-shadow: 0 16px 28px -18px rgba(110, 231, 255, 0.45);
+        }
+
+        .project-card h3 {
+            margin: 0 0 0.55rem;
+            font-size: 1.04rem;
+        }
+
+        .project-card p {
+            margin: 0;
+            color: var(--muted);
+            font-size: 0.95rem;
+        }
+
+        footer {
+            border-top: 1px solid rgba(255, 255, 255, 0.08);
+            color: var(--muted);
+            text-align: center;
+            padding: 1.25rem 0 2rem;
+            font-size: 0.9rem;
+        }
+
+        @media (max-width: 640px) {
+            header {
+                padding-top: 4rem;
+            }
+            .hero {
+                padding: 1.4rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header class="container">
+        <section class="hero">
+            <span class="eyebrow">Portafolio personal</span>
+            <h1>Hola, soy Brian Prado</h1>
+            <p class="subtitle">Construyo soluciones de software enfocadas en utilidad real: desde herramientas matemáticas y sistemas de escritorio hasta proyectos interactivos.</p>
+            <div class="cta-row">
+                <a class="button button-primary" href="#proyectos">Ver proyectos</a>
+                <a class="button button-secondary" href="mailto:contacto@ejemplo.com">Contactar</a>
+            </div>
+        </section>
+    </header>
+
+    <main class="container" id="proyectos">
+        <h2 class="section-title">Mis proyectos destacados</h2>
+        <p class="section-copy">Estos son algunos de los trabajos que mejor representan mi perfil técnico y mi enfoque práctico.</p>
+        <ul class="project-grid">
+            <li class="project-card">
+                <h3>Sistema de Punto de Venta</h3>
+                <p>Aplicación en Python para registrar ventas, productos e inventario con flujo de uso claro.</p>
+            </li>
+            <li class="project-card">
+                <h3>Método de Jacobi</h3>
+                <p>Herramienta en C++ para resolver sistemas de ecuaciones con visualización iterativa.</p>
+            </li>
+            <li class="project-card">
+                <h3>Juego estilo Tetris</h3>
+                <p>Desarrollado en C++ con SFML, enfocado en jugabilidad fluida y arquitectura modular.</p>
+            </li>
+            <li class="project-card">
+                <h3>Próximamente</h3>
+                <p>Nuevos proyectos en camino orientados a automatización y experiencia de usuario.</p>
+            </li>
+        </ul>
+    </main>
+
+    <footer>
+        <div class="container">© 2026 Brian Prado · Hecho con HTML y CSS</div>
+    </footer>
+</body>
+</html>
