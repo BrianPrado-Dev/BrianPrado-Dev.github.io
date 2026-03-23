@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+
+<html class="light" lang="es"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<link href="https://fonts.googleapis.com/css2?family=Epilogue:wght@400;500;700;800;900&amp;family=Be+Vietnam+Pro:wght@400;500;600&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            colors: {
+              "on-error": "#ffffff",
+              "tertiary-fixed": "#c8e6ff",
+              "outline": "#8f706c",
+              "tertiary-container": "#006e9d",
+              "primary-fixed-dim": "#ffb4ac",
+              "error-container": "#ffdad6",
+              "secondary-container": "#fe8a80",
+              "on-tertiary": "#ffffff",
+              "surface": "#fbfbe2",
+              "on-secondary": "#ffffff",
+              "on-secondary-fixed-variant": "#7f2924",
+              "surface-container-highest": "#e4e4cc",
+              "surface-container-low": "#f5f5dc",
+              "on-surface-variant": "#5b403d",
+              "secondary-fixed-dim": "#ffb4ac",
+              "surface-variant": "#e4e4cc",
+              "outline-variant": "#e4beba",
+              "secondary-fixed": "#ffdad6",
+              "on-primary-container": "#ffe0dd",
+              "inverse-surface": "#303221",
+              "inverse-primary": "#ffb4ac",
+              "primary-fixed": "#ffdad6",
+              "surface-container-lowest": "#ffffff",
+              "surface-bright": "#fbfbe2",
+              "secondary": "#9e403a",
+              "on-primary": "#ffffff",
+              "on-primary-fixed-variant": "#93000e",
+              "on-surface": "#1b1d0e",
+              "inverse-on-surface": "#f2f2d9",
+              "primary": "#a20513",
+              "surface-tint": "#b91d20",
+              "on-tertiary-container": "#d1eaff",
+              "on-primary-fixed": "#410003",
+              "tertiary-fixed-dim": "#88ceff",
+              "surface-container-high": "#eaead1",
+              "on-background": "#1b1d0e",
+              "on-secondary-fixed": "#410003",
+              "background": "#fbfbe2",
+              "primary-container": "#c62828",
+              "on-error-container": "#93000a",
+              "surface-container": "#efefd7",
+              "tertiary": "#00557a",
+              "on-tertiary-fixed": "#001e2f",
+              "on-secondary-container": "#75221e",
+              "error": "#ba1a1a",
+              "on-tertiary-fixed-variant": "#004c6e",
+              "surface-dim": "#dbdcc3"
+            },
+            fontFamily: {
+              "headline": ["Epilogue"],
+              "body": ["Be Vietnam Pro"],
+              "label": ["Be Vietnam Pro"]
+            },
+            borderRadius: {"DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px"},
+          },
+        },
+      }
+    </script>
+<style>.material-symbols-outlined {
+    font-variation-settings: "FILL" 0, "wght" 400, "GRAD" 0, "opsz" 24
+    }
+/* Subtle paper/plaster texture effect */
+.paper-texture {
+    background-color: #fbfbe2;
+    background-image: url(https://lh3.googleusercontent.com/aida-public/AB6AXuDcvL4o5MvMiQiGs1cwtdmfF9wU6QYIviz0WxG8bIeezqGhRN4buQ0DhQLU_MMj67fxhoGPd8fqhmeSF9PphsBjpctqqE4bLugHOGVymiOGW6df5tU7Ca80cCVn7WaX2QTe95754jo_9Zpl31JyOSK55mI32oARsDw0_QMJVy4gj9dEoFXjh-mTC_cOzHH8rOOjz0LL5U9oOw110_tVJmgz1HhaBmayI-ltt28KeiM2PnEa_a1h4urMLa01uo4_3P-LaPB0x6QPdFzi)
+    }
+.chile-glow {
+    box-shadow: 0 0 30px -5px rgba(162, 5, 19, 0.25)
+    }</style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="paper-texture min-h-screen font-body text-on-surface pb-32">
+<!-- TopAppBar -->
+<header class="bg-[#fbfbe2] dark:bg-[#1b1d0e] flex justify-between items-center px-6 py-4 w-full docked full-width top-0 sticky z-50 shadow-[0_24px_24px_rgba(27,29,14,0.06)]">
+<div class="flex items-center gap-3">
+<span class="material-symbols-outlined text-[#a20513] dark:text-[#c62828]" style="font-size: 28px;">restaurant</span>
+<h1 class="font-['Epilogue'] font-bold text-2xl tracking-tight text-[#a20513] dark:text-[#c62828]">Doña Susy</h1>
+</div>
+<div class="flex items-center gap-4">
+<span class="material-symbols-outlined text-[#1b1d0e] dark:text-[#fbfbe2] opacity-70">notifications</span>
+</div>
+</header>
+<main class="px-6 pt-8 max-w-5xl mx-auto">
+<!-- Dashboard Header -->
+<section class="mb-10">
+<div class="flex flex-col md:flex-row md:items-end justify-between gap-4">
+<div>
+<h2 class="font-headline font-black text-4xl tracking-tighter text-on-surface mb-2">Gestión de Mesas</h2>
+<p class="font-body text-on-surface-variant opacity-80 uppercase tracking-widest text-xs font-semibold">Salón Principal</p>
+</div>
+<!-- Summary Chips -->
+<div class="flex gap-3">
+<div class="bg-primary-container text-on-primary-container px-4 py-3 rounded-2xl flex items-center gap-3 shadow-sm">
+<span class="material-symbols-outlined text-xl" style="font-variation-settings: 'FILL' 1;">cooking</span>
+<div class="flex flex-col">
+<span class="font-headline font-bold leading-none text-lg">12 Activas</span>
+</div>
+</div>
+<div class="bg-surface-container-highest text-on-surface px-4 py-3 rounded-2xl flex items-center gap-3">
+<span class="material-symbols-outlined text-xl">restaurant</span>
+<div class="flex flex-col">
+<span class="font-headline font-bold leading-none text-lg">8 Libres</span>
+</div>
+</div>
+</div>
+</div>
+</section>
+<!-- Tables Layout Bento Grid -->
+<div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+<!-- Left Side: Mesa 1 & 2 Side-by-side -->
+<div class="md:col-span-2 grid grid-cols-1 sm:grid-cols-2 gap-6">
+<!-- Mesa 1: Occupied -->
+<div class="bg-surface-container-low rounded-[2.5rem] p-8 flex flex-col justify-between min-h-[280px] chile-glow relative overflow-hidden group">
+<div class="absolute top-0 right-0 p-6">
+<span class="bg-primary text-white text-[10px] font-black px-3 py-1 rounded-full uppercase tracking-widest">Ocupada</span>
+</div>
+<div>
+<h3 class="font-headline font-extrabold text-5xl mb-1 text-primary">Mesa 1</h3>
+<p class="font-body text-on-surface-variant text-sm flex items-center gap-2">
+<span class="material-symbols-outlined text-sm">schedule</span> hace 42 min
+                        </p>
+</div>
+<div class="bg-white/40 backdrop-blur-md rounded-3xl p-4 mt-6">
+<div class="flex items-start gap-3">
+<span class="material-symbols-outlined text-primary">receipt_long</span>
+<div>
+<p class="font-headline font-bold text-on-surface">2 Tortas Ahogadas</p>
+<p class="font-body text-xs text-on-surface-variant">Extra picante • Con cebolla</p>
+</div>
+</div>
+</div>
+</div>
+<!-- Mesa 2: Free -->
+<div class="bg-surface-container-low rounded-[2.5rem] p-8 flex flex-col justify-between min-h-[280px] border border-transparent hover:border-outline-variant/30 transition-all cursor-pointer">
+<div class="absolute top-0 right-0 p-6">
+<span class="bg-on-surface-variant/10 text-on-surface-variant text-[10px] font-black px-3 py-1 rounded-full uppercase tracking-widest">Disponible</span>
+</div>
+<div>
+<h3 class="font-headline font-extrabold text-5xl mb-1 text-on-surface opacity-40">Mesa 2</h3>
+<p class="font-body text-on-surface-variant text-sm">Lista para recibir</p>
+</div>
+<button class="bg-surface-container-highest text-primary font-headline font-bold py-4 rounded-2xl flex items-center justify-center gap-2 hover:bg-primary hover:text-white transition-all">
+<span class="material-symbols-outlined">add_circle</span>
+                        Abrir Cuenta
+                    </button>
+</div>
+</div>
+<!-- Right Side: Mesa 3 & 4 Stacked -->
+<div class="flex flex-col gap-6">
+<!-- Mesa 3: Occupied -->
+<div class="bg-surface-container-low rounded-[2.5rem] p-6 flex flex-col justify-between flex-1 min-h-[220px] chile-glow relative overflow-hidden">
+<div class="flex justify-between items-start">
+<h3 class="font-headline font-extrabold text-3xl text-primary">Mesa 3</h3>
+<span class="bg-primary/10 text-primary text-[10px] font-black px-2 py-1 rounded-md uppercase tracking-tighter">En Proceso</span>
+</div>
+<div class="mt-4">
+<div class="flex items-center gap-2 text-on-surface-variant mb-2">
+<span class="material-symbols-outlined text-lg">person</span>
+<span class="font-bold text-sm">4 Comensales</span>
+</div>
+<div class="flex -space-x-2">
+<div class="w-8 h-8 rounded-full border-2 border-surface bg-surface-container-highest overflow-hidden">
+<img class="w-full h-full object-cover" data-alt="User avatar 1" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAQawZcLf2VKX3uV-MMJR5RvMJXFzc51Rlfzx23nx3zDI9Tz2jwKDNHu9BntTO7z4f5QSU6vQnolX9zoiZ3grZcSo4jhqtd3VMQljzvOLPVFK8HKetbHZPTI5iYRbBlMJNlWgdvmmKB5Wwgj1y9fQX437Usn8Ini9KsTb-YfjaFaAba3g6HfGkeZ1sMz3eR0lDBQRfsxt-k6O2RNOqmrewTU1ylFLFI6zzeALDuL0PXuCRtXKzILdS1AXEgKeO5xSmQKU_WFO3ez-cn"/>
+</div>
+<div class="w-8 h-8 rounded-full border-2 border-surface bg-surface-container-highest overflow-hidden">
+<img class="w-full h-full object-cover" data-alt="User avatar 2" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBcU1rghavhsLp8FwxQ_kNkFRlszYxYd7pQbltjb0CRGl_u4rVOeyCksCFeA-gDWCScGc8kQT2pY3wdApGRF1MUqblGYZ9gn_cuxTKQB9kh7_OGosEY2fH8lDxcEIBvCn7sfbt14ig5RK04RHsCuGLnrDtU-HGFlmzq0A3a5dm7IWXLANtIX2GaacY5Ttmk7xfATpE7_M3W5LyzwNs6I9SM1GDbnGejU73uFmbSMlnH4Wj9VkE5vyZHyVRmOw9tU_CiYRhfvi2tuvEh"/>
+</div>
+<div class="w-8 h-8 rounded-full border-2 border-surface bg-primary text-white flex items-center justify-center text-[10px] font-bold">+2</div>
+</div>
+</div>
+</div>
+<!-- Mesa 4: Free -->
+<div class="bg-surface-container-low rounded-[2.5rem] p-6 flex flex-col justify-between flex-1 min-h-[220px] opacity-90 grayscale-[0.5] hover:grayscale-0 transition-all cursor-pointer">
+<div class="flex justify-between items-start">
+<h3 class="font-headline font-extrabold text-3xl text-on-surface opacity-30">Mesa 4</h3>
+<span class="material-symbols-outlined text-on-surface-variant opacity-20">check_circle</span>
+</div>
+<div class="mt-4">
+<p class="font-body text-on-surface-variant text-sm italic">Mesa limpia y desinfectada</p>
+<div class="mt-3 flex items-center gap-2 text-primary font-bold">
+<span class="material-symbols-outlined text-sm">add</span>
+<span class="text-xs uppercase tracking-widest">Asignar ahora</span>
+</div>
+</div>
+</div>
+</div>
+</div>
+</main>
+<!-- Prominent Floating Action Button -->
+<button class="fixed right-6 bottom-28 w-16 h-16 bg-primary rounded-full flex items-center justify-center text-white shadow-[0_12px_24px_rgba(162,5,19,0.4)] active:scale-95 transition-transform z-40">
+<span class="material-symbols-outlined text-3xl" style="font-variation-settings: 'wght' 600;">add</span>
+</button>
+<!-- BottomNavBar -->
+<nav class="fixed bottom-0 left-0 w-full flex justify-around items-center px-4 pb-6 pt-3 bg-[#fbfbe2]/85 dark:bg-[#1b1d0e]/85 backdrop-blur-xl border-t border-[#e4beba]/15 z-50 rounded-t-3xl shadow-[0_-8px_24px_rgba(27,29,14,0.04)]">
+<!-- Tables (Active) -->
+<a class="flex flex-col items-center justify-center bg-[#c62828] text-white rounded-full px-5 py-2 transition-all" href="#">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">grid_view</span>
+<span class="font-['Be_Vietnam_Pro'] text-[10px] font-medium uppercase tracking-widest mt-0.5">Tables</span>
+</a>
+<!-- Menu -->
+<a class="flex flex-col items-center justify-center text-[#1b1d0e] dark:text-[#fbfbe2] opacity-60 px-5 py-2 hover:bg-[#f5f5dc] dark:hover:bg-[#2a2d1a] rounded-full transition-all active:scale-90" href="#">
+<span class="material-symbols-outlined">restaurant_menu</span>
+<span class="font-['Be_Vietnam_Pro'] text-[10px] font-medium uppercase tracking-widest mt-0.5">Menu</span>
+</a>
+<!-- Settings -->
+<a class="flex flex-col items-center justify-center text-[#1b1d0e] dark:text-[#fbfbe2] opacity-60 px-5 py-2 hover:bg-[#f5f5dc] dark:hover:bg-[#2a2d1a] rounded-full transition-all active:scale-90" href="#">
+<span class="material-symbols-outlined">settings</span>
+<span class="font-['Be_Vietnam_Pro'] text-[10px] font-medium uppercase tracking-widest mt-0.5">Settings</span>
+</a>
+</nav>
+</body></html>
