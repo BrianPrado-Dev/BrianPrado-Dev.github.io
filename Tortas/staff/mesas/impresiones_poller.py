@@ -26,7 +26,7 @@ from typing import Any
 import requests
 
 # === Configuración ===
-API_URL = "http://127.0.0.1:8000/api/impresiones"  # Cambia por tu endpoint
+API_URL = "http://127.0.0.1:5500/Tortas/staff/mesas/index.html"  # Cambia por tu endpoint
 POLL_SECONDS = 3
 MAX_AGE_SECONDS = 10
 REQUEST_TIMEOUT_SECONDS = 5
