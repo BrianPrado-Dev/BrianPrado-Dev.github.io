@@ -1,19 +1,16 @@
 """
-Servidor + impresor automático (todo en uno) para Windows.
+Servidor + impresor automático (sin dependencias externas).
 
-Funciones:
-- API local para recibir tickets/comandas desde la web:
-  - POST   /api/impresiones
-  - GET    /api/impresiones
-  - DELETE /api/impresiones
-- Worker de impresión cada 3 segundos.
-- Imprime solo tickets con menos de 10 segundos de creados.
-- Evita duplicados.
+API local:
+- GET    /api/impresiones
+- POST   /api/impresiones
+- DELETE /api/impresiones
+- OPTIONS /api/impresiones (CORS preflight)
 
-Uso:
-1) pip install flask
-2) python impresiones_poller.py
-3) (Opcional) convertir a .exe con pyinstaller.
+Además:
+- Worker de impresión cada 3 segundos
+- Imprime solo tickets con menos de 10 segundos
+- Evita duplicados
 """
 
 from __future__ import annotations
@@ -24,10 +21,10 @@ import tempfile
 import threading
 import time
 from datetime import datetime, timezone
+from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
 from typing import Any
-
-from flask import Flask, jsonify, request
+from urllib.parse import urlparse
 
 HOST = "0.0.0.0"
 PORT = 8000
@@ -38,16 +35,7 @@ BASE_DIR = Path(__file__).resolve().parent
 QUEUE_FILE = BASE_DIR / "impresiones_queue_runtime.json"
 STATE_FILE = BASE_DIR / "impresiones_estado.json"
 
-app = Flask(__name__)
 LOCK = threading.Lock()
-
-
-@app.after_request
-def add_cors_headers(response):
-    response.headers["Access-Control-Allow-Origin"] = "*"
-    response.headers["Access-Control-Allow-Methods"] = "GET,POST,DELETE,OPTIONS"
-    response.headers["Access-Control-Allow-Headers"] = "Content-Type"
-    return response
 
 
 def now_utc() -> datetime:
@@ -147,7 +135,6 @@ def print_text_windows(text: str) -> None:
     with tempfile.NamedTemporaryFile(delete=False, suffix=".txt", mode="w", encoding="utf-8") as tmp:
         tmp.write(text)
         tmp_path = tmp.name
-
     try:
         os.startfile(tmp_path, "print")
     finally:
@@ -162,11 +149,9 @@ def should_print(ticket: dict[str, Any], printed_ids: set[str]) -> bool:
     ticket_id = str(ticket.get("id", "")).strip()
     if not ticket_id or ticket_id in printed_ids:
         return False
-
     created = parse_iso(str(ticket.get("createdAt", "")))
     if created is None:
         return False
-
     age = (now_utc() - created).total_seconds()
     return 0 <= age <= MAX_AGE_SECONDS
 
@@ -177,69 +162,93 @@ def printer_worker() -> None:
         try:
             with LOCK:
                 queue = load_queue()
-
             changed = False
             for ticket in queue:
                 if not isinstance(ticket, dict):
                     continue
                 if not should_print(ticket, printed_ids):
                     continue
-
                 ticket_id = str(ticket.get("id"))
                 print_text_windows(build_ticket_text(ticket))
                 printed_ids.add(ticket_id)
                 changed = True
                 print(f"[PRINT] Ticket impreso: {ticket_id}")
-
             if changed:
                 save_printed_ids(printed_ids)
-
         except Exception as err:
             print(f"[WARN] Error en worker: {err}")
-
         time.sleep(POLL_SECONDS)
 
 
-@app.get("/api/impresiones")
-def api_get_impresiones():
-    with LOCK:
-        queue = load_queue()
-    return jsonify({"queue": queue})
+class ApiHandler(BaseHTTPRequestHandler):
+    def _set_headers(self, status_code: int = 200, content_type: str = "application/json") -> None:
+        self.send_response(status_code)
+        self.send_header("Content-Type", content_type)
+        self.send_header("Access-Control-Allow-Origin", "*")
+        self.send_header("Access-Control-Allow-Methods", "GET,POST,DELETE,OPTIONS")
+        self.send_header("Access-Control-Allow-Headers", "Content-Type")
+        self.end_headers()
 
+    def _is_api_path(self) -> bool:
+        return urlparse(self.path).path == "/api/impresiones"
 
-@app.route("/api/impresiones", methods=["OPTIONS"])
-def api_options_impresiones():
-    return ("", 204)
+    def do_OPTIONS(self) -> None:
+        if self._is_api_path():
+            self._set_headers(204)
+            return
+        self._set_headers(404)
 
+    def do_GET(self) -> None:
+        if not self._is_api_path():
+            self._set_headers(404)
+            self.wfile.write(b'{"ok":false,"error":"Not found"}')
+            return
+        with LOCK:
+            queue = load_queue()
+        self._set_headers(200)
+        self.wfile.write(json.dumps({"queue": queue}, ensure_ascii=False).encode("utf-8"))
 
-@app.post("/api/impresiones")
-def api_post_impresiones():
-    ticket = request.get_json(silent=True)
-    if not isinstance(ticket, dict):
-        return jsonify({"ok": False, "error": "JSON inválido"}), 400
-    if not str(ticket.get("id", "")).strip():
-        return jsonify({"ok": False, "error": "Falta id"}), 400
+    def do_POST(self) -> None:
+        if not self._is_api_path():
+            self._set_headers(404)
+            self.wfile.write(b'{"ok":false,"error":"Not found"}')
+            return
+        content_len = int(self.headers.get("Content-Length", "0"))
+        raw = self.rfile.read(content_len) if content_len > 0 else b""
+        try:
+            ticket = json.loads(raw.decode("utf-8"))
+        except Exception:
+            self._set_headers(400)
+            self.wfile.write(b'{"ok":false,"error":"JSON invalido"}')
+            return
+        if not isinstance(ticket, dict) or not str(ticket.get("id", "")).strip():
+            self._set_headers(400)
+            self.wfile.write(b'{"ok":false,"error":"Falta id"}')
+            return
+        with LOCK:
+            queue = load_queue()
+            queue.insert(0, ticket)
+            save_queue(queue)
+        self._set_headers(200)
+        self.wfile.write(b'{"ok":true}')
 
-    with LOCK:
-        queue = load_queue()
-        queue.insert(0, ticket)
-        save_queue(queue)
-
-    return jsonify({"ok": True})
-
-
-@app.delete("/api/impresiones")
-def api_delete_impresiones():
-    with LOCK:
-        save_queue([])
-    return jsonify({"ok": True})
+    def do_DELETE(self) -> None:
+        if not self._is_api_path():
+            self._set_headers(404)
+            self.wfile.write(b'{"ok":false,"error":"Not found"}')
+            return
+        with LOCK:
+            save_queue([])
+        self._set_headers(200)
+        self.wfile.write(b'{"ok":true}')
 
 
 def main() -> None:
     worker = threading.Thread(target=printer_worker, daemon=True)
     worker.start()
+    server = ThreadingHTTPServer((HOST, PORT), ApiHandler)
     print(f"Servidor de impresión activo en http://{HOST}:{PORT}/api/impresiones")
-    app.run(host=HOST, port=PORT, debug=False)
+    server.serve_forever()
 
 
 if __name__ == "__main__":
