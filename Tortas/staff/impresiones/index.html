@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Doña Susy - Impresiones</title>
+  <link href="https://fonts.googleapis.com/css2?family=Epilogue:wght@700;800;900&family=Be+Vietnam+Pro:wght@400;500;700&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet" />
+  <script src="https://cdn.tailwindcss.com?plugins=forms"></script>
+</head>
+<body class="min-h-screen bg-[#f6ead8] text-[#1b1d0e] font-['Be_Vietnam_Pro']">
+  <main class="max-w-5xl mx-auto p-6">
+    <header class="flex items-center justify-between mb-6">
+      <div>
+        <h1 class="font-['Epilogue'] font-black text-4xl text-[#a20513]">Impresiones</h1>
+        <p class="text-sm opacity-80">Cola central para ticket cliente y comanda cocina.</p>
+      </div>
+      <a href="../mesas/index.html" class="px-4 py-2 rounded-xl bg-white/70 hover:bg-[#a20513] hover:text-white font-semibold">Volver a mesas</a>
+    </header>
+
+    <div class="bg-white/60 rounded-3xl p-5 mb-5">
+      <p class="text-sm mb-3"><strong>API URL sugerida para Python:</strong> <code>/Tortas/staff/impresiones/queue.json</code></p>
+      <div class="flex items-center gap-2">
+        <button id="refresh-button" class="px-4 py-2 rounded-xl bg-[#a20513] text-white font-semibold">Refrescar</button>
+        <button id="clear-button" class="px-4 py-2 rounded-xl bg-red-100 text-red-700 font-semibold">Limpiar cola</button>
+      </div>
+    </div>
+
+    <section id="list" class="space-y-3"></section>
+  </main>
+
+  <script>
+    const PRINT_QUEUE_KEY = "dona_susy_print_queue_v1";
+    const PRINT_API_URL = "http://127.0.0.1:8000/api/impresiones";
+
+    function loadQueue() {
+      const raw = localStorage.getItem(PRINT_QUEUE_KEY);
+      if (!raw) return [];
+      try {
+        const parsed = JSON.parse(raw);
+        return Array.isArray(parsed.queue) ? parsed.queue : [];
+      } catch {
+        return [];
+      }
+    }
+
+    function saveQueue(queue) {
+      localStorage.setItem(PRINT_QUEUE_KEY, JSON.stringify({ queue }));
+    }
+
+    async function fetchRemoteQueue() {
+      try {
+        const response = await fetch(PRINT_API_URL, { cache: "no-store" });
+        if (!response.ok) return null;
+        const data = await response.json();
+        if (Array.isArray(data)) return data;
+        if (Array.isArray(data.queue)) return data.queue;
+        return null;
+      } catch {
+        return null;
+      }
+    }
+
+    async function clearRemoteQueue() {
+      try {
+        await fetch(PRINT_API_URL, { method: "DELETE" });
+      } catch {
+      }
+    }
+
+    function downloadQueueJson(queue) {
+      const blob = new Blob([JSON.stringify({ queue }, null, 2)], { type: "application/json" });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = "queue.json";
+      a.click();
+      URL.revokeObjectURL(url);
+    }
+
+    async function render() {
+      const remote = await fetchRemoteQueue();
+      const queue = remote ?? loadQueue();
+      const list = document.getElementById("list");
+      if (!queue.length) {
+        list.innerHTML = `<div class="bg-white/70 rounded-2xl p-4 text-sm opacity-80">No hay impresiones pendientes.</div>`;
+        return;
+      }
+      list.innerHTML = queue.map((t) => `
+        <article class="bg-white/75 rounded-2xl p-4 flex items-center justify-between gap-3">
+          <div>
+            <p class="font-semibold">${t.type === "comanda" ? "Comanda cocina" : "Ticket cliente"} - Mesa ${t.tableNumber}</p>
+            <p class="text-xs opacity-70">${new Date(t.createdAt).toLocaleString("es-MX")} • Mesera: ${t.mesera}</p>
+          </div>
+          <span class="text-xs font-bold px-2 py-1 rounded-lg ${t.type === "comanda" ? "bg-amber-100 text-amber-800" : "bg-blue-100 text-blue-800"}">${t.type || "ticket"}</span>
+        </article>
+      `).join("");
+    }
+
+    document.getElementById("refresh-button").addEventListener("click", async () => {
+      await render();
+      downloadQueueJson(loadQueue());
+    });
+    document.getElementById("clear-button").addEventListener("click", async () => {
+      await clearRemoteQueue();
+      saveQueue([]);
+      await render();
+    });
+
+    render();
+  </script>
+</body>
+</html>

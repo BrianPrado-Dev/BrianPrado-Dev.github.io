@@ -46,28 +46,6 @@
       min-height: max(100dvh, 860px);
     }
 
-    @media print {
-      body * {
-        visibility: hidden !important;
-      }
-
-      #print-ticket-root, #print-ticket-root * {
-        visibility: visible !important;
-      }
-
-      #print-ticket-root {
-        display: block !important;
-        position: absolute;
-        left: 0;
-        top: 0;
-        width: 57mm;
-      }
-
-      @page {
-        size: 57mm auto;
-        margin: 0;
-      }
-    }
   </style>
 </head>
 <body class="paper-texture min-h-screen font-body text-on-surface">
@@ -95,10 +73,10 @@
             <span class="material-symbols-outlined">history</span>
             <span class="font-semibold">Historial</span>
           </button>
-          <button id="open-prints-button" class="bg-surface-container-highest px-4 py-3 rounded-2xl flex items-center gap-2 hover:bg-primary hover:text-white transition-colors">
+          <a href="../impresiones/index.html" class="bg-surface-container-highest px-4 py-3 rounded-2xl flex items-center gap-2 hover:bg-primary hover:text-white transition-colors">
             <span class="material-symbols-outlined">print</span>
             <span class="font-semibold">Impresiones</span>
-          </button>
+          </a>
           <div class="bg-primary-container text-white px-4 py-3 rounded-2xl flex items-center gap-3 shadow-sm">
             <span class="material-symbols-outlined text-xl">cooking</span>
             <div><span id="active-count" class="font-headline font-bold text-lg">0 Ocupadas</span></div>
@@ -136,24 +114,6 @@
             <span id="order-total" class="font-headline font-black text-3xl text-primary">$0</span>
           </div>
         </div>
-      </div>
-    </section>
-
-    <section id="prints-view" class="hidden">
-      <div class="mb-6 flex items-center justify-between gap-3">
-        <button id="back-from-prints-button" class="bg-surface-container-highest hover:bg-primary hover:text-white transition-colors px-4 py-2 rounded-xl flex items-center gap-2">
-          <span class="material-symbols-outlined">arrow_back</span>
-          Volver a mesas
-        </button>
-        <h2 class="font-headline font-black text-3xl">Impresiones</h2>
-      </div>
-      <div class="bg-surface-container-low rounded-3xl p-5">
-        <p class="text-sm text-on-surface-variant mb-3">Aquí se registran todos los tickets listos para imprimir. Tu app en Python puede leer este arreglo desde localStorage (`dona_susy_print_queue_v1`) y procesarlo.</p>
-        <div class="mb-3 flex items-center gap-2">
-          <button id="print-all-button" class="bg-primary text-white px-4 py-2 rounded-xl font-semibold hover:opacity-90">Imprimir todos</button>
-          <button id="clear-prints-button" class="bg-red-100 text-red-700 px-4 py-2 rounded-xl font-semibold hover:bg-red-200">Limpiar cola</button>
-        </div>
-        <div id="prints-list" class="space-y-3"></div>
       </div>
     </section>
 
@@ -195,7 +155,6 @@
     </div>
   </div>
 
-  <div id="print-ticket-root" class="hidden"></div>
   <div id="variant-modal" class="hidden fixed inset-0 z-50 bg-black/40 p-4 flex items-center justify-center">
     <div class="bg-surface-container-low rounded-3xl p-5 w-full max-w-md shadow-[0_20px_40px_rgba(27,29,14,0.25)]">
       <h3 id="variant-modal-title" class="font-headline font-bold text-2xl mb-4">Selecciona una opción</h3>
@@ -209,6 +168,7 @@
     const PRINT_QUEUE_KEY = "dona_susy_print_queue_v1";
     const HISTORY_KEY = "dona_susy_history_v1";
     const WAITER_NAME_KEY = "dona_susy_mesera_nombre";
+    const PRINT_API_URL = "http://127.0.0.1:8000/api/impresiones";
     const FIXED_TABLES = [1, 2, 3, 4];
 
     const MENU = {
@@ -301,6 +261,14 @@
 
     function persistPrintQueue() {
       localStorage.setItem(PRINT_QUEUE_KEY, JSON.stringify({ queue: state.printQueue }));
+    }
+
+    async function enqueueRemote(ticket) {
+      await fetch(PRINT_API_URL, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(ticket)
+      });
     }
 
     function loadHistory() {
@@ -681,10 +649,11 @@
       renderTables();
     }
 
-    function createTicketData(table) {
+    function createTicketData(table, type = "ticket") {
       const timestamp = new Date().toISOString();
       return {
         id: `ticket_${table.id}_${Date.now()}`,
+        type,
         tableId: table.id,
         tableNumber: table.number,
         mesera: state.meseraNombre,
@@ -706,125 +675,39 @@
       };
     }
 
-    function queueTableTicket(tableId) {
+    async function queueTableTicket(tableId) {
       const table = getTableById(tableId);
       if (!table) return;
-      const ticket = createTicketData(table);
+      const ticket = createTicketData(table, "ticket");
       state.printQueue.unshift(ticket);
       persistPrintQueue();
-      renderPrints();
+      try {
+        await enqueueRemote(ticket);
+      } catch (_) {
+      }
     }
 
-    function renderTicketHtml(ticket) {
-      const dateText = new Date(ticket.createdAt).toLocaleString("es-MX");
-      const platesHtml = ticket.plates.map((plate) => {
-        const rows = plate.items.length
-          ? plate.items.map((item) => `
-              <div style="display:flex; justify-content:space-between; gap:4px; font-size:11px; margin-bottom:2px;">
-                <span>${item.qty}x ${item.name}${formatVariant(item.variant)}</span>
-                <span>${formatMoney(item.subtotal)}</span>
-              </div>
-            `).join("")
-          : `<div style="font-size:11px; color:#555;">Sin productos</div>`;
-        return `
-          <div style="margin-top:8px; border-top:1px dashed #000; padding-top:6px;">
-            <div style="font-weight:700; font-size:11px;">${plate.name}</div>
-            ${rows}
-          </div>
-        `;
-      }).join("");
-
-      return `
-        <div style="font-family: 'Be Vietnam Pro', Arial, sans-serif; width:57mm; padding:3mm; color:#000;">
-          <div style="text-align:center; font-weight:800; font-size:13px;">Tortas Ahogadas Doña Susy</div>
-          <div style="text-align:center; font-size:11px;">Mesa ${ticket.tableNumber}</div>
-          <div style="text-align:center; font-size:10px; margin-bottom:4px;">${dateText}</div>
-          <div style="border-top:1px dashed #000; margin-top:4px; padding-top:4px;"></div>
-          ${platesHtml}
-          <div style="border-top:1px dashed #000; margin-top:8px; padding-top:6px; display:flex; justify-content:space-between; font-weight:800;">
-            <span>Total</span>
-            <span>${formatMoney(ticket.total)}</span>
-          </div>
-          <div style="text-align:center; margin-top:8px; font-size:11px; font-weight:700;">Gracias por su preferencia</div>
-          <div style="margin-top:10px; font-size:11px;">Mesera: ${ticket.mesera}</div>
-        </div>
-      `;
-    }
-
-    function renderKitchenComandaHtml(table) {
-      const dateText = new Date().toLocaleString("es-MX");
-      const platesHtml = table.plates.map((plate) => {
-        const items = getPlateLineItems(plate);
-        const rows = items.length
-          ? items.map((line) => `
-              <div style="display:flex; justify-content:space-between; gap:4px; font-size:11px; margin-bottom:2px;">
-                <span>${line.qty}x ${ITEM_INDEX[line.itemId].name}${formatVariant(line.variant)}</span>
-              </div>
-            `).join("")
-          : `<div style="font-size:11px; color:#555;">Sin productos</div>`;
-
-        return `
-          <div style="margin-top:8px; border-top:1px dashed #000; padding-top:6px;">
-            <div style="font-weight:700; font-size:11px;">${plate.name}</div>
-            ${rows}
-          </div>
-        `;
-      }).join("");
-
-      return `
-        <div style="font-family: 'Be Vietnam Pro', Arial, sans-serif; width:57mm; padding:3mm; color:#000;">
-          <div style="text-align:center; font-weight:800; font-size:13px;">Tortas Ahogadas Doña Susy</div>
-          <div style="text-align:center; font-size:11px;">COMANDA COCINA</div>
-          <div style="text-align:center; font-size:11px;">Mesa ${table.number}</div>
-          <div style="text-align:center; font-size:10px; margin-bottom:4px;">${dateText}</div>
-          <div style="border-top:1px dashed #000; margin-top:4px; padding-top:4px;"></div>
-          ${platesHtml}
-          <div style="margin-top:10px; font-size:11px;">Mesera: ${state.meseraNombre}</div>
-        </div>
-      `;
-    }
-
-    function printTicket(ticket) {
-      const root = document.getElementById("print-ticket-root");
-      root.innerHTML = renderTicketHtml(ticket);
-      root.classList.remove("hidden");
-      window.print();
-      root.classList.add("hidden");
-      root.innerHTML = "";
-    }
-
-    function printKitchenComanda(tableId) {
+    async function queueKitchenComanda(tableId) {
       const table = getTableById(tableId);
       if (!table) return;
-      const root = document.getElementById("print-ticket-root");
-      root.innerHTML = renderKitchenComandaHtml(table);
-      root.classList.remove("hidden");
-      window.print();
-      root.classList.add("hidden");
-      root.innerHTML = "";
-    }
-
-    function printAllTickets() {
-      state.printQueue.forEach((ticket) => printTicket(ticket));
-    }
-
-    function clearPrintQueue() {
-      state.printQueue = [];
+      const comanda = createTicketData(table, "comanda");
+      state.printQueue.unshift(comanda);
       persistPrintQueue();
-      renderPrints();
+      try {
+        await enqueueRemote(comanda);
+      } catch (_) {
+      }
     }
 
     function showView(view) {
       const tables = document.getElementById("tables-view");
       const detail = document.getElementById("detail-view");
-      const prints = document.getElementById("prints-view");
       const history = document.getElementById("history-view");
       const addTableButton = document.getElementById("add-table-button");
       const detailActionsBar = document.getElementById("detail-actions-bar");
 
       tables.classList.add("hidden");
       detail.classList.add("hidden");
-      prints.classList.add("hidden");
       history.classList.add("hidden");
       addTableButton.classList.add("hidden");
       detailActionsBar.classList.add("hidden");
@@ -835,8 +718,6 @@
       } else if (view === "detail") {
         detail.classList.remove("hidden");
         detailActionsBar.classList.remove("hidden");
-      } else if (view === "prints") {
-        prints.classList.remove("hidden");
       } else if (view === "history") {
         history.classList.remove("hidden");
       }
@@ -893,7 +774,10 @@
       });
 
       grid.querySelectorAll("[data-print]").forEach((btn) => {
-        btn.addEventListener("click", () => queueTableTicket(btn.dataset.print));
+        btn.addEventListener("click", async () => {
+          await queueTableTicket(btn.dataset.print);
+          window.alert("Ticket enviado a la cola de impresiones.");
+        });
       });
 
       grid.querySelectorAll("[data-clear]").forEach((btn) => {
@@ -1024,30 +908,6 @@
       renderOrderList(table);
     }
 
-    function renderPrints() {
-      const list = document.getElementById("prints-list");
-      if (!state.printQueue.length) {
-        list.innerHTML = `<div class="bg-white/60 rounded-2xl p-4 text-sm text-on-surface-variant">No hay tickets pendientes.</div>`;
-        return;
-      }
-      list.innerHTML = state.printQueue.map((ticket) => `
-        <article class="bg-white/70 rounded-2xl p-4 flex items-center justify-between gap-3">
-          <div>
-            <p class="font-semibold">Ticket Mesa ${ticket.tableNumber}</p>
-            <p class="text-xs text-on-surface-variant">${new Date(ticket.createdAt).toLocaleString("es-MX")} • ${formatMoney(ticket.total)} • Mesera: ${ticket.mesera}</p>
-          </div>
-          <button data-print-ticket="${ticket.id}" class="bg-primary text-white px-3 py-2 rounded-xl font-semibold">Imprimir</button>
-        </article>
-      `).join("");
-
-      list.querySelectorAll("[data-print-ticket]").forEach((btn) => {
-        btn.addEventListener("click", () => {
-          const ticket = state.printQueue.find((t) => t.id === btn.dataset.printTicket);
-          if (ticket) printTicket(ticket);
-        });
-      });
-    }
-
     function renderHistory() {
       const list = document.getElementById("history-list");
       if (!state.history.length) {
@@ -1078,18 +938,15 @@
       document.getElementById("add-table-button").addEventListener("click", addExtraTable);
       document.getElementById("back-button").addEventListener("click", closeTableDetail);
       document.getElementById("add-plate-button").addEventListener("click", addPlateToSelectedTable);
-      document.getElementById("print-comanda-button").addEventListener("click", () => {
+      document.getElementById("print-comanda-button").addEventListener("click", async () => {
         if (state.selectedTableId) {
-          printKitchenComanda(state.selectedTableId);
+          await queueKitchenComanda(state.selectedTableId);
+          window.alert("Comanda enviada a la cola de impresiones.");
         }
       });
       document.getElementById("plate-select").addEventListener("change", (event) => {
         state.selectedPlateId = event.target.value;
         renderDetail();
-      });
-      document.getElementById("open-prints-button").addEventListener("click", () => {
-        renderPrints();
-        showView("prints");
       });
       document.getElementById("open-history-button").addEventListener("click", () => {
         if (!userCanAccessHistory()) {
@@ -1099,16 +956,10 @@
         renderHistory();
         showView("history");
       });
-      document.getElementById("back-from-prints-button").addEventListener("click", () => {
-        showView("tables");
-        renderTables();
-      });
       document.getElementById("back-from-history-button").addEventListener("click", () => {
         showView("tables");
         renderTables();
       });
-      document.getElementById("clear-prints-button").addEventListener("click", clearPrintQueue);
-      document.getElementById("print-all-button").addEventListener("click", printAllTickets);
     }
 
     loadPrintQueue();
