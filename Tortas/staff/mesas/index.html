@@ -122,22 +122,15 @@
         <h2 id="detail-title" class="font-headline font-black text-3xl">Mesa</h2>
       </div>
 
-      <div class="mb-4 flex items-center justify-end gap-3">
-        <div class="flex items-center gap-2">
-          <label for="plate-select" class="text-sm font-semibold">Plato actual:</label>
-          <select id="plate-select" class="rounded-xl border-outline-variant bg-white/80"></select>
-        </div>
-      </div>
-
       <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
         <div class="bg-surface-container-low rounded-3xl p-5 space-y-5">
           <h3 class="font-headline font-bold text-2xl">Menú</h3>
           <div id="menu-sections" class="space-y-6"></div>
         </div>
 
-        <div class="bg-surface-container-low rounded-3xl p-5 flex flex-col">
+        <div class="bg-surface-container-low rounded-3xl p-5 flex flex-col self-start">
           <h3 class="font-headline font-bold text-2xl mb-4">Pedido actual (por plato)</h3>
-          <div id="order-list" class="space-y-3 flex-1"></div>
+          <div id="order-list" class="space-y-3 overflow-y-auto pr-1 max-h-[48vh] md:max-h-[60vh]"></div>
           <div class="border-t border-outline-variant mt-6 pt-4 flex justify-between items-center">
             <span class="font-headline font-bold text-xl">Total</span>
             <span id="order-total" class="font-headline font-black text-3xl text-primary">$0</span>
@@ -189,14 +182,27 @@
         <span class="material-symbols-outlined">add_circle</span>
         Agregar plato
       </button>
-      <button id="print-comanda-button" class="bg-surface-container-highest text-on-surface px-5 py-3 rounded-2xl font-semibold hover:bg-primary hover:text-white flex items-center gap-2 shadow-[0_10px_20px_rgba(27,29,14,0.15)]">
-        <span class="material-symbols-outlined">receipt_long</span>
-        Imprimir comanda
-      </button>
+      <div class="flex flex-col items-end gap-2">
+        <div class="flex items-center gap-2 bg-surface-container-highest/90 rounded-xl px-3 py-2 shadow-[0_8px_16px_rgba(27,29,14,0.12)]">
+          <label for="plate-select" class="text-xs font-semibold whitespace-nowrap">Plato actual</label>
+          <select id="plate-select" class="rounded-lg border-outline-variant bg-white/90 text-sm px-2 py-1 min-w-[140px]"></select>
+        </div>
+        <button id="print-comanda-button" class="bg-surface-container-highest text-on-surface px-5 py-3 rounded-2xl font-semibold hover:bg-primary hover:text-white flex items-center gap-2 shadow-[0_10px_20px_rgba(27,29,14,0.15)]">
+          <span class="material-symbols-outlined">receipt_long</span>
+          Imprimir comanda
+        </button>
+      </div>
     </div>
   </div>
 
   <div id="print-ticket-root" class="hidden"></div>
+  <div id="variant-modal" class="hidden fixed inset-0 z-50 bg-black/40 p-4 flex items-center justify-center">
+    <div class="bg-surface-container-low rounded-3xl p-5 w-full max-w-md shadow-[0_20px_40px_rgba(27,29,14,0.25)]">
+      <h3 id="variant-modal-title" class="font-headline font-bold text-2xl mb-4">Selecciona una opción</h3>
+      <div id="variant-modal-options" class="grid grid-cols-2 gap-2 mb-3"></div>
+      <button id="variant-modal-cancel" class="w-full bg-red-100 text-red-700 px-4 py-2 rounded-xl font-semibold hover:bg-red-200">Cancelar</button>
+    </div>
+  </div>
 
   <script>
     const STORAGE_KEY = "dona_susy_mesas_v2";
@@ -208,20 +214,21 @@
     const MENU = {
       comida: [
         { id: "torta_ahogada", name: "Torta Ahogada", price: 55, note: "Carnitas, Buche, Lengua" },
-        { id: "taco_dorado_sencillo", name: "Taco Dorado Sencillo", price: 10, note: "Papa, Frijol y Requesón" },
+        { id: "taco_dorado_sencillo", name: "Taco Dorado Sencillo", price: 10, note: "Papa, Frijol, Requesón y Picadillo" },
         { id: "taco_dorado_carne", name: "Taco Dorado con Carne", price: 25, note: "Carnitas, Buche, Lengua" },
         { id: "taco_blandito", name: "Taco Blandito", price: 25, note: "Carnitas, Buche, Lengua" },
         { id: "kilo_carne", name: "Kilo de Carne", price: 300, note: "Carnitas, Buche, Lengua" }
       ],
       paquetes: [
-        { id: "paquete_1", name: "Paquete #1", price: 80, note: "1 Torta + 1 Taco Dorado Sencillo + 1 Refresco (o Agua 1LT)" },
-        { id: "paquete_2", name: "Paquete #2", price: 85, note: "1 Torta + 2 Tacos Dorados Sencillos + 1 Refresco (o Agua 1LT)" },
+        { id: "paquete_1", name: "Paquete #1", price: 80, note: "1 Torta + 1 Taco Dorado Sencillo + 1 Refresco (o Agua Fresca)" },
+        { id: "paquete_2", name: "Paquete #2", price: 85, note: "1 Torta + 2 Tacos Dorados Sencillos + 1 Refresco (o Agua Fresca)" },
         { id: "paquete_3", name: "Paquete #3", price: 205, note: "3 Tortas + 5 Tacos Dorados Sencillos" },
         { id: "paquete_4", name: "Paquete #4", price: 320, note: "5 Tortas + 6 Tacos Dorados Sencillos" },
         { id: "paquete_5", name: "Paquete #5", price: 630, note: "10 Tortas + 10 Tacos Dorados Sencillos" }
       ],
       bebidas: [
         { id: "refresco_taparosca", name: "Refresco Taparosca", price: 30 },
+        { id: "refresco_retornable", name: "Refresco Retornable", price: 28 },
         { id: "agua_fresca_1lt", name: "Agua Fresca 1LT", price: 25 },
         { id: "agua_500ml", name: "Agua 500ml", price: 15 },
         { id: "cerveza_corona_500ml", name: "Cerveza Corona 500ml", price: 25 },
@@ -240,6 +247,7 @@
       selectedPlateId: null,
       printQueue: [],
       history: [],
+      menuSectionsOpen: { comida: true, paquetes: false, bebidas: false },
       meseraNombre: localStorage.getItem(WAITER_NAME_KEY) || "Sin nombre"
     };
 
@@ -328,9 +336,8 @@
         totalBeforeClear: tableTotal(table),
         plates: table.plates.map((plate) => ({
           name: plate.name,
-          items: Object.entries(plate.order)
-            .filter(([, qty]) => qty > 0)
-            .map(([itemId, qty]) => `${qty}x ${ITEM_INDEX[itemId].name}`)
+          items: getPlateLineItems(plate)
+            .map((line) => `${line.qty}x ${ITEM_INDEX[line.itemId].name}${formatVariant(line.variant)}`)
         }))
       };
       state.history.unshift(record);
@@ -375,8 +382,163 @@
       return table.plates.find((p) => p.id === plateId) || null;
     }
 
+    function getPlateLineItems(plate) {
+      return Object.entries(plate.order || {}).map(([lineKey, value]) => {
+        if (typeof value === "number") {
+          return { lineKey, itemId: lineKey, qty: value, variant: "" };
+        }
+        return {
+          lineKey,
+          itemId: value.itemId || lineKey,
+          qty: Number(value.qty) || 0,
+          variant: value.variant || ""
+        };
+      }).filter((line) => line.qty > 0 && ITEM_INDEX[line.itemId]);
+    }
+
+    function formatVariant(variant) {
+      return variant ? ` (${variant})` : "";
+    }
+
+    function makeLineKey(itemId, variant) {
+      return `${itemId}__${variant || "base"}`;
+    }
+
+    function getItemQtyInPlate(plate, itemId) {
+      return getPlateLineItems(plate)
+        .filter((line) => line.itemId === itemId)
+        .reduce((sum, line) => sum + line.qty, 0);
+    }
+
+    function getOptionButtonClass(title, option) {
+      const opt = String(option).toLowerCase();
+      const isRefrescoTitle = String(title).toLowerCase().includes("refresco") || String(title).toLowerCase().includes("bebida");
+      if (!isRefrescoTitle) {
+        return "bg-white/90 text-on-surface hover:bg-primary hover:text-white";
+      }
+      if (opt.includes("coca light")) return "bg-gray-600 text-white hover:bg-gray-700";
+      if (opt.includes("coca")) return "bg-red-600 text-white hover:bg-red-700";
+      if (opt.includes("fanta")) return "bg-orange-500 text-white hover:bg-orange-600";
+      if (opt.includes("manzana")) return "bg-amber-700 text-white hover:bg-amber-800";
+      if (opt.includes("sprite")) return "bg-green-600 text-white hover:bg-green-700";
+      return "bg-white/90 text-on-surface hover:bg-primary hover:text-white";
+    }
+
+    function chooseOption(title, options) {
+      if (!options || !options.length) return Promise.resolve("");
+      if (options.length === 1) return Promise.resolve(options[0]);
+
+      return new Promise((resolve) => {
+        const modal = document.getElementById("variant-modal");
+        const titleEl = document.getElementById("variant-modal-title");
+        const optionsEl = document.getElementById("variant-modal-options");
+        const cancelBtn = document.getElementById("variant-modal-cancel");
+
+        titleEl.textContent = title;
+        optionsEl.innerHTML = options.map((option) => `
+          <button data-variant-choice="${option}" class="px-4 py-4 rounded-xl font-bold text-base text-left min-h-[64px] ${getOptionButtonClass(title, option)}">${option}</button>
+        `).join("");
+
+        modal.classList.remove("hidden");
+
+        const cleanup = () => {
+          modal.classList.add("hidden");
+          optionsEl.innerHTML = "";
+          cancelBtn.removeEventListener("click", onCancel);
+        };
+
+        const onCancel = () => {
+          cleanup();
+          resolve(null);
+        };
+
+        cancelBtn.addEventListener("click", onCancel);
+
+        optionsEl.querySelectorAll("[data-variant-choice]").forEach((btn) => {
+          btn.addEventListener("click", () => {
+            const selected = btn.dataset.variantChoice;
+            cleanup();
+            resolve(selected);
+          }, { once: true });
+        });
+      });
+    }
+
+    async function askVariantForItem(itemId) {
+      const carne = ["Carnitas", "Buche", "Lengua"];
+      const tacoSabor = ["Papa", "Frijol", "Requesón", "Picadillo"];
+      const refresco = ["Coca", "Coca Light", "Fanta", "Manzana", "Sprite"];
+      const aguas = ["Horchata", "Jamaica"];
+      const cerveza = ["Clara", "Oscura"];
+
+      if (["torta_ahogada", "taco_blandito", "kilo_carne"].includes(itemId)) {
+        return await chooseOption("Selecciona tipo", carne);
+      }
+      if (itemId === "taco_dorado_sencillo") {
+        return await chooseOption("Selecciona sabor del taco", tacoSabor);
+      }
+      if (itemId === "taco_dorado_carne") {
+        const tipoCarne = await chooseOption("Selecciona tipo de carne", carne);
+        if (tipoCarne === null) return null;
+        const saborTaco = await chooseOption("Selecciona sabor del taco", tacoSabor);
+        if (saborTaco === null) return null;
+        return `Carne:${tipoCarne} | Sabor:${saborTaco}`;
+      }
+      if (itemId === "refresco_taparosca" || itemId === "refresco_retornable") {
+        return await chooseOption("Selecciona sabor de refresco", refresco);
+      }
+      if (itemId === "agua_fresca_1lt") {
+        return await chooseOption("Selecciona sabor de agua fresca", aguas);
+      }
+      if (itemId === "cerveza_corona_500ml") {
+        return await chooseOption("Selecciona tipo de cerveza", cerveza);
+      }
+      if (itemId === "agua_500ml") {
+        return "Natural";
+      }
+      if (itemId === "caguama_mega") {
+        return "Única";
+      }
+      if (itemId === "paquete_1") {
+        const tipoCarne = await chooseOption("Paquete #1 - Tipo de carne de la torta", carne);
+        if (tipoCarne === null) return null;
+        const saborTaco = await chooseOption("Paquete #1 - Sabor del taco dorado sencillo", tacoSabor);
+        if (saborTaco === null) return null;
+        let bebida = await chooseOption("Paquete #1 - Bebida", [...refresco, "Agua Fresca"]);
+        if (bebida === null) return null;
+        if (bebida === "Agua Fresca") {
+          const saborAgua = await chooseOption("Paquete #1 - Sabor de agua fresca", aguas);
+          if (saborAgua === null) return null;
+          bebida = `Agua Fresca ${saborAgua}`;
+        }
+        return `Torta:${tipoCarne} | Taco:${saborTaco} | Bebida:${bebida}`;
+      }
+      if (itemId === "paquete_2") {
+        const tipoCarne = await chooseOption("Paquete #2 - Tipo de carne de la torta", carne);
+        if (tipoCarne === null) return null;
+        const saborTaco = await chooseOption("Paquete #2 - Sabor de los tacos dorados sencillos", tacoSabor);
+        if (saborTaco === null) return null;
+        let bebida = await chooseOption("Paquete #2 - Bebida", [...refresco, "Agua Fresca"]);
+        if (bebida === null) return null;
+        if (bebida === "Agua Fresca") {
+          const saborAgua = await chooseOption("Paquete #2 - Sabor de agua fresca", aguas);
+          if (saborAgua === null) return null;
+          bebida = `Agua Fresca ${saborAgua}`;
+        }
+        return `Torta:${tipoCarne} | Tacos:${saborTaco} | Bebida:${bebida}`;
+      }
+      if (["paquete_3", "paquete_4", "paquete_5"].includes(itemId)) {
+        const tipoCarne = await chooseOption("Tipo de carne de las tortas del paquete", carne);
+        if (tipoCarne === null) return null;
+        const saborTaco = await chooseOption("Sabor de los tacos dorados sencillos del paquete", tacoSabor);
+        if (saborTaco === null) return null;
+        return `Tortas:${tipoCarne} | Tacos:${saborTaco}`;
+      }
+      return "";
+    }
+
     function plateHasItems(plate) {
-      return Object.values(plate.order).some((qty) => qty > 0);
+      return getPlateLineItems(plate).length > 0;
     }
 
     function tableHasItems(table) {
@@ -386,17 +548,17 @@
     function tableSummary(table) {
       const firstPlateWithItems = table.plates.find((p) => plateHasItems(p));
       if (!firstPlateWithItems) return "Sin pedido";
-      const entries = Object.entries(firstPlateWithItems.order).filter(([, qty]) => qty > 0);
+      const entries = getPlateLineItems(firstPlateWithItems);
       const base = entries
         .slice(0, 3)
-        .map(([itemId, qty]) => `${qty}x ${ITEM_INDEX[itemId].name}`)
+        .map((line) => `${line.qty}x ${ITEM_INDEX[line.itemId].name}`)
         .join(" • ");
       return `${firstPlateWithItems.name}: ${base}`;
     }
 
     function tableTotal(table) {
       return table.plates.reduce((tableSum, plate) => {
-        const plateTotal = Object.entries(plate.order).reduce((sum, [itemId, qty]) => sum + ITEM_INDEX[itemId].price * qty, 0);
+        const plateTotal = getPlateLineItems(plate).reduce((sum, line) => sum + ITEM_INDEX[line.itemId].price * line.qty, 0);
         return tableSum + plateTotal;
       }, 0);
     }
@@ -470,12 +632,12 @@
       renderTables();
     }
 
-    function removeItemFromPlate(tableId, plateId, itemId) {
+    function removeItemFromPlate(tableId, plateId, lineKey) {
       const table = getTableById(tableId);
       if (!table) return;
       const plate = getPlateById(table, plateId);
       if (!plate) return;
-      delete plate.order[itemId];
+      delete plate.order[lineKey];
       persistState();
       renderDetail();
       renderTables();
@@ -484,7 +646,6 @@
     function removePlate(tableId, plateId) {
       const table = getTableById(tableId);
       if (!table) return;
-      if (table.plates.length <= 1) return;
       table.plates = table.plates.filter((plate) => plate.id !== plateId);
       if (!table.plates.length) {
         table.plates = [createPlate(1)];
@@ -497,17 +658,23 @@
       renderTables();
     }
 
-    function updateItemQty(tableId, plateId, itemId, delta) {
+    async function addItemWithVariant(tableId, plateId, itemId) {
       const table = getTableById(tableId);
       if (!table) return;
       const plate = getPlateById(table, plateId);
       if (!plate) return;
-      const current = plate.order[itemId] || 0;
-      const next = Math.max(0, current + delta);
-      if (next === 0) {
-        delete plate.order[itemId];
+      const variant = await askVariantForItem(itemId);
+      if (variant === null) return;
+      const lineKey = makeLineKey(itemId, variant);
+      const current = plate.order[lineKey];
+      if (typeof current === "number") {
+        plate.order[lineKey] = { itemId, qty: current + 1, variant };
+      } else if (current && typeof current === "object") {
+        current.qty = (Number(current.qty) || 0) + 1;
+        current.itemId = itemId;
+        current.variant = variant;
       } else {
-        plate.order[itemId] = next;
+        plate.order[lineKey] = { itemId, qty: 1, variant };
       }
       persistState();
       renderDetail();
@@ -525,14 +692,14 @@
         plates: table.plates.map((plate) => ({
           id: plate.id,
           name: plate.name,
-          items: Object.entries(plate.order)
-            .filter(([, qty]) => qty > 0)
-            .map(([itemId, qty]) => ({
-              id: itemId,
-              name: ITEM_INDEX[itemId].name,
-              qty,
-              price: ITEM_INDEX[itemId].price,
-              subtotal: ITEM_INDEX[itemId].price * qty
+          items: getPlateLineItems(plate)
+            .map((line) => ({
+              id: line.itemId,
+              name: ITEM_INDEX[line.itemId].name,
+              variant: line.variant,
+              qty: line.qty,
+              price: ITEM_INDEX[line.itemId].price,
+              subtotal: ITEM_INDEX[line.itemId].price * line.qty
             }))
         })),
         total: tableTotal(table)
@@ -554,7 +721,7 @@
         const rows = plate.items.length
           ? plate.items.map((item) => `
               <div style="display:flex; justify-content:space-between; gap:4px; font-size:11px; margin-bottom:2px;">
-                <span>${item.qty}x ${item.name}</span>
+                <span>${item.qty}x ${item.name}${formatVariant(item.variant)}</span>
                 <span>${formatMoney(item.subtotal)}</span>
               </div>
             `).join("")
@@ -587,11 +754,11 @@
     function renderKitchenComandaHtml(table) {
       const dateText = new Date().toLocaleString("es-MX");
       const platesHtml = table.plates.map((plate) => {
-        const items = Object.entries(plate.order).filter(([, qty]) => qty > 0);
+        const items = getPlateLineItems(plate);
         const rows = items.length
-          ? items.map(([itemId, qty]) => `
+          ? items.map((line) => `
               <div style="display:flex; justify-content:space-between; gap:4px; font-size:11px; margin-bottom:2px;">
-                <span>${qty}x ${ITEM_INDEX[itemId].name}</span>
+                <span>${line.qty}x ${ITEM_INDEX[line.itemId].name}${formatVariant(line.variant)}</span>
               </div>
             `).join("")
           : `<div style="font-size:11px; color:#555;">Sin productos</div>`;
@@ -752,7 +919,7 @@
 
       container.innerHTML = sectionEntries.map(([key, title]) => {
         const itemsHtml = MENU[key].map((item) => {
-          const qty = plate.order[item.id] || 0;
+          const qty = getItemQtyInPlate(plate, item.id);
           return `
             <div class="bg-white/50 rounded-2xl p-3 flex items-center justify-between gap-2">
               <div>
@@ -768,38 +935,49 @@
         }).join("");
 
         return `
-          <section>
-            <h4 class="font-headline font-bold text-xl mb-3">${title}</h4>
-            <div class="space-y-2">${itemsHtml}</div>
-          </section>
+          <details data-menu-section="${key}" class="bg-white/45 rounded-2xl p-2" ${state.menuSectionsOpen[key] ? "open" : ""}>
+            <summary class="list-none cursor-pointer flex items-center justify-between px-2 py-2">
+              <h4 class="font-headline font-bold text-xl">${title}</h4>
+              <span class="material-symbols-outlined text-on-surface-variant">expand_more</span>
+            </summary>
+            <div class="space-y-2 px-1 pb-1">${itemsHtml}</div>
+          </details>
         `;
       }).join("");
 
       container.querySelectorAll("[data-item-plus]").forEach((btn) => {
-        btn.addEventListener("click", () => updateItemQty(table.id, plate.id, btn.dataset.itemPlus, 1));
+        btn.addEventListener("click", () => addItemWithVariant(table.id, plate.id, btn.dataset.itemPlus));
+      });
+      container.querySelectorAll("[data-menu-section]").forEach((details) => {
+        details.addEventListener("toggle", () => {
+          state.menuSectionsOpen[details.dataset.menuSection] = details.open;
+        });
       });
     }
 
     function renderOrderList(table) {
       const list = document.getElementById("order-list");
       const platesHtml = table.plates.map((plate) => {
-        const entries = Object.entries(plate.order).filter(([, qty]) => qty > 0);
+        const entries = getPlateLineItems(plate);
         if (!entries.length) {
           return `
             <div class="bg-white/60 rounded-2xl p-3">
-              <p class="font-semibold">${plate.name}</p>
+              <div class="flex items-center justify-between gap-2">
+                <p class="font-semibold">${plate.name}</p>
+                <button data-remove-plate="${table.id}|${plate.id}" class="px-2 py-1 rounded-lg bg-red-100 text-red-700 text-xs font-semibold hover:bg-red-200">Eliminar plato</button>
+              </div>
               <p class="text-sm text-on-surface-variant">Sin productos</p>
             </div>
           `;
         }
-        const rows = entries.map(([itemId, qty]) => {
-          const item = ITEM_INDEX[itemId];
-          const subtotal = item.price * qty;
+        const rows = entries.map((line) => {
+          const item = ITEM_INDEX[line.itemId];
+          const subtotal = item.price * line.qty;
           return `
             <div class="flex items-center justify-between text-base mt-2 gap-2">
-              <span class="flex-1 font-medium">${qty}x ${item.name}</span>
+              <span class="flex-1 font-medium">${line.qty}x ${item.name}${formatVariant(line.variant)}</span>
               <span class="font-semibold text-base">${formatMoney(subtotal)}</span>
-              <button data-remove-item="${table.id}|${plate.id}|${itemId}" class="w-11 h-11 rounded-xl bg-red-100 text-red-700 hover:bg-red-200 flex items-center justify-center" title="Eliminar item">
+              <button data-remove-item data-table-id="${table.id}" data-plate-id="${plate.id}" data-line-key="${line.lineKey}" class="w-11 h-11 rounded-xl bg-red-100 text-red-700 hover:bg-red-200 flex items-center justify-center" title="Eliminar item">
                 <span class="material-symbols-outlined text-2xl">delete</span>
               </button>
             </div>
@@ -809,7 +987,7 @@
           <div class="bg-white/60 rounded-2xl p-3">
             <div class="flex items-center justify-between gap-2">
               <p class="font-semibold">${plate.name}</p>
-              <button data-remove-plate="${table.id}|${plate.id}" class="px-2 py-1 rounded-lg bg-red-100 text-red-700 text-xs font-semibold hover:bg-red-200 ${table.plates.length <= 1 ? "opacity-40 cursor-not-allowed" : ""}" ${table.plates.length <= 1 ? "disabled" : ""}>Eliminar plato</button>
+              <button data-remove-plate="${table.id}|${plate.id}" class="px-2 py-1 rounded-lg bg-red-100 text-red-700 text-xs font-semibold hover:bg-red-200">Eliminar plato</button>
             </div>
             ${rows}
           </div>
@@ -819,8 +997,7 @@
       list.innerHTML = platesHtml;
       list.querySelectorAll("[data-remove-item]").forEach((btn) => {
         btn.addEventListener("click", () => {
-          const parts = btn.dataset.removeItem.split("|");
-          removeItemFromPlate(parts[0], parts[1], parts[2]);
+          removeItemFromPlate(btn.dataset.tableId, btn.dataset.plateId, btn.dataset.lineKey);
         });
       });
       list.querySelectorAll("[data-remove-plate]").forEach((btn) => {
