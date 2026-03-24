@@ -181,66 +181,67 @@ def printer_worker() -> None:
 
 
 class ApiHandler(BaseHTTPRequestHandler):
-    def _set_headers(self, status_code: int = 200, content_type: str = "application/json") -> None:
+    protocol_version = "HTTP/1.0"
+
+    def _set_headers(self, status_code: int = 200, content_type: str = "application/json", content_length: int = 0) -> None:
         self.send_response(status_code)
         self.send_header("Content-Type", content_type)
+        self.send_header("Content-Length", str(content_length))
+        self.send_header("Connection", "close")
         self.send_header("Access-Control-Allow-Origin", "*")
         self.send_header("Access-Control-Allow-Methods", "GET,POST,DELETE,OPTIONS")
         self.send_header("Access-Control-Allow-Headers", "Content-Type")
         self.end_headers()
+
+    def _send_json(self, status_code: int, payload: dict[str, Any]) -> None:
+        body = json.dumps(payload, ensure_ascii=False).encode("utf-8")
+        self._set_headers(status_code, content_type="application/json", content_length=len(body))
+        self.wfile.write(body)
 
     def _is_api_path(self) -> bool:
         return urlparse(self.path).path == "/api/impresiones"
 
     def do_OPTIONS(self) -> None:
         if self._is_api_path():
-            self._set_headers(204)
+            self._set_headers(204, content_length=0)
             return
-        self._set_headers(404)
+        self._send_json(404, {"ok": False, "error": "Not found"})
 
     def do_GET(self) -> None:
         if not self._is_api_path():
-            self._set_headers(404)
-            self.wfile.write(b'{"ok":false,"error":"Not found"}')
+            self._send_json(404, {"ok": False, "error": "Not found"})
             return
         with LOCK:
             queue = load_queue()
-        self._set_headers(200)
-        self.wfile.write(json.dumps({"queue": queue}, ensure_ascii=False).encode("utf-8"))
+        self._send_json(200, {"queue": queue})
 
     def do_POST(self) -> None:
         if not self._is_api_path():
-            self._set_headers(404)
-            self.wfile.write(b'{"ok":false,"error":"Not found"}')
+            self._send_json(404, {"ok": False, "error": "Not found"})
             return
         content_len = int(self.headers.get("Content-Length", "0"))
         raw = self.rfile.read(content_len) if content_len > 0 else b""
         try:
             ticket = json.loads(raw.decode("utf-8"))
         except Exception:
-            self._set_headers(400)
-            self.wfile.write(b'{"ok":false,"error":"JSON invalido"}')
+            self._send_json(400, {"ok": False, "error": "JSON invalido"})
             return
         if not isinstance(ticket, dict) or not str(ticket.get("id", "")).strip():
-            self._set_headers(400)
-            self.wfile.write(b'{"ok":false,"error":"Falta id"}')
+            self._send_json(400, {"ok": False, "error": "Falta id"})
             return
         with LOCK:
             queue = load_queue()
             queue.insert(0, ticket)
             save_queue(queue)
-        self._set_headers(200)
-        self.wfile.write(b'{"ok":true}')
+        self._send_json(200, {"ok": True})
 
     def do_DELETE(self) -> None:
         if not self._is_api_path():
-            self._set_headers(404)
-            self.wfile.write(b'{"ok":false,"error":"Not found"}')
+            self._send_json(404, {"ok": False, "error": "Not found"})
             return
         with LOCK:
             save_queue([])
-        self._set_headers(200)
-        self.wfile.write(b'{"ok":true}')
+        self._send_json(200, {"ok": True})
 
 
 def main() -> None:
