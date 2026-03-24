@@ -133,7 +133,7 @@
                         <span class="material-symbols-outlined text-xl">login</span>
 </button>
 </div>
-<button class="w-full bg-surface-container-highest text-on-surface font-label font-bold text-base py-3 rounded-full hover:bg-surface-container-high active:scale-95 transition-all duration-300 flex items-center justify-center gap-2" onclick="window.history.back()" type="button">
+<button class="w-full bg-surface-container-highest text-on-surface font-label font-bold text-base py-3 rounded-full hover:bg-surface-container-high active:scale-95 transition-all duration-300 flex items-center justify-center gap-2" onclick="window.location.href='../index.html'" type="button">
 <span class="material-symbols-outlined text-lg">arrow_back</span>
                     Regresar
                 </button>
@@ -193,6 +193,7 @@
         });
 
         if (isValid) {
+          localStorage.setItem("dona_susy_mesera_nombre", username);
           window.location.href = "mesas/index.html";
           return;
         }

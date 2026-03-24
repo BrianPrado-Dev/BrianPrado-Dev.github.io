@@ -1,20 +1,20 @@
 {
   "users": [
     {
-      "username": "admin",
-      "password": "admin123"
+      "username": "Brian",
+      "password": "Kfc-2020"
     },
     {
       "username": "Adriana",
-      "password": "Adriana2026"
+      "password": "Adriana2"
     },
     {
       "username": "Lupe",
-      "password": "Lupe2026"
+      "password": "Lupe2"
     },
     {
       "username": "Ceci",
-      "password": "Ceci2026"
+      "password": "Ceci2"
     }
   ]
 }

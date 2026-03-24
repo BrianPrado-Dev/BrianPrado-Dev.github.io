@@ -1,230 +1,946 @@
 <!DOCTYPE html>
-
-<html class="light" lang="es"><head>
-<meta charset="utf-8"/>
-<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
-<link href="https://fonts.googleapis.com/css2?family=Epilogue:wght@400;500;700;800;900&amp;family=Be+Vietnam+Pro:wght@400;500;600&amp;display=swap" rel="stylesheet"/>
-<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
-<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
-<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
-<script id="tailwind-config">
-      tailwind.config = {
-        darkMode: "class",
-        theme: {
-          extend: {
-            colors: {
-              "on-error": "#ffffff",
-              "tertiary-fixed": "#c8e6ff",
-              "outline": "#8f706c",
-              "tertiary-container": "#006e9d",
-              "primary-fixed-dim": "#ffb4ac",
-              "error-container": "#ffdad6",
-              "secondary-container": "#fe8a80",
-              "on-tertiary": "#ffffff",
-              "surface": "#fbfbe2",
-              "on-secondary": "#ffffff",
-              "on-secondary-fixed-variant": "#7f2924",
-              "surface-container-highest": "#e4e4cc",
-              "surface-container-low": "#f5f5dc",
-              "on-surface-variant": "#5b403d",
-              "secondary-fixed-dim": "#ffb4ac",
-              "surface-variant": "#e4e4cc",
-              "outline-variant": "#e4beba",
-              "secondary-fixed": "#ffdad6",
-              "on-primary-container": "#ffe0dd",
-              "inverse-surface": "#303221",
-              "inverse-primary": "#ffb4ac",
-              "primary-fixed": "#ffdad6",
-              "surface-container-lowest": "#ffffff",
-              "surface-bright": "#fbfbe2",
-              "secondary": "#9e403a",
-              "on-primary": "#ffffff",
-              "on-primary-fixed-variant": "#93000e",
-              "on-surface": "#1b1d0e",
-              "inverse-on-surface": "#f2f2d9",
-              "primary": "#a20513",
-              "surface-tint": "#b91d20",
-              "on-tertiary-container": "#d1eaff",
-              "on-primary-fixed": "#410003",
-              "tertiary-fixed-dim": "#88ceff",
-              "surface-container-high": "#eaead1",
-              "on-background": "#1b1d0e",
-              "on-secondary-fixed": "#410003",
-              "background": "#fbfbe2",
-              "primary-container": "#c62828",
-              "on-error-container": "#93000a",
-              "surface-container": "#efefd7",
-              "tertiary": "#00557a",
-              "on-tertiary-fixed": "#001e2f",
-              "on-secondary-container": "#75221e",
-              "error": "#ba1a1a",
-              "on-tertiary-fixed-variant": "#004c6e",
-              "surface-dim": "#dbdcc3"
-            },
-            fontFamily: {
-              "headline": ["Epilogue"],
-              "body": ["Be Vietnam Pro"],
-              "label": ["Be Vietnam Pro"]
-            },
-            borderRadius: {"DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px"},
+<html class="light" lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+  <title>Doña Susy - Gestión de Mesas</title>
+  <link href="https://fonts.googleapis.com/css2?family=Epilogue:wght@400;700;800;900&family=Be+Vietnam+Pro:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet" />
+  <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+  <script id="tailwind-config">
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          colors: {
+            primary: "#a20513",
+            "primary-container": "#c62828",
+            surface: "#fbfbe2",
+            "surface-container-low": "#f5f5dc",
+            "surface-container-highest": "#e4e4cc",
+            "on-surface": "#1b1d0e",
+            "on-surface-variant": "#5b403d",
+            "outline-variant": "#e4beba"
           },
-        },
+          fontFamily: {
+            headline: ["Epilogue"],
+            body: ["Be Vietnam Pro"]
+          }
+        }
       }
-    </script>
-<style>.material-symbols-outlined {
-    font-variation-settings: "FILL" 0, "wght" 400, "GRAD" 0, "opsz" 24
+    };
+  </script>
+  <style>
+    .material-symbols-outlined {
+      font-variation-settings: "FILL" 0, "wght" 400, "GRAD" 0, "opsz" 24;
     }
-/* Subtle paper/plaster texture effect */
-.paper-texture {
-    background-color: #fbfbe2;
-    background-image: url(https://lh3.googleusercontent.com/aida-public/AB6AXuDcvL4o5MvMiQiGs1cwtdmfF9wU6QYIviz0WxG8bIeezqGhRN4buQ0DhQLU_MMj67fxhoGPd8fqhmeSF9PphsBjpctqqE4bLugHOGVymiOGW6df5tU7Ca80cCVn7WaX2QTe95754jo_9Zpl31JyOSK55mI32oARsDw0_QMJVy4gj9dEoFXjh-mTC_cOzHH8rOOjz0LL5U9oOw110_tVJmgz1HhaBmayI-ltt28KeiM2PnEa_a1h4urMLa01uo4_3P-LaPB0x6QPdFzi)
+
+    .paper-texture {
+      background-color: #f4e5cf;
+      background-image:
+        radial-gradient(circle at 10% 12%, rgba(255, 255, 255, 0.45), rgba(255, 255, 255, 0) 38%),
+        linear-gradient(145deg, #f6ead8 0%, #efddc4 45%, #e7d2b4 100%);
     }
-.chile-glow {
-    box-shadow: 0 0 30px -5px rgba(162, 5, 19, 0.25)
-    }</style>
-<style>
+
     body {
-      min-height: max(884px, 100dvh);
+      min-height: max(100dvh, 860px);
+    }
+
+    @media print {
+      body * {
+        visibility: hidden !important;
+      }
+
+      #print-ticket-root, #print-ticket-root * {
+        visibility: visible !important;
+      }
+
+      #print-ticket-root {
+        display: block !important;
+        position: absolute;
+        left: 0;
+        top: 0;
+        width: 57mm;
+      }
+
+      @page {
+        size: 57mm auto;
+        margin: 0;
+      }
     }
   </style>
-  </head>
-<body class="paper-texture min-h-screen font-body text-on-surface pb-32">
-<!-- TopAppBar -->
-<header class="bg-[#fbfbe2] dark:bg-[#1b1d0e] flex justify-between items-center px-6 py-4 w-full docked full-width top-0 sticky z-50 shadow-[0_24px_24px_rgba(27,29,14,0.06)]">
-<div class="flex items-center gap-3">
-<span class="material-symbols-outlined text-[#a20513] dark:text-[#c62828]" style="font-size: 28px;">restaurant</span>
-<h1 class="font-['Epilogue'] font-bold text-2xl tracking-tight text-[#a20513] dark:text-[#c62828]">Doña Susy</h1>
-</div>
-<div class="flex items-center gap-4">
-<span class="material-symbols-outlined text-[#1b1d0e] dark:text-[#fbfbe2] opacity-70">notifications</span>
-</div>
-</header>
-<main class="px-6 pt-8 max-w-5xl mx-auto">
-<!-- Dashboard Header -->
-<section class="mb-10">
-<div class="flex flex-col md:flex-row md:items-end justify-between gap-4">
-<div>
-<h2 class="font-headline font-black text-4xl tracking-tighter text-on-surface mb-2">Gestión de Mesas</h2>
-<p class="font-body text-on-surface-variant opacity-80 uppercase tracking-widest text-xs font-semibold">Salón Principal</p>
-</div>
-<!-- Summary Chips -->
-<div class="flex gap-3">
-<div class="bg-primary-container text-on-primary-container px-4 py-3 rounded-2xl flex items-center gap-3 shadow-sm">
-<span class="material-symbols-outlined text-xl" style="font-variation-settings: 'FILL' 1;">cooking</span>
-<div class="flex flex-col">
-<span class="font-headline font-bold leading-none text-lg">12 Activas</span>
-</div>
-</div>
-<div class="bg-surface-container-highest text-on-surface px-4 py-3 rounded-2xl flex items-center gap-3">
-<span class="material-symbols-outlined text-xl">restaurant</span>
-<div class="flex flex-col">
-<span class="font-headline font-bold leading-none text-lg">8 Libres</span>
-</div>
-</div>
-</div>
-</div>
-</section>
-<!-- Tables Layout Bento Grid -->
-<div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-<!-- Left Side: Mesa 1 & 2 Side-by-side -->
-<div class="md:col-span-2 grid grid-cols-1 sm:grid-cols-2 gap-6">
-<!-- Mesa 1: Occupied -->
-<div class="bg-surface-container-low rounded-[2.5rem] p-8 flex flex-col justify-between min-h-[280px] chile-glow relative overflow-hidden group">
-<div class="absolute top-0 right-0 p-6">
-<span class="bg-primary text-white text-[10px] font-black px-3 py-1 rounded-full uppercase tracking-widest">Ocupada</span>
-</div>
-<div>
-<h3 class="font-headline font-extrabold text-5xl mb-1 text-primary">Mesa 1</h3>
-<p class="font-body text-on-surface-variant text-sm flex items-center gap-2">
-<span class="material-symbols-outlined text-sm">schedule</span> hace 42 min
-                        </p>
-</div>
-<div class="bg-white/40 backdrop-blur-md rounded-3xl p-4 mt-6">
-<div class="flex items-start gap-3">
-<span class="material-symbols-outlined text-primary">receipt_long</span>
-<div>
-<p class="font-headline font-bold text-on-surface">2 Tortas Ahogadas</p>
-<p class="font-body text-xs text-on-surface-variant">Extra picante • Con cebolla</p>
-</div>
-</div>
-</div>
-</div>
-<!-- Mesa 2: Free -->
-<div class="bg-surface-container-low rounded-[2.5rem] p-8 flex flex-col justify-between min-h-[280px] border border-transparent hover:border-outline-variant/30 transition-all cursor-pointer">
-<div class="absolute top-0 right-0 p-6">
-<span class="bg-on-surface-variant/10 text-on-surface-variant text-[10px] font-black px-3 py-1 rounded-full uppercase tracking-widest">Disponible</span>
-</div>
-<div>
-<h3 class="font-headline font-extrabold text-5xl mb-1 text-on-surface opacity-40">Mesa 2</h3>
-<p class="font-body text-on-surface-variant text-sm">Lista para recibir</p>
-</div>
-<button class="bg-surface-container-highest text-primary font-headline font-bold py-4 rounded-2xl flex items-center justify-center gap-2 hover:bg-primary hover:text-white transition-all">
-<span class="material-symbols-outlined">add_circle</span>
-                        Abrir Cuenta
-                    </button>
-</div>
-</div>
-<!-- Right Side: Mesa 3 & 4 Stacked -->
-<div class="flex flex-col gap-6">
-<!-- Mesa 3: Occupied -->
-<div class="bg-surface-container-low rounded-[2.5rem] p-6 flex flex-col justify-between flex-1 min-h-[220px] chile-glow relative overflow-hidden">
-<div class="flex justify-between items-start">
-<h3 class="font-headline font-extrabold text-3xl text-primary">Mesa 3</h3>
-<span class="bg-primary/10 text-primary text-[10px] font-black px-2 py-1 rounded-md uppercase tracking-tighter">En Proceso</span>
-</div>
-<div class="mt-4">
-<div class="flex items-center gap-2 text-on-surface-variant mb-2">
-<span class="material-symbols-outlined text-lg">person</span>
-<span class="font-bold text-sm">4 Comensales</span>
-</div>
-<div class="flex -space-x-2">
-<div class="w-8 h-8 rounded-full border-2 border-surface bg-surface-container-highest overflow-hidden">
-<img class="w-full h-full object-cover" data-alt="User avatar 1" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAQawZcLf2VKX3uV-MMJR5RvMJXFzc51Rlfzx23nx3zDI9Tz2jwKDNHu9BntTO7z4f5QSU6vQnolX9zoiZ3grZcSo4jhqtd3VMQljzvOLPVFK8HKetbHZPTI5iYRbBlMJNlWgdvmmKB5Wwgj1y9fQX437Usn8Ini9KsTb-YfjaFaAba3g6HfGkeZ1sMz3eR0lDBQRfsxt-k6O2RNOqmrewTU1ylFLFI6zzeALDuL0PXuCRtXKzILdS1AXEgKeO5xSmQKU_WFO3ez-cn"/>
-</div>
-<div class="w-8 h-8 rounded-full border-2 border-surface bg-surface-container-highest overflow-hidden">
-<img class="w-full h-full object-cover" data-alt="User avatar 2" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBcU1rghavhsLp8FwxQ_kNkFRlszYxYd7pQbltjb0CRGl_u4rVOeyCksCFeA-gDWCScGc8kQT2pY3wdApGRF1MUqblGYZ9gn_cuxTKQB9kh7_OGosEY2fH8lDxcEIBvCn7sfbt14ig5RK04RHsCuGLnrDtU-HGFlmzq0A3a5dm7IWXLANtIX2GaacY5Ttmk7xfATpE7_M3W5LyzwNs6I9SM1GDbnGejU73uFmbSMlnH4Wj9VkE5vyZHyVRmOw9tU_CiYRhfvi2tuvEh"/>
-</div>
-<div class="w-8 h-8 rounded-full border-2 border-surface bg-primary text-white flex items-center justify-center text-[10px] font-bold">+2</div>
-</div>
-</div>
-</div>
-<!-- Mesa 4: Free -->
-<div class="bg-surface-container-low rounded-[2.5rem] p-6 flex flex-col justify-between flex-1 min-h-[220px] opacity-90 grayscale-[0.5] hover:grayscale-0 transition-all cursor-pointer">
-<div class="flex justify-between items-start">
-<h3 class="font-headline font-extrabold text-3xl text-on-surface opacity-30">Mesa 4</h3>
-<span class="material-symbols-outlined text-on-surface-variant opacity-20">check_circle</span>
-</div>
-<div class="mt-4">
-<p class="font-body text-on-surface-variant text-sm italic">Mesa limpia y desinfectada</p>
-<div class="mt-3 flex items-center gap-2 text-primary font-bold">
-<span class="material-symbols-outlined text-sm">add</span>
-<span class="text-xs uppercase tracking-widest">Asignar ahora</span>
-</div>
-</div>
-</div>
-</div>
-</div>
-</main>
-<!-- Prominent Floating Action Button -->
-<button class="fixed right-6 bottom-28 w-16 h-16 bg-primary rounded-full flex items-center justify-center text-white shadow-[0_12px_24px_rgba(162,5,19,0.4)] active:scale-95 transition-transform z-40">
-<span class="material-symbols-outlined text-3xl" style="font-variation-settings: 'wght' 600;">add</span>
-</button>
-<!-- BottomNavBar -->
-<nav class="fixed bottom-0 left-0 w-full flex justify-around items-center px-4 pb-6 pt-3 bg-[#fbfbe2]/85 dark:bg-[#1b1d0e]/85 backdrop-blur-xl border-t border-[#e4beba]/15 z-50 rounded-t-3xl shadow-[0_-8px_24px_rgba(27,29,14,0.04)]">
-<!-- Tables (Active) -->
-<a class="flex flex-col items-center justify-center bg-[#c62828] text-white rounded-full px-5 py-2 transition-all" href="#">
-<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">grid_view</span>
-<span class="font-['Be_Vietnam_Pro'] text-[10px] font-medium uppercase tracking-widest mt-0.5">Tables</span>
-</a>
-<!-- Menu -->
-<a class="flex flex-col items-center justify-center text-[#1b1d0e] dark:text-[#fbfbe2] opacity-60 px-5 py-2 hover:bg-[#f5f5dc] dark:hover:bg-[#2a2d1a] rounded-full transition-all active:scale-90" href="#">
-<span class="material-symbols-outlined">restaurant_menu</span>
-<span class="font-['Be_Vietnam_Pro'] text-[10px] font-medium uppercase tracking-widest mt-0.5">Menu</span>
-</a>
-<!-- Settings -->
-<a class="flex flex-col items-center justify-center text-[#1b1d0e] dark:text-[#fbfbe2] opacity-60 px-5 py-2 hover:bg-[#f5f5dc] dark:hover:bg-[#2a2d1a] rounded-full transition-all active:scale-90" href="#">
-<span class="material-symbols-outlined">settings</span>
-<span class="font-['Be_Vietnam_Pro'] text-[10px] font-medium uppercase tracking-widest mt-0.5">Settings</span>
-</a>
-</nav>
-</body></html>
+</head>
+<body class="paper-texture min-h-screen font-body text-on-surface">
+  <header class="bg-[#fbfbe2] flex justify-between items-center px-6 py-4 w-full sticky top-0 z-40 shadow-[0_12px_24px_rgba(27,29,14,0.08)]">
+    <div class="flex items-center gap-3">
+      <span class="material-symbols-outlined text-primary" style="font-size: 28px;">restaurant</span>
+      <h1 class="font-headline font-bold text-2xl tracking-tight text-primary">Tortas Doña Susy</h1>
+    </div>
+    <p id="current-user-label" class="text-xs uppercase tracking-widest text-on-surface-variant">Usuario: -</p>
+  </header>
+
+  <main class="px-6 pt-8 pb-28 max-w-6xl mx-auto">
+    <section id="tables-view">
+      <div class="flex flex-col md:flex-row md:items-end justify-between gap-4 mb-8">
+        <div>
+          <h2 class="font-headline font-black text-4xl tracking-tighter mb-2">Gestión de Mesas</h2>
+          <p class="text-on-surface-variant uppercase tracking-widest text-xs font-semibold">Salón principal</p>
+          <a href="../index.html" class="mt-3 inline-flex items-center gap-2 bg-surface-container-highest hover:bg-primary hover:text-white transition-colors px-4 py-2 rounded-xl text-sm font-semibold">
+            <span class="material-symbols-outlined text-base">arrow_back</span>
+            Volver al Login
+          </a>
+        </div>
+        <div class="flex gap-3">
+          <button id="open-history-button" class="bg-surface-container-highest px-4 py-3 rounded-2xl flex items-center gap-2 hover:bg-primary hover:text-white transition-colors">
+            <span class="material-symbols-outlined">history</span>
+            <span class="font-semibold">Historial</span>
+          </button>
+          <button id="open-prints-button" class="bg-surface-container-highest px-4 py-3 rounded-2xl flex items-center gap-2 hover:bg-primary hover:text-white transition-colors">
+            <span class="material-symbols-outlined">print</span>
+            <span class="font-semibold">Impresiones</span>
+          </button>
+          <div class="bg-primary-container text-white px-4 py-3 rounded-2xl flex items-center gap-3 shadow-sm">
+            <span class="material-symbols-outlined text-xl">cooking</span>
+            <div><span id="active-count" class="font-headline font-bold text-lg">0 Ocupadas</span></div>
+          </div>
+          <div class="bg-surface-container-highest px-4 py-3 rounded-2xl flex items-center gap-3">
+            <span class="material-symbols-outlined text-xl">table_restaurant</span>
+            <div><span id="free-count" class="font-headline font-bold text-lg">0 Libres</span></div>
+          </div>
+        </div>
+      </div>
+
+      <div id="tables-grid" class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-5"></div>
+    </section>
+
+    <section id="detail-view" class="hidden">
+      <div class="mb-6 flex items-center justify-between gap-3">
+        <button id="back-button" class="bg-surface-container-highest hover:bg-primary hover:text-white transition-colors px-4 py-2 rounded-xl flex items-center gap-2">
+          <span class="material-symbols-outlined">arrow_back</span>
+          Volver a mesas
+        </button>
+        <h2 id="detail-title" class="font-headline font-black text-3xl">Mesa</h2>
+      </div>
+
+      <div class="mb-4 flex items-center justify-end gap-3">
+        <div class="flex items-center gap-2">
+          <label for="plate-select" class="text-sm font-semibold">Plato actual:</label>
+          <select id="plate-select" class="rounded-xl border-outline-variant bg-white/80"></select>
+        </div>
+      </div>
+
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <div class="bg-surface-container-low rounded-3xl p-5 space-y-5">
+          <h3 class="font-headline font-bold text-2xl">Menú</h3>
+          <div id="menu-sections" class="space-y-6"></div>
+        </div>
+
+        <div class="bg-surface-container-low rounded-3xl p-5 flex flex-col">
+          <h3 class="font-headline font-bold text-2xl mb-4">Pedido actual (por plato)</h3>
+          <div id="order-list" class="space-y-3 flex-1"></div>
+          <div class="border-t border-outline-variant mt-6 pt-4 flex justify-between items-center">
+            <span class="font-headline font-bold text-xl">Total</span>
+            <span id="order-total" class="font-headline font-black text-3xl text-primary">$0</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section id="prints-view" class="hidden">
+      <div class="mb-6 flex items-center justify-between gap-3">
+        <button id="back-from-prints-button" class="bg-surface-container-highest hover:bg-primary hover:text-white transition-colors px-4 py-2 rounded-xl flex items-center gap-2">
+          <span class="material-symbols-outlined">arrow_back</span>
+          Volver a mesas
+        </button>
+        <h2 class="font-headline font-black text-3xl">Impresiones</h2>
+      </div>
+      <div class="bg-surface-container-low rounded-3xl p-5">
+        <p class="text-sm text-on-surface-variant mb-3">Aquí se registran todos los tickets listos para imprimir. Tu app en Python puede leer este arreglo desde localStorage (`dona_susy_print_queue_v1`) y procesarlo.</p>
+        <div class="mb-3 flex items-center gap-2">
+          <button id="print-all-button" class="bg-primary text-white px-4 py-2 rounded-xl font-semibold hover:opacity-90">Imprimir todos</button>
+          <button id="clear-prints-button" class="bg-red-100 text-red-700 px-4 py-2 rounded-xl font-semibold hover:bg-red-200">Limpiar cola</button>
+        </div>
+        <div id="prints-list" class="space-y-3"></div>
+      </div>
+    </section>
+
+    <section id="history-view" class="hidden">
+      <div class="mb-6 flex items-center justify-between gap-3">
+        <button id="back-from-history-button" class="bg-surface-container-highest hover:bg-primary hover:text-white transition-colors px-4 py-2 rounded-xl flex items-center gap-2">
+          <span class="material-symbols-outlined">arrow_back</span>
+          Volver a mesas
+        </button>
+        <h2 class="font-headline font-black text-3xl">Historial</h2>
+      </div>
+      <div class="bg-surface-container-low rounded-3xl p-5">
+        <p class="text-sm text-on-surface-variant mb-3">Registros de mesas limpiadas.</p>
+        <div id="history-list" class="space-y-3"></div>
+      </div>
+    </section>
+  </main>
+
+  <button id="add-table-button" class="fixed right-6 bottom-8 w-16 h-16 bg-primary rounded-full flex items-center justify-center text-white shadow-[0_12px_24px_rgba(162,5,19,0.4)] active:scale-95 transition-transform z-40">
+    <span class="material-symbols-outlined text-3xl">add</span>
+  </button>
+
+  <div id="detail-actions-bar" class="hidden fixed bottom-6 left-6 right-6 z-40">
+    <div class="flex items-center justify-between gap-3">
+      <button id="add-plate-button" class="bg-primary text-white px-5 py-3 rounded-2xl font-semibold hover:opacity-90 flex items-center gap-2 shadow-[0_10px_20px_rgba(162,5,19,0.25)]">
+        <span class="material-symbols-outlined">add_circle</span>
+        Agregar plato
+      </button>
+      <button id="print-comanda-button" class="bg-surface-container-highest text-on-surface px-5 py-3 rounded-2xl font-semibold hover:bg-primary hover:text-white flex items-center gap-2 shadow-[0_10px_20px_rgba(27,29,14,0.15)]">
+        <span class="material-symbols-outlined">receipt_long</span>
+        Imprimir comanda
+      </button>
+    </div>
+  </div>
+
+  <div id="print-ticket-root" class="hidden"></div>
+
+  <script>
+    const STORAGE_KEY = "dona_susy_mesas_v2";
+    const PRINT_QUEUE_KEY = "dona_susy_print_queue_v1";
+    const HISTORY_KEY = "dona_susy_history_v1";
+    const WAITER_NAME_KEY = "dona_susy_mesera_nombre";
+    const FIXED_TABLES = [1, 2, 3, 4];
+
+    const MENU = {
+      comida: [
+        { id: "torta_ahogada", name: "Torta Ahogada", price: 55, note: "Carnitas, Buche, Lengua" },
+        { id: "taco_dorado_sencillo", name: "Taco Dorado Sencillo", price: 10, note: "Papa, Frijol y Requesón" },
+        { id: "taco_dorado_carne", name: "Taco Dorado con Carne", price: 25, note: "Carnitas, Buche, Lengua" },
+        { id: "taco_blandito", name: "Taco Blandito", price: 25, note: "Carnitas, Buche, Lengua" },
+        { id: "kilo_carne", name: "Kilo de Carne", price: 300, note: "Carnitas, Buche, Lengua" }
+      ],
+      paquetes: [
+        { id: "paquete_1", name: "Paquete #1", price: 80, note: "1 Torta + 1 Taco Dorado Sencillo + 1 Refresco (o Agua 1LT)" },
+        { id: "paquete_2", name: "Paquete #2", price: 85, note: "1 Torta + 2 Tacos Dorados Sencillos + 1 Refresco (o Agua 1LT)" },
+        { id: "paquete_3", name: "Paquete #3", price: 205, note: "3 Tortas + 5 Tacos Dorados Sencillos" },
+        { id: "paquete_4", name: "Paquete #4", price: 320, note: "5 Tortas + 6 Tacos Dorados Sencillos" },
+        { id: "paquete_5", name: "Paquete #5", price: 630, note: "10 Tortas + 10 Tacos Dorados Sencillos" }
+      ],
+      bebidas: [
+        { id: "refresco_taparosca", name: "Refresco Taparosca", price: 30 },
+        { id: "agua_fresca_1lt", name: "Agua Fresca 1LT", price: 25 },
+        { id: "agua_500ml", name: "Agua 500ml", price: 15 },
+        { id: "cerveza_corona_500ml", name: "Cerveza Corona 500ml", price: 25 },
+        { id: "caguama_mega", name: "Caguama Mega", price: 70 }
+      ]
+    };
+
+    const ITEM_INDEX = Object.values(MENU).flat().reduce((acc, item) => {
+      acc[item.id] = item;
+      return acc;
+    }, {});
+
+    const state = {
+      tables: [],
+      selectedTableId: null,
+      selectedPlateId: null,
+      printQueue: [],
+      history: [],
+      meseraNombre: localStorage.getItem(WAITER_NAME_KEY) || "Sin nombre"
+    };
+
+    function todayKey() {
+      return new Date().toISOString().slice(0, 10);
+    }
+
+    function createPlate(index) {
+      return { id: `plato_${index}`, name: `Cliente ${index}`, order: {} };
+    }
+
+    function createTable(number, isDefault, createdOn = todayKey()) {
+      return {
+        id: `mesa_${number}`,
+        number,
+        isDefault,
+        createdOn,
+        plates: [createPlate(1)]
+      };
+    }
+
+    function normalizeTable(table) {
+      const oldOrder = table.order && typeof table.order === "object" ? table.order : null;
+      let plates = Array.isArray(table.plates) ? table.plates : [];
+      if (!plates.length) {
+        plates = [createPlate(1)];
+      }
+      if (oldOrder) {
+        plates[0].order = { ...(plates[0].order || {}), ...oldOrder };
+      }
+      const cleanPlates = plates.map((p, idx) => ({
+        id: p.id || `plato_${idx + 1}`,
+        name: p.name || `Cliente ${idx + 1}`,
+        order: p.order && typeof p.order === "object" ? p.order : {}
+      }));
+      return {
+        ...table,
+        plates: cleanPlates
+      };
+    }
+
+    function loadPrintQueue() {
+      const raw = localStorage.getItem(PRINT_QUEUE_KEY);
+      if (!raw) {
+        state.printQueue = [];
+        return;
+      }
+      const parsed = JSON.parse(raw);
+      state.printQueue = Array.isArray(parsed.queue) ? parsed.queue : [];
+    }
+
+    function persistPrintQueue() {
+      localStorage.setItem(PRINT_QUEUE_KEY, JSON.stringify({ queue: state.printQueue }));
+    }
+
+    function loadHistory() {
+      const raw = localStorage.getItem(HISTORY_KEY);
+      if (!raw) {
+        state.history = [];
+        return;
+      }
+      const parsed = JSON.parse(raw);
+      const allHistory = Array.isArray(parsed.history) ? parsed.history : [];
+      const today = todayKey();
+      state.history = allHistory.filter((record) => {
+        if (!record || !record.cleanedAt) return false;
+        return String(record.cleanedAt).slice(0, 10) === today;
+      });
+      persistHistory();
+    }
+
+    function persistHistory() {
+      localStorage.setItem(HISTORY_KEY, JSON.stringify({ history: state.history }));
+    }
+
+    function userCanAccessHistory() {
+      return String(state.meseraNombre).trim().toLowerCase() === "brian";
+    }
+
+    function pushHistoryRecord(table) {
+      const record = {
+        id: `hist_${table.id}_${Date.now()}`,
+        tableNumber: table.number,
+        cleanedBy: state.meseraNombre,
+        cleanedAt: new Date().toISOString(),
+        totalBeforeClear: tableTotal(table),
+        plates: table.plates.map((plate) => ({
+          name: plate.name,
+          items: Object.entries(plate.order)
+            .filter(([, qty]) => qty > 0)
+            .map(([itemId, qty]) => `${qty}x ${ITEM_INDEX[itemId].name}`)
+        }))
+      };
+      state.history.unshift(record);
+      persistHistory();
+    }
+
+    function loadState() {
+      const raw = localStorage.getItem(STORAGE_KEY);
+      if (!raw) {
+        state.tables = FIXED_TABLES.map((n) => createTable(n, true, "fixed"));
+        persistState();
+        return;
+      }
+
+      const parsed = JSON.parse(raw);
+      const parsedTables = Array.isArray(parsed.tables) ? parsed.tables : [];
+      const fixed = FIXED_TABLES.map((n) => {
+        const existing = parsedTables.find((t) => t.number === n);
+        return existing
+          ? normalizeTable({ ...existing, isDefault: true, createdOn: "fixed" })
+          : createTable(n, true, "fixed");
+      });
+
+      const extras = parsedTables.filter((t) => !FIXED_TABLES.includes(t.number) && !t.isDefault);
+      const cleanedExtras = extras
+        .filter((t) => t.createdOn === todayKey())
+        .map((t) => normalizeTable({ ...t, isDefault: false }));
+
+      state.tables = [...fixed, ...cleanedExtras].sort((a, b) => a.number - b.number);
+      persistState();
+    }
+
+    function persistState() {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify({ tables: state.tables }));
+    }
+
+    function getTableById(id) {
+      return state.tables.find((t) => t.id === id) || null;
+    }
+
+    function getPlateById(table, plateId) {
+      return table.plates.find((p) => p.id === plateId) || null;
+    }
+
+    function plateHasItems(plate) {
+      return Object.values(plate.order).some((qty) => qty > 0);
+    }
+
+    function tableHasItems(table) {
+      return table.plates.some((plate) => plateHasItems(plate));
+    }
+
+    function tableSummary(table) {
+      const firstPlateWithItems = table.plates.find((p) => plateHasItems(p));
+      if (!firstPlateWithItems) return "Sin pedido";
+      const entries = Object.entries(firstPlateWithItems.order).filter(([, qty]) => qty > 0);
+      const base = entries
+        .slice(0, 3)
+        .map(([itemId, qty]) => `${qty}x ${ITEM_INDEX[itemId].name}`)
+        .join(" • ");
+      return `${firstPlateWithItems.name}: ${base}`;
+    }
+
+    function tableTotal(table) {
+      return table.plates.reduce((tableSum, plate) => {
+        const plateTotal = Object.entries(plate.order).reduce((sum, [itemId, qty]) => sum + ITEM_INDEX[itemId].price * qty, 0);
+        return tableSum + plateTotal;
+      }, 0);
+    }
+
+    function formatMoney(amount) {
+      return `$${amount.toLocaleString("es-MX")}`;
+    }
+
+    function nextTableNumber() {
+      const nums = state.tables.map((t) => t.number);
+      let candidate = 1;
+      while (nums.includes(candidate)) candidate += 1;
+      return candidate;
+    }
+
+    function addExtraTable() {
+      const number = nextTableNumber();
+      state.tables.push(createTable(number, false, todayKey()));
+      state.tables.sort((a, b) => a.number - b.number);
+      persistState();
+      renderTables();
+    }
+
+    function removeExtraTable(tableId) {
+      state.tables = state.tables.filter((t) => t.id !== tableId);
+      persistState();
+      renderTables();
+    }
+
+    function clearTable(tableId) {
+      const table = getTableById(tableId);
+      if (!table) return;
+      const confirmed = window.confirm(`¿Seguro que quieres limpiar la Mesa ${table.number}? Se borrará todo el pedido.`);
+      if (!confirmed) return;
+      pushHistoryRecord(table);
+      table.plates = [createPlate(1)];
+      if (state.selectedTableId === tableId) {
+        state.selectedPlateId = table.plates[0].id;
+      }
+      persistState();
+      renderTables();
+      if (state.selectedTableId === tableId) {
+        renderDetail();
+      }
+    }
+
+    function openTableDetail(tableId) {
+      state.selectedTableId = tableId;
+      const table = getTableById(tableId);
+      state.selectedPlateId = table && table.plates.length ? table.plates[0].id : null;
+      renderDetail();
+      showView("detail");
+    }
+
+    function closeTableDetail() {
+      state.selectedTableId = null;
+      state.selectedPlateId = null;
+      showView("tables");
+      renderTables();
+    }
+
+    function addPlateToSelectedTable() {
+      const table = getTableById(state.selectedTableId);
+      if (!table) return;
+      const nextIndex = table.plates.length + 1;
+      const plate = createPlate(nextIndex);
+      table.plates.push(plate);
+      state.selectedPlateId = plate.id;
+      persistState();
+      renderDetail();
+      renderTables();
+    }
+
+    function removeItemFromPlate(tableId, plateId, itemId) {
+      const table = getTableById(tableId);
+      if (!table) return;
+      const plate = getPlateById(table, plateId);
+      if (!plate) return;
+      delete plate.order[itemId];
+      persistState();
+      renderDetail();
+      renderTables();
+    }
+
+    function removePlate(tableId, plateId) {
+      const table = getTableById(tableId);
+      if (!table) return;
+      if (table.plates.length <= 1) return;
+      table.plates = table.plates.filter((plate) => plate.id !== plateId);
+      if (!table.plates.length) {
+        table.plates = [createPlate(1)];
+      }
+      if (state.selectedPlateId === plateId) {
+        state.selectedPlateId = table.plates[0].id;
+      }
+      persistState();
+      renderDetail();
+      renderTables();
+    }
+
+    function updateItemQty(tableId, plateId, itemId, delta) {
+      const table = getTableById(tableId);
+      if (!table) return;
+      const plate = getPlateById(table, plateId);
+      if (!plate) return;
+      const current = plate.order[itemId] || 0;
+      const next = Math.max(0, current + delta);
+      if (next === 0) {
+        delete plate.order[itemId];
+      } else {
+        plate.order[itemId] = next;
+      }
+      persistState();
+      renderDetail();
+      renderTables();
+    }
+
+    function createTicketData(table) {
+      const timestamp = new Date().toISOString();
+      return {
+        id: `ticket_${table.id}_${Date.now()}`,
+        tableId: table.id,
+        tableNumber: table.number,
+        mesera: state.meseraNombre,
+        createdAt: timestamp,
+        plates: table.plates.map((plate) => ({
+          id: plate.id,
+          name: plate.name,
+          items: Object.entries(plate.order)
+            .filter(([, qty]) => qty > 0)
+            .map(([itemId, qty]) => ({
+              id: itemId,
+              name: ITEM_INDEX[itemId].name,
+              qty,
+              price: ITEM_INDEX[itemId].price,
+              subtotal: ITEM_INDEX[itemId].price * qty
+            }))
+        })),
+        total: tableTotal(table)
+      };
+    }
+
+    function queueTableTicket(tableId) {
+      const table = getTableById(tableId);
+      if (!table) return;
+      const ticket = createTicketData(table);
+      state.printQueue.unshift(ticket);
+      persistPrintQueue();
+      renderPrints();
+    }
+
+    function renderTicketHtml(ticket) {
+      const dateText = new Date(ticket.createdAt).toLocaleString("es-MX");
+      const platesHtml = ticket.plates.map((plate) => {
+        const rows = plate.items.length
+          ? plate.items.map((item) => `
+              <div style="display:flex; justify-content:space-between; gap:4px; font-size:11px; margin-bottom:2px;">
+                <span>${item.qty}x ${item.name}</span>
+                <span>${formatMoney(item.subtotal)}</span>
+              </div>
+            `).join("")
+          : `<div style="font-size:11px; color:#555;">Sin productos</div>`;
+        return `
+          <div style="margin-top:8px; border-top:1px dashed #000; padding-top:6px;">
+            <div style="font-weight:700; font-size:11px;">${plate.name}</div>
+            ${rows}
+          </div>
+        `;
+      }).join("");
+
+      return `
+        <div style="font-family: 'Be Vietnam Pro', Arial, sans-serif; width:57mm; padding:3mm; color:#000;">
+          <div style="text-align:center; font-weight:800; font-size:13px;">Tortas Ahogadas Doña Susy</div>
+          <div style="text-align:center; font-size:11px;">Mesa ${ticket.tableNumber}</div>
+          <div style="text-align:center; font-size:10px; margin-bottom:4px;">${dateText}</div>
+          <div style="border-top:1px dashed #000; margin-top:4px; padding-top:4px;"></div>
+          ${platesHtml}
+          <div style="border-top:1px dashed #000; margin-top:8px; padding-top:6px; display:flex; justify-content:space-between; font-weight:800;">
+            <span>Total</span>
+            <span>${formatMoney(ticket.total)}</span>
+          </div>
+          <div style="text-align:center; margin-top:8px; font-size:11px; font-weight:700;">Gracias por su preferencia</div>
+          <div style="margin-top:10px; font-size:11px;">Mesera: ${ticket.mesera}</div>
+        </div>
+      `;
+    }
+
+    function renderKitchenComandaHtml(table) {
+      const dateText = new Date().toLocaleString("es-MX");
+      const platesHtml = table.plates.map((plate) => {
+        const items = Object.entries(plate.order).filter(([, qty]) => qty > 0);
+        const rows = items.length
+          ? items.map(([itemId, qty]) => `
+              <div style="display:flex; justify-content:space-between; gap:4px; font-size:11px; margin-bottom:2px;">
+                <span>${qty}x ${ITEM_INDEX[itemId].name}</span>
+              </div>
+            `).join("")
+          : `<div style="font-size:11px; color:#555;">Sin productos</div>`;
+
+        return `
+          <div style="margin-top:8px; border-top:1px dashed #000; padding-top:6px;">
+            <div style="font-weight:700; font-size:11px;">${plate.name}</div>
+            ${rows}
+          </div>
+        `;
+      }).join("");
+
+      return `
+        <div style="font-family: 'Be Vietnam Pro', Arial, sans-serif; width:57mm; padding:3mm; color:#000;">
+          <div style="text-align:center; font-weight:800; font-size:13px;">Tortas Ahogadas Doña Susy</div>
+          <div style="text-align:center; font-size:11px;">COMANDA COCINA</div>
+          <div style="text-align:center; font-size:11px;">Mesa ${table.number}</div>
+          <div style="text-align:center; font-size:10px; margin-bottom:4px;">${dateText}</div>
+          <div style="border-top:1px dashed #000; margin-top:4px; padding-top:4px;"></div>
+          ${platesHtml}
+          <div style="margin-top:10px; font-size:11px;">Mesera: ${state.meseraNombre}</div>
+        </div>
+      `;
+    }
+
+    function printTicket(ticket) {
+      const root = document.getElementById("print-ticket-root");
+      root.innerHTML = renderTicketHtml(ticket);
+      root.classList.remove("hidden");
+      window.print();
+      root.classList.add("hidden");
+      root.innerHTML = "";
+    }
+
+    function printKitchenComanda(tableId) {
+      const table = getTableById(tableId);
+      if (!table) return;
+      const root = document.getElementById("print-ticket-root");
+      root.innerHTML = renderKitchenComandaHtml(table);
+      root.classList.remove("hidden");
+      window.print();
+      root.classList.add("hidden");
+      root.innerHTML = "";
+    }
+
+    function printAllTickets() {
+      state.printQueue.forEach((ticket) => printTicket(ticket));
+    }
+
+    function clearPrintQueue() {
+      state.printQueue = [];
+      persistPrintQueue();
+      renderPrints();
+    }
+
+    function showView(view) {
+      const tables = document.getElementById("tables-view");
+      const detail = document.getElementById("detail-view");
+      const prints = document.getElementById("prints-view");
+      const history = document.getElementById("history-view");
+      const addTableButton = document.getElementById("add-table-button");
+      const detailActionsBar = document.getElementById("detail-actions-bar");
+
+      tables.classList.add("hidden");
+      detail.classList.add("hidden");
+      prints.classList.add("hidden");
+      history.classList.add("hidden");
+      addTableButton.classList.add("hidden");
+      detailActionsBar.classList.add("hidden");
+
+      if (view === "tables") {
+        tables.classList.remove("hidden");
+        addTableButton.classList.remove("hidden");
+      } else if (view === "detail") {
+        detail.classList.remove("hidden");
+        detailActionsBar.classList.remove("hidden");
+      } else if (view === "prints") {
+        prints.classList.remove("hidden");
+      } else if (view === "history") {
+        history.classList.remove("hidden");
+      }
+    }
+
+    function renderTables() {
+      const grid = document.getElementById("tables-grid");
+      const active = state.tables.filter((table) => tableHasItems(table)).length;
+      const free = state.tables.length - active;
+      document.getElementById("active-count").textContent = `${active} Ocupadas`;
+      document.getElementById("free-count").textContent = `${free} Libres`;
+
+      grid.innerHTML = state.tables.map((table) => {
+        const occupied = tableHasItems(table);
+        const statusClass = occupied ? "bg-primary text-white" : "bg-on-surface-variant/10 text-on-surface-variant";
+        const cardRing = occupied ? "ring-2 ring-primary/20" : "ring-1 ring-outline-variant/40";
+        const removeButton = table.isDefault
+          ? ""
+          : `<button data-remove="${table.id}" class="text-xs px-2 py-1 rounded-lg bg-white/60 hover:bg-red-100 text-red-700">Eliminar</button>`;
+        const clearButton = occupied
+          ? `<button data-clear="${table.id}" class="bg-amber-100 text-amber-900 px-3 py-2 rounded-xl font-semibold hover:bg-amber-200">Limpiar</button>`
+          : "";
+
+        return `
+          <article class="bg-surface-container-low rounded-3xl p-5 ${cardRing} flex flex-col gap-4">
+            <div class="flex items-start justify-between gap-2">
+              <div>
+                <h3 class="font-headline font-extrabold text-3xl text-primary">Mesa ${table.number}</h3>
+                <p class="text-sm text-on-surface-variant">${tableSummary(table)}</p>
+              </div>
+              <div class="flex items-center gap-2">
+                <span class="${statusClass} text-[10px] font-black px-3 py-1 rounded-full uppercase tracking-widest">${occupied ? "Ocupada" : "Libre"}</span>
+                ${removeButton}
+              </div>
+            </div>
+            <div class="flex items-center justify-between gap-2">
+              <span class="text-sm font-semibold text-on-surface-variant">${formatMoney(tableTotal(table))}</span>
+              <div class="flex items-center gap-2">
+                ${clearButton}
+                <button data-print="${table.id}" class="bg-surface-container-highest px-3 py-2 rounded-xl font-semibold hover:bg-primary hover:text-white">Imprimir ticket</button>
+                <button data-open="${table.id}" class="bg-primary text-white px-4 py-2 rounded-xl font-semibold hover:opacity-90">Abrir mesa</button>
+              </div>
+            </div>
+          </article>
+        `;
+      }).join("");
+
+      grid.querySelectorAll("[data-open]").forEach((btn) => {
+        btn.addEventListener("click", () => openTableDetail(btn.dataset.open));
+      });
+
+      grid.querySelectorAll("[data-remove]").forEach((btn) => {
+        btn.addEventListener("click", () => removeExtraTable(btn.dataset.remove));
+      });
+
+      grid.querySelectorAll("[data-print]").forEach((btn) => {
+        btn.addEventListener("click", () => queueTableTicket(btn.dataset.print));
+      });
+
+      grid.querySelectorAll("[data-clear]").forEach((btn) => {
+        btn.addEventListener("click", () => clearTable(btn.dataset.clear));
+      });
+    }
+
+    function renderPlateSelect(table) {
+      const select = document.getElementById("plate-select");
+      select.innerHTML = table.plates.map((plate) => `
+        <option value="${plate.id}" ${plate.id === state.selectedPlateId ? "selected" : ""}>${plate.name}</option>
+      `).join("");
+    }
+
+    function renderMenuSections(table) {
+      const plate = getPlateById(table, state.selectedPlateId) || table.plates[0];
+      const container = document.getElementById("menu-sections");
+      const sectionEntries = [
+        ["comida", "Comida"],
+        ["paquetes", "Paquetes"],
+        ["bebidas", "Bebidas"]
+      ];
+
+      container.innerHTML = sectionEntries.map(([key, title]) => {
+        const itemsHtml = MENU[key].map((item) => {
+          const qty = plate.order[item.id] || 0;
+          return `
+            <div class="bg-white/50 rounded-2xl p-3 flex items-center justify-between gap-2">
+              <div>
+                <p class="font-semibold">${item.name} <span class="text-primary">${formatMoney(item.price)}</span></p>
+                ${item.note ? `<p class="text-xs text-on-surface-variant">${item.note}</p>` : ""}
+              </div>
+              <div class="flex items-center gap-2">
+                <span class="min-w-8 text-center font-bold">${qty}</span>
+                <button data-item-plus="${item.id}" class="w-8 h-8 rounded-lg bg-primary text-white hover:opacity-90 font-bold">+</button>
+              </div>
+            </div>
+          `;
+        }).join("");
+
+        return `
+          <section>
+            <h4 class="font-headline font-bold text-xl mb-3">${title}</h4>
+            <div class="space-y-2">${itemsHtml}</div>
+          </section>
+        `;
+      }).join("");
+
+      container.querySelectorAll("[data-item-plus]").forEach((btn) => {
+        btn.addEventListener("click", () => updateItemQty(table.id, plate.id, btn.dataset.itemPlus, 1));
+      });
+    }
+
+    function renderOrderList(table) {
+      const list = document.getElementById("order-list");
+      const platesHtml = table.plates.map((plate) => {
+        const entries = Object.entries(plate.order).filter(([, qty]) => qty > 0);
+        if (!entries.length) {
+          return `
+            <div class="bg-white/60 rounded-2xl p-3">
+              <p class="font-semibold">${plate.name}</p>
+              <p class="text-sm text-on-surface-variant">Sin productos</p>
+            </div>
+          `;
+        }
+        const rows = entries.map(([itemId, qty]) => {
+          const item = ITEM_INDEX[itemId];
+          const subtotal = item.price * qty;
+          return `
+            <div class="flex items-center justify-between text-base mt-2 gap-2">
+              <span class="flex-1 font-medium">${qty}x ${item.name}</span>
+              <span class="font-semibold text-base">${formatMoney(subtotal)}</span>
+              <button data-remove-item="${table.id}|${plate.id}|${itemId}" class="w-11 h-11 rounded-xl bg-red-100 text-red-700 hover:bg-red-200 flex items-center justify-center" title="Eliminar item">
+                <span class="material-symbols-outlined text-2xl">delete</span>
+              </button>
+            </div>
+          `;
+        }).join("");
+        return `
+          <div class="bg-white/60 rounded-2xl p-3">
+            <div class="flex items-center justify-between gap-2">
+              <p class="font-semibold">${plate.name}</p>
+              <button data-remove-plate="${table.id}|${plate.id}" class="px-2 py-1 rounded-lg bg-red-100 text-red-700 text-xs font-semibold hover:bg-red-200 ${table.plates.length <= 1 ? "opacity-40 cursor-not-allowed" : ""}" ${table.plates.length <= 1 ? "disabled" : ""}>Eliminar plato</button>
+            </div>
+            ${rows}
+          </div>
+        `;
+      }).join("");
+
+      list.innerHTML = platesHtml;
+      list.querySelectorAll("[data-remove-item]").forEach((btn) => {
+        btn.addEventListener("click", () => {
+          const parts = btn.dataset.removeItem.split("|");
+          removeItemFromPlate(parts[0], parts[1], parts[2]);
+        });
+      });
+      list.querySelectorAll("[data-remove-plate]").forEach((btn) => {
+        btn.addEventListener("click", () => {
+          const parts = btn.dataset.removePlate.split("|");
+          removePlate(parts[0], parts[1]);
+        });
+      });
+      document.getElementById("order-total").textContent = formatMoney(tableTotal(table));
+    }
+
+    function renderDetail() {
+      const table = getTableById(state.selectedTableId);
+      if (!table) {
+        closeTableDetail();
+        return;
+      }
+      if (!getPlateById(table, state.selectedPlateId)) {
+        state.selectedPlateId = table.plates[0].id;
+      }
+      document.getElementById("detail-title").textContent = `Mesa ${table.number} - ${tableHasItems(table) ? "Ocupada" : "Libre"}`;
+      renderPlateSelect(table);
+      renderMenuSections(table);
+      renderOrderList(table);
+    }
+
+    function renderPrints() {
+      const list = document.getElementById("prints-list");
+      if (!state.printQueue.length) {
+        list.innerHTML = `<div class="bg-white/60 rounded-2xl p-4 text-sm text-on-surface-variant">No hay tickets pendientes.</div>`;
+        return;
+      }
+      list.innerHTML = state.printQueue.map((ticket) => `
+        <article class="bg-white/70 rounded-2xl p-4 flex items-center justify-between gap-3">
+          <div>
+            <p class="font-semibold">Ticket Mesa ${ticket.tableNumber}</p>
+            <p class="text-xs text-on-surface-variant">${new Date(ticket.createdAt).toLocaleString("es-MX")} • ${formatMoney(ticket.total)} • Mesera: ${ticket.mesera}</p>
+          </div>
+          <button data-print-ticket="${ticket.id}" class="bg-primary text-white px-3 py-2 rounded-xl font-semibold">Imprimir</button>
+        </article>
+      `).join("");
+
+      list.querySelectorAll("[data-print-ticket]").forEach((btn) => {
+        btn.addEventListener("click", () => {
+          const ticket = state.printQueue.find((t) => t.id === btn.dataset.printTicket);
+          if (ticket) printTicket(ticket);
+        });
+      });
+    }
+
+    function renderHistory() {
+      const list = document.getElementById("history-list");
+      if (!state.history.length) {
+        list.innerHTML = `<div class="bg-white/60 rounded-2xl p-4 text-sm text-on-surface-variant">No hay registros de limpieza.</div>`;
+        return;
+      }
+      list.innerHTML = state.history.map((record) => {
+        const plates = record.plates.map((plate) => {
+          const detail = plate.items.length ? plate.items.join(" • ") : "Sin productos";
+          return `<p class="text-xs text-on-surface-variant"><strong>${plate.name}:</strong> ${detail}</p>`;
+        }).join("");
+        return `
+          <article class="bg-white/70 rounded-2xl p-4">
+            <p class="font-semibold">Mesa ${record.tableNumber} limpiada por ${record.cleanedBy}</p>
+            <p class="text-xs text-on-surface-variant">${new Date(record.cleanedAt).toLocaleString("es-MX")} • Total previo: ${formatMoney(record.totalBeforeClear)}</p>
+            <div class="mt-2 space-y-1">${plates}</div>
+          </article>
+        `;
+      }).join("");
+    }
+
+    function renderLoggedUser() {
+      const userLabel = document.getElementById("current-user-label");
+      userLabel.textContent = `Usuario: ${state.meseraNombre}`;
+    }
+
+    function setupEvents() {
+      document.getElementById("add-table-button").addEventListener("click", addExtraTable);
+      document.getElementById("back-button").addEventListener("click", closeTableDetail);
+      document.getElementById("add-plate-button").addEventListener("click", addPlateToSelectedTable);
+      document.getElementById("print-comanda-button").addEventListener("click", () => {
+        if (state.selectedTableId) {
+          printKitchenComanda(state.selectedTableId);
+        }
+      });
+      document.getElementById("plate-select").addEventListener("change", (event) => {
+        state.selectedPlateId = event.target.value;
+        renderDetail();
+      });
+      document.getElementById("open-prints-button").addEventListener("click", () => {
+        renderPrints();
+        showView("prints");
+      });
+      document.getElementById("open-history-button").addEventListener("click", () => {
+        if (!userCanAccessHistory()) {
+          window.alert("No tienes permisos para acceder al Historial.");
+          return;
+        }
+        renderHistory();
+        showView("history");
+      });
+      document.getElementById("back-from-prints-button").addEventListener("click", () => {
+        showView("tables");
+        renderTables();
+      });
+      document.getElementById("back-from-history-button").addEventListener("click", () => {
+        showView("tables");
+        renderTables();
+      });
+      document.getElementById("clear-prints-button").addEventListener("click", clearPrintQueue);
+      document.getElementById("print-all-button").addEventListener("click", printAllTickets);
+    }
+
+    loadPrintQueue();
+    loadHistory();
+    loadState();
+    setupEvents();
+    renderLoggedUser();
+    renderTables();
+    showView("tables");
+  </script>
+</body>
+</html>
