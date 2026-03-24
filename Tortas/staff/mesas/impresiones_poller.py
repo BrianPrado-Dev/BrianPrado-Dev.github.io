@@ -42,6 +42,14 @@ app = Flask(__name__)
 LOCK = threading.Lock()
 
 
+@app.after_request
+def add_cors_headers(response):
+    response.headers["Access-Control-Allow-Origin"] = "*"
+    response.headers["Access-Control-Allow-Methods"] = "GET,POST,DELETE,OPTIONS"
+    response.headers["Access-Control-Allow-Headers"] = "Content-Type"
+    return response
+
+
 def now_utc() -> datetime:
     return datetime.now(timezone.utc)
 
@@ -197,6 +205,11 @@ def api_get_impresiones():
     with LOCK:
         queue = load_queue()
     return jsonify({"queue": queue})
+
+
+@app.route("/api/impresiones", methods=["OPTIONS"])
+def api_options_impresiones():
+    return ("", 204)
 
 
 @app.post("/api/impresiones")
