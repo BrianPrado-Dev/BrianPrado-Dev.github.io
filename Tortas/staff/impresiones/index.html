@@ -19,7 +19,7 @@
     </header>
 
     <div class="bg-white/60 rounded-3xl p-5 mb-5">
-      <p class="text-sm mb-3"><strong>API URL sugerida para Python:</strong> <code>/Tortas/staff/impresiones/queue.json</code></p>
+      <p class="text-sm mb-3"><strong>Modo actual:</strong> Supabase (cola remota). Si no configuras Supabase, usa fallback local.</p>
       <div class="flex items-center gap-2">
         <button id="refresh-button" class="px-4 py-2 rounded-xl bg-[#a20513] text-white font-semibold">Refrescar</button>
         <button id="clear-button" class="px-4 py-2 rounded-xl bg-red-100 text-red-700 font-semibold">Limpiar cola</button>
@@ -31,7 +31,11 @@
 
   <script>
     const PRINT_QUEUE_KEY = "dona_susy_print_queue_v1";
+    const PRINT_PROVIDER = "supabase"; // "supabase" | "local-api"
     const PRINT_API_URL = "http://192.168.1.171:8000/api/impresiones";
+    const SUPABASE_URL = "https://zazifirbccucazaottlo.supabase.co";
+    const SUPABASE_ANON_KEY = "sb_publishable_vhGMCD4ML10ssk46sxBH_w_C-x1lR97";
+    const SUPABASE_TABLE = "impresiones_queue";
 
     function loadQueue() {
       const raw = localStorage.getItem(PRINT_QUEUE_KEY);
@@ -48,7 +52,47 @@
       localStorage.setItem(PRINT_QUEUE_KEY, JSON.stringify({ queue }));
     }
 
+    function supabaseConfigured() {
+      return (
+        SUPABASE_URL.includes(".supabase.co")
+        && !SUPABASE_URL.includes("TU-PROYECTO")
+        && SUPABASE_ANON_KEY
+        && !SUPABASE_ANON_KEY.includes("TU_SUPABASE_ANON_KEY")
+      );
+    }
+
+    function mapSupabaseRowToTicket(row) {
+      if (row && row.payload && typeof row.payload === "object") return row.payload;
+      return {
+        id: row.id,
+        type: row.type,
+        tableId: row.table_id,
+        tableNumber: row.table_number,
+        mesera: row.mesera,
+        createdAt: row.created_at
+      };
+    }
+
     async function fetchRemoteQueue() {
+      if (PRINT_PROVIDER === "supabase" && supabaseConfigured()) {
+        try {
+          const url = `${SUPABASE_URL}/rest/v1/${SUPABASE_TABLE}?printed=eq.false&order=created_at.desc`;
+          const response = await fetch(url, {
+            cache: "no-store",
+            headers: {
+              "apikey": SUPABASE_ANON_KEY,
+              "Authorization": `Bearer ${SUPABASE_ANON_KEY}`
+            }
+          });
+          if (!response.ok) return null;
+          const rows = await response.json();
+          if (!Array.isArray(rows)) return null;
+          return rows.map(mapSupabaseRowToTicket);
+        } catch {
+          return null;
+        }
+      }
+
       try {
         const response = await fetch(PRINT_API_URL, { cache: "no-store" });
         if (!response.ok) return null;
@@ -62,6 +106,22 @@
     }
 
     async function clearRemoteQueue() {
+      if (PRINT_PROVIDER === "supabase" && supabaseConfigured()) {
+        try {
+          await fetch(`${SUPABASE_URL}/rest/v1/${SUPABASE_TABLE}?printed=eq.false`, {
+            method: "PATCH",
+            headers: {
+              "Content-Type": "application/json",
+              "apikey": SUPABASE_ANON_KEY,
+              "Authorization": `Bearer ${SUPABASE_ANON_KEY}`
+            },
+            body: JSON.stringify({ printed: true })
+          });
+        } catch {
+        }
+        return;
+      }
+
       try {
         await fetch(PRINT_API_URL, { method: "DELETE" });
       } catch {

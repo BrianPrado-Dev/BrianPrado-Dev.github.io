@@ -168,7 +168,11 @@
     const PRINT_QUEUE_KEY = "dona_susy_print_queue_v1";
     const HISTORY_KEY = "dona_susy_history_v1";
     const WAITER_NAME_KEY = "dona_susy_mesera_nombre";
+    const PRINT_PROVIDER = "supabase"; // "supabase" | "local-api"
     const PRINT_API_URL = "http://192.168.1.171:8000/api/impresiones";
+    const SUPABASE_URL = "https://zazifirbccucazaottlo.supabase.co";
+    const SUPABASE_ANON_KEY = "sb_publishable_vhGMCD4ML10ssk46sxBH_w_C-x1lR97";
+    const SUPABASE_TABLE = "impresiones_queue";
     const FIXED_TABLES = [1, 2, 3, 4];
 
     const MENU = {
@@ -263,12 +267,54 @@
       localStorage.setItem(PRINT_QUEUE_KEY, JSON.stringify({ queue: state.printQueue }));
     }
 
+    function supabaseConfigured() {
+      return (
+        SUPABASE_URL.includes(".supabase.co")
+        && !SUPABASE_URL.includes("TU-PROYECTO")
+        && SUPABASE_ANON_KEY
+        && !SUPABASE_ANON_KEY.includes("TU_SUPABASE_ANON_KEY")
+      );
+    }
+
+    function toSupabaseRow(ticket) {
+      return {
+        id: ticket.id,
+        type: ticket.type,
+        table_id: ticket.tableId,
+        table_number: ticket.tableNumber,
+        mesera: ticket.mesera,
+        created_at: ticket.createdAt,
+        printed: false,
+        payload: ticket
+      };
+    }
+
     async function enqueueRemote(ticket) {
-      await fetch(PRINT_API_URL, {
+      if (PRINT_PROVIDER === "supabase" && supabaseConfigured()) {
+        const response = await fetch(`${SUPABASE_URL}/rest/v1/${SUPABASE_TABLE}`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "apikey": SUPABASE_ANON_KEY,
+            "Authorization": `Bearer ${SUPABASE_ANON_KEY}`,
+            "Prefer": "return=minimal"
+          },
+          body: JSON.stringify(toSupabaseRow(ticket))
+        });
+        if (!response.ok) {
+          throw new Error(`Supabase error ${response.status}`);
+        }
+        return;
+      }
+
+      const response = await fetch(PRINT_API_URL, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(ticket)
       });
+      if (!response.ok) {
+        throw new Error(`API local error ${response.status}`);
+      }
     }
 
     function loadHistory() {
