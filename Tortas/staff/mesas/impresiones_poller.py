@@ -13,6 +13,7 @@ from __future__ import annotations
 
 import os
 import time
+import textwrap
 from datetime import datetime, timezone
 from typing import Any
 
@@ -26,6 +27,7 @@ SUPABASE_SERVICE_KEY = os.getenv("SUPABASE_SERVICE_KEY", "")
 SUPABASE_TABLE = "impresiones_queue"
 POLL_SECONDS = 2
 MAX_AGE_SECONDS = 120
+LINE_WIDTH = 25
 
 
 def now_utc() -> datetime:
@@ -58,44 +60,71 @@ def configured() -> bool:
     )
 
 
+def current_date_text() -> str:
+    return datetime.now().strftime("%d/%m/%Y")
+
+
+def wrap_line(text: str, width: int = LINE_WIDTH) -> list[str]:
+    clean = str(text or "").strip()
+    if not clean:
+        return [""]
+    return textwrap.wrap(clean, width=width, break_long_words=True, break_on_hyphens=False) or [clean[:width]]
+
+
+def format_with_right(left: str, right: str, width: int = LINE_WIDTH) -> list[str]:
+    right_text = str(right).strip()
+    left_parts = wrap_line(left, width=max(1, width - max(0, len(right_text) + 1)))
+    if not left_parts:
+        left_parts = [""]
+    first_left = left_parts[0]
+    spaces = max(1, width - len(first_left) - len(right_text))
+    lines = [f"{first_left}{' ' * spaces}{right_text}"[:width]]
+    lines.extend(left_parts[1:])
+    return lines
+
+
 def build_ticket_text(ticket: dict[str, Any]) -> str:
     ticket_type = str(ticket.get("type", "ticket")).strip().lower()
     table_number = ticket.get("tableNumber", "-")
     mesera = ticket.get("mesera", "Sin nombre")
-    created_at = ticket.get("createdAt", "")
     total = ticket.get("total", 0)
     plates = ticket.get("plates", [])
 
     lines: list[str] = []
-    lines.append("Tortas Ahogadas Dona Susy")
-    lines.append("================================")
-    lines.append("COMANDA COCINA" if ticket_type == "comanda" else "TICKET CLIENTE")
-    lines.append(f"Mesa: {table_number}")
-    lines.append(f"Fecha: {created_at}")
+    if ticket_type == "comanda":
+        lines.append("COMANDA COCINA")
+    else:
+        lines.append("Tortas Ahogadas Dona Susy")
+        lines.append("Geranio #869")
+        lines.append("+52 3336844525")
+    lines.append("=" * LINE_WIDTH)
+    lines.extend(wrap_line(f"Mesa: {table_number}"))
+    lines.extend(wrap_line(f"Fecha: {current_date_text()}"))
     lines.append("")
 
     for plate in plates:
-        lines.append(f"[{plate.get('name', 'Cliente')}]")
+        lines.extend(wrap_line(f"[{plate.get('name', 'Cliente')}]"))
         items = plate.get("items", [])
         if not items:
-            lines.append("  - Sin productos")
+            lines.extend(wrap_line("- Sin productos"))
         for item in items:
             qty = item.get("qty", 0)
             name = item.get("name", "Item")
             variant = item.get("variant") or ""
             subtotal = item.get("subtotal", 0)
             variant_text = f" ({variant})" if variant else ""
+            item_text = f"{qty}x {name}{variant_text}"
             if ticket_type == "comanda":
-                lines.append(f"  - {qty}x {name}{variant_text}")
+                lines.extend(wrap_line(f"- {item_text}"))
             else:
-                lines.append(f"  - {qty}x {name}{variant_text}   ${subtotal}")
+                lines.extend(format_with_right(item_text, f"${subtotal}"))
         lines.append("")
 
-    lines.append("--------------------------------")
+    lines.append("-" * LINE_WIDTH)
     if ticket_type != "comanda":
-        lines.append(f"TOTAL: ${total}")
+        lines.extend(format_with_right("TOTAL:", f"${total}"))
         lines.append("Gracias por su preferencia")
-    lines.append(f"Mesera: {mesera}")
+    lines.extend(wrap_line(f"Mesera: {mesera}"))
     lines.append("")
     return "\n".join(lines)
 
@@ -112,14 +141,14 @@ def print_text_windows(text: str) -> None:
         hdc.StartDoc("Ticket Dona Susy")
         hdc.StartPage()
 
-        # Replica el formato de Main.py para tickets termicos legibles.
-        font = win32ui.CreateFont({"name": "Arial", "height": 30, "weight": FW_NORMAL})
-        hdc.SelectObject(font)
+        font_normal = win32ui.CreateFont({"name": "Arial", "height": 30, "weight": FW_NORMAL})
+        font_big = win32ui.CreateFont({"name": "Arial", "height": 44, "weight": FW_NORMAL})
 
         y = 20
         for line in text.split("\n"):
+            hdc.SelectObject(font_big if line.strip() == "COMANDA COCINA" else font_normal)
             hdc.TextOut(20, y, line.rstrip())
-            y += 30
+            y += 42 if line.strip() == "COMANDA COCINA" else 30
 
         hdc.EndPage()
         hdc.EndDoc()
