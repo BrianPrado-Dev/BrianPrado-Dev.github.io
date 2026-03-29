@@ -165,6 +165,14 @@
     <div class="bg-surface-container-low rounded-3xl p-5 w-full max-w-md shadow-[0_20px_40px_rgba(27,29,14,0.25)]">
       <h3 id="variant-modal-title" class="font-headline font-bold text-2xl mb-4">Selecciona una opción</h3>
       <div id="variant-modal-options" class="grid grid-cols-2 gap-2 mb-3"></div>
+      <div class="bg-white/70 rounded-2xl p-3 mb-3">
+        <p class="text-sm font-semibold mb-2">Cantidad</p>
+        <div class="flex items-center gap-2">
+          <button id="variant-modal-qty-dec" class="w-12 h-10 rounded-xl bg-red-100 text-red-700 font-bold hover:bg-red-200">-</button>
+          <span id="variant-modal-qty-value" class="flex-1 text-center text-lg font-bold">1</span>
+          <button id="variant-modal-qty-inc" class="w-12 h-10 rounded-xl bg-green-100 text-green-700 font-bold hover:bg-green-200">+</button>
+        </div>
+      </div>
       <button id="variant-modal-cancel" class="w-full bg-red-100 text-red-700 px-4 py-2 rounded-xl font-semibold hover:bg-red-200">Cancelar</button>
     </div>
   </div>
@@ -232,7 +240,8 @@
       printQueue: [],
       history: [],
       menuSectionsOpen: { comida: true, paquetes: false, bebidas: false },
-      meseraNombre: localStorage.getItem(WAITER_NAME_KEY) || "Sin nombre"
+      meseraNombre: localStorage.getItem(WAITER_NAME_KEY) || "Sin nombre",
+      draggingLine: null
     };
 
     function todayKey() {
@@ -537,7 +546,7 @@
       return "bg-white/90 text-on-surface hover:bg-primary hover:text-white";
     }
 
-    function chooseOption(title, options) {
+    function chooseOption(title, options, quantityState = null) {
       if (!options || !options.length) return Promise.resolve("");
       if (options.length === 1) return Promise.resolve(options[0]);
 
@@ -546,11 +555,20 @@
         const titleEl = document.getElementById("variant-modal-title");
         const optionsEl = document.getElementById("variant-modal-options");
         const cancelBtn = document.getElementById("variant-modal-cancel");
+        const decBtn = document.getElementById("variant-modal-qty-dec");
+        const incBtn = document.getElementById("variant-modal-qty-inc");
+        const qtyEl = document.getElementById("variant-modal-qty-value");
 
+        if (quantityState) {
+          quantityState.usedInModal = true;
+          quantityState.value = Math.max(1, Number(quantityState.value) || 1);
+        }
+        let qty = quantityState ? quantityState.value : 1;
         titleEl.textContent = title;
         optionsEl.innerHTML = options.map((option) => `
           <button data-variant-choice="${option}" class="px-4 py-4 rounded-xl font-bold text-base text-left min-h-[64px] ${getOptionButtonClass(title, option)}">${option}</button>
         `).join("");
+        qtyEl.textContent = String(qty);
 
         modal.classList.remove("hidden");
 
@@ -558,14 +576,28 @@
           modal.classList.add("hidden");
           optionsEl.innerHTML = "";
           cancelBtn.removeEventListener("click", onCancel);
+          decBtn.removeEventListener("click", onDec);
+          incBtn.removeEventListener("click", onInc);
         };
 
         const onCancel = () => {
           cleanup();
           resolve(null);
         };
+        const onDec = () => {
+          qty = Math.max(1, qty - 1);
+          qtyEl.textContent = String(qty);
+          if (quantityState) quantityState.value = qty;
+        };
+        const onInc = () => {
+          qty += 1;
+          qtyEl.textContent = String(qty);
+          if (quantityState) quantityState.value = qty;
+        };
 
         cancelBtn.addEventListener("click", onCancel);
+        decBtn.addEventListener("click", onDec);
+        incBtn.addEventListener("click", onInc);
 
         optionsEl.querySelectorAll("[data-variant-choice]").forEach((btn) => {
           btn.addEventListener("click", () => {
@@ -577,7 +609,68 @@
       });
     }
 
-    async function askVariantForItem(itemId) {
+    async function chooseQuantity(defaultQty = 1) {
+      return new Promise((resolve) => {
+        const modal = document.getElementById("variant-modal");
+        const titleEl = document.getElementById("variant-modal-title");
+        const optionsEl = document.getElementById("variant-modal-options");
+        const cancelBtn = document.getElementById("variant-modal-cancel");
+        const decBtn = document.getElementById("variant-modal-qty-dec");
+        const incBtn = document.getElementById("variant-modal-qty-inc");
+        const qtyEl = document.getElementById("variant-modal-qty-value");
+
+        let qty = Math.max(1, Number(defaultQty) || 1);
+        titleEl.textContent = "Selecciona cantidad";
+        optionsEl.innerHTML = `
+          <button data-variant-choice="confirmar_cantidad" class="col-span-2 px-4 py-4 rounded-xl font-bold text-base text-left min-h-[64px] bg-primary text-white hover:opacity-90">Confirmar cantidad</button>
+        `;
+        qtyEl.textContent = String(qty);
+        modal.classList.remove("hidden");
+
+        const cleanup = () => {
+          modal.classList.add("hidden");
+          optionsEl.innerHTML = "";
+          cancelBtn.removeEventListener("click", onCancel);
+          decBtn.removeEventListener("click", onDec);
+          incBtn.removeEventListener("click", onInc);
+          confirmBtn?.removeEventListener("click", onConfirm);
+        };
+
+        const onCancel = () => {
+          cleanup();
+          resolve(null);
+        };
+        const onDec = () => {
+          qty = Math.max(1, qty - 1);
+          qtyEl.textContent = String(qty);
+        };
+        const onInc = () => {
+          qty += 1;
+          qtyEl.textContent = String(qty);
+        };
+        const onConfirm = () => {
+          cleanup();
+          resolve(qty);
+        };
+
+        cancelBtn.addEventListener("click", onCancel);
+        decBtn.addEventListener("click", onDec);
+        incBtn.addEventListener("click", onInc);
+        const confirmBtn = optionsEl.querySelector("[data-variant-choice='confirmar_cantidad']");
+        confirmBtn?.addEventListener("click", onConfirm);
+      });
+    }
+
+    async function askItemSelection(itemId) {
+      const quantityState = { value: 1, usedInModal: false };
+      const variant = await askVariantForItem(itemId, quantityState);
+      if (variant === null) return null;
+      const qty = quantityState.usedInModal ? quantityState.value : await chooseQuantity(1);
+      if (qty === null) return null;
+      return { variant, qty };
+    }
+
+    async function askVariantForItem(itemId, quantityState) {
       const carne = ["Carnitas", "Buche", "Lengua", "Mixta"];
       const modoKiloCarne = ["Por gramos", "Por dinero"];
       const tacoSabor = ["Papa", "Frijol", "Requesón", "Picadillo"];
@@ -586,12 +679,12 @@
       const cerveza = ["Clara", "Oscura"];
 
       if (["torta_ahogada", "torta_mini", "taco_blandito"].includes(itemId)) {
-        return await chooseOption("Selecciona tipo", carne);
+        return await chooseOption("Selecciona tipo", carne, quantityState);
       }
       if (itemId === "kilo_carne") {
-        const tipoCarne = await chooseOption("Kilo de Carne - Selecciona tipo", carne);
+        const tipoCarne = await chooseOption("Kilo de Carne - Selecciona tipo", carne, quantityState);
         if (tipoCarne === null) return null;
-        const modo = await chooseOption("Kilo de Carne - ¿Cómo lo piden?", modoKiloCarne);
+        const modo = await chooseOption("Kilo de Carne - ¿Cómo lo piden?", modoKiloCarne, quantityState);
         if (modo === null) return null;
         const precioPorKilo = ITEM_INDEX.kilo_carne.price;
         const gramosPorKilo = 1000;
@@ -607,62 +700,62 @@
         return `Carne:${tipoCarne} | Modo:Por dinero | Cantidad:$${dinero.toFixed(2)} | Equiv:${gramos.toFixed(2)}g | Total:$${dinero.toFixed(2)}`;
       }
       if (itemId === "taco_dorado_sencillo") {
-        return await chooseOption("Selecciona sabor del taco", tacoSabor);
+        return await chooseOption("Selecciona sabor del taco", tacoSabor, quantityState);
       }
       if (itemId === "taco_dorado_carne") {
-        const tipoCarne = await chooseOption("Selecciona tipo de carne", carne);
+        const tipoCarne = await chooseOption("Selecciona tipo de carne", carne, quantityState);
         if (tipoCarne === null) return null;
-        const saborTaco = await chooseOption("Selecciona sabor del taco", tacoSabor);
+        const saborTaco = await chooseOption("Selecciona sabor del taco", tacoSabor, quantityState);
         if (saborTaco === null) return null;
         return `Carne:${tipoCarne} | Sabor:${saborTaco}`;
       }
       if (itemId === "refresco_taparosca" || itemId === "refresco_retornable") {
-        return await chooseOption("Selecciona sabor de refresco", refresco);
+        return await chooseOption("Selecciona sabor de refresco", refresco, quantityState);
       }
       if (itemId === "agua_fresca_1lt") {
-        return await chooseOption("Selecciona sabor de agua fresca", aguas);
+        return await chooseOption("Selecciona sabor de agua fresca", aguas, quantityState);
       }
       if (itemId === "cerveza_corona_500ml") {
-        return await chooseOption("Selecciona tipo de cerveza", cerveza);
+        return await chooseOption("Selecciona tipo de cerveza", cerveza, quantityState);
       }
       if (itemId === "agua_500ml") {
-        return await chooseOption("Selecciona sabor de agua fresca", aguas);
+        return await chooseOption("Selecciona sabor de agua fresca", aguas, quantityState);
       }
       if (itemId === "caguama_mega") {
         return "Única";
       }
       if (itemId === "paquete_1") {
-        const tipoCarne = await chooseOption("Paquete #1 - Tipo de carne de la torta", carne);
+        const tipoCarne = await chooseOption("Paquete #1 - Tipo de carne de la torta", carne, quantityState);
         if (tipoCarne === null) return null;
-        const saborTaco = await chooseOption("Paquete #1 - Sabor del taco dorado sencillo", tacoSabor);
+        const saborTaco = await chooseOption("Paquete #1 - Sabor del taco dorado sencillo", tacoSabor, quantityState);
         if (saborTaco === null) return null;
-        let bebida = await chooseOption("Paquete #1 - Bebida", [...refresco, "Agua Fresca"]);
+        let bebida = await chooseOption("Paquete #1 - Bebida", [...refresco, "Agua Fresca"], quantityState);
         if (bebida === null) return null;
         if (bebida === "Agua Fresca") {
-          const saborAgua = await chooseOption("Paquete #1 - Sabor de agua fresca", aguas);
+          const saborAgua = await chooseOption("Paquete #1 - Sabor de agua fresca", aguas, quantityState);
           if (saborAgua === null) return null;
           bebida = `Agua Fresca ${saborAgua}`;
         }
         return `Torta:${tipoCarne} | Taco:${saborTaco} | Bebida:${bebida}`;
       }
       if (itemId === "paquete_2") {
-        const tipoCarne = await chooseOption("Paquete #2 - Tipo de carne de la torta", carne);
+        const tipoCarne = await chooseOption("Paquete #2 - Tipo de carne de la torta", carne, quantityState);
         if (tipoCarne === null) return null;
-        const saborTaco = await chooseOption("Paquete #2 - Sabor de los tacos dorados sencillos", tacoSabor);
+        const saborTaco = await chooseOption("Paquete #2 - Sabor de los tacos dorados sencillos", tacoSabor, quantityState);
         if (saborTaco === null) return null;
-        let bebida = await chooseOption("Paquete #2 - Bebida", [...refresco, "Agua Fresca"]);
+        let bebida = await chooseOption("Paquete #2 - Bebida", [...refresco, "Agua Fresca"], quantityState);
         if (bebida === null) return null;
         if (bebida === "Agua Fresca") {
-          const saborAgua = await chooseOption("Paquete #2 - Sabor de agua fresca", aguas);
+          const saborAgua = await chooseOption("Paquete #2 - Sabor de agua fresca", aguas, quantityState);
           if (saborAgua === null) return null;
           bebida = `Agua Fresca ${saborAgua}`;
         }
         return `Torta:${tipoCarne} | Tacos:${saborTaco} | Bebida:${bebida}`;
       }
       if (["paquete_3", "paquete_4", "paquete_5"].includes(itemId)) {
-        const tipoCarne = await chooseOption("Tipo de carne de las tortas del paquete", carne);
+        const tipoCarne = await chooseOption("Tipo de carne de las tortas del paquete", carne, quantityState);
         if (tipoCarne === null) return null;
-        const saborTaco = await chooseOption("Sabor de los tacos dorados sencillos del paquete", tacoSabor);
+        const saborTaco = await chooseOption("Sabor de los tacos dorados sencillos del paquete", tacoSabor, quantityState);
         if (saborTaco === null) return null;
         return `Tortas:${tipoCarne} | Tacos:${saborTaco}`;
       }
@@ -693,6 +786,10 @@
         const plateTotal = getPlateLineItems(plate).reduce((sum, line) => sum + getLineSubtotal(line), 0);
         return tableSum + plateTotal;
       }, 0);
+    }
+
+    function plateTotal(plate) {
+      return getPlateLineItems(plate).reduce((sum, line) => sum + getLineSubtotal(line), 0);
     }
 
     function formatMoney(amount) {
@@ -859,6 +956,48 @@
       renderTables();
     }
 
+    function moveLineBetweenPlates(tableId, fromPlateId, toPlateId, lineKey) {
+      if (fromPlateId === toPlateId) return;
+      const table = getTableById(tableId);
+      if (!table) return;
+      const fromPlate = getPlateById(table, fromPlateId);
+      const toPlate = getPlateById(table, toPlateId);
+      if (!fromPlate || !toPlate) return;
+
+      const fromEntry = fromPlate.order[lineKey];
+      if (!fromEntry) return;
+
+      const movedLine = typeof fromEntry === "number"
+        ? { itemId: lineKey, qty: Number(fromEntry) || 0, variant: "" }
+        : {
+            itemId: fromEntry.itemId || lineKey,
+            qty: Number(fromEntry.qty) || 0,
+            variant: fromEntry.variant || ""
+          };
+      if (movedLine.qty <= 0) return;
+
+      delete fromPlate.order[lineKey];
+
+      const targetEntry = toPlate.order[lineKey];
+      if (typeof targetEntry === "number") {
+        toPlate.order[lineKey] = {
+          itemId: movedLine.itemId,
+          qty: (Number(targetEntry) || 0) + movedLine.qty,
+          variant: movedLine.variant
+        };
+      } else if (targetEntry && typeof targetEntry === "object") {
+        targetEntry.itemId = targetEntry.itemId || movedLine.itemId;
+        targetEntry.variant = targetEntry.variant || movedLine.variant;
+        targetEntry.qty = (Number(targetEntry.qty) || 0) + movedLine.qty;
+      } else {
+        toPlate.order[lineKey] = movedLine;
+      }
+
+      persistState();
+      renderDetail();
+      renderTables();
+    }
+
     function removePlate(tableId, plateId) {
       const table = getTableById(tableId);
       if (!table) return;
@@ -879,18 +1018,19 @@
       if (!table) return;
       const plate = getPlateById(table, plateId);
       if (!plate) return;
-      const variant = await askVariantForItem(itemId);
-      if (variant === null) return;
+      const selection = await askItemSelection(itemId);
+      if (!selection) return;
+      const { variant, qty } = selection;
       const lineKey = makeLineKey(itemId, variant);
       const current = plate.order[lineKey];
       if (typeof current === "number") {
-        plate.order[lineKey] = { itemId, qty: current + 1, variant };
+        plate.order[lineKey] = { itemId, qty: current + qty, variant };
       } else if (current && typeof current === "object") {
-        current.qty = (Number(current.qty) || 0) + 1;
+        current.qty = (Number(current.qty) || 0) + qty;
         current.itemId = itemId;
         current.variant = variant;
       } else {
-        plate.order[lineKey] = { itemId, qty: 1, variant };
+        plate.order[lineKey] = { itemId, qty, variant };
       }
       persistState();
       renderDetail();
@@ -923,6 +1063,33 @@
       };
     }
 
+    function createPlateTicketData(table, plate, type = "ticket") {
+      const timestamp = new Date().toISOString();
+      return {
+        id: `ticket_${table.id}_${plate.id}_${Date.now()}`,
+        type,
+        tableId: table.id,
+        tableNumber: table.number,
+        mesera: state.meseraNombre,
+        createdAt: timestamp,
+        plateId: plate.id,
+        plateName: plate.name,
+        plates: [{
+          id: plate.id,
+          name: plate.name,
+          items: getPlateLineItems(plate).map((line) => ({
+            id: line.itemId,
+            name: ITEM_INDEX[line.itemId].name,
+            variant: line.variant,
+            qty: line.qty,
+            price: getLineUnitPrice(line),
+            subtotal: getLineSubtotal(line)
+          }))
+        }],
+        total: plateTotal(plate)
+      };
+    }
+
     async function queueTableTicket(tableId) {
       const table = getTableById(tableId);
       if (!table) return;
@@ -943,6 +1110,20 @@
       persistPrintQueue();
       try {
         await enqueueRemote(comanda);
+      } catch (_) {
+      }
+    }
+
+    async function queuePlateTicket(tableId, plateId) {
+      const table = getTableById(tableId);
+      if (!table) return;
+      const plate = getPlateById(table, plateId);
+      if (!plate) return;
+      const ticket = createPlateTicketData(table, plate, "ticket");
+      state.printQueue.unshift(ticket);
+      persistPrintQueue();
+      try {
+        await enqueueRemote(ticket);
       } catch (_) {
       }
     }
@@ -1093,12 +1274,13 @@
         const entries = getPlateLineItems(plate);
         if (!entries.length) {
           return `
-            <div class="bg-white/60 rounded-2xl p-3">
+            <div data-drop-plate="${table.id}|${plate.id}" class="bg-white/60 rounded-2xl p-3 border-2 border-transparent transition-colors">
               <div class="flex items-center justify-between gap-2">
                 <p class="font-semibold">${plate.name}</p>
                 <button data-remove-plate="${table.id}|${plate.id}" class="px-2 py-1 rounded-lg bg-red-100 text-red-700 text-xs font-semibold hover:bg-red-200">Eliminar plato</button>
               </div>
               <p class="text-sm text-on-surface-variant">Sin productos</p>
+              <p class="text-xs text-on-surface-variant mt-2">Arrastra aquí productos desde otro plato.</p>
             </div>
           `;
         }
@@ -1106,7 +1288,7 @@
           const item = ITEM_INDEX[line.itemId];
           const subtotal = getLineSubtotal(line);
           return `
-            <div class="flex items-center justify-between text-base mt-2 gap-2">
+            <div draggable="true" data-drag-item data-table-id="${table.id}" data-plate-id="${plate.id}" data-line-key="${line.lineKey}" class="flex items-center justify-between text-base mt-2 gap-2 cursor-grab active:cursor-grabbing rounded-xl px-1">
               <span class="flex-1 font-medium">${line.qty}x ${item.name}${formatVariant(line.variant)}</span>
               <span class="font-semibold text-base">${formatMoney(subtotal)}</span>
               <button data-remove-item data-table-id="${table.id}" data-plate-id="${plate.id}" data-line-key="${line.lineKey}" class="w-11 h-11 rounded-xl bg-red-100 text-red-700 hover:bg-red-200 flex items-center justify-center" title="Eliminar item">
@@ -1116,12 +1298,16 @@
           `;
         }).join("");
         return `
-          <div class="bg-white/60 rounded-2xl p-3">
+          <div data-drop-plate="${table.id}|${plate.id}" class="bg-white/60 rounded-2xl p-3 border-2 border-transparent transition-colors">
             <div class="flex items-center justify-between gap-2">
               <p class="font-semibold">${plate.name}</p>
               <button data-remove-plate="${table.id}|${plate.id}" class="px-2 py-1 rounded-lg bg-red-100 text-red-700 text-xs font-semibold hover:bg-red-200">Eliminar plato</button>
             </div>
             ${rows}
+            <div class="flex items-center justify-between mt-3 pt-2 border-t border-outline-variant/40">
+              <p class="text-xs text-on-surface-variant">Arrastra productos a este plato.</p>
+              <button data-print-plate="${table.id}|${plate.id}" class="bg-surface-container-highest px-3 py-2 rounded-xl text-xs font-semibold hover:bg-primary hover:text-white">Imprimir plato</button>
+            </div>
           </div>
         `;
       }).join("");
@@ -1136,6 +1322,60 @@
         btn.addEventListener("click", () => {
           const parts = btn.dataset.removePlate.split("|");
           removePlate(parts[0], parts[1]);
+        });
+      });
+      list.querySelectorAll("[data-print-plate]").forEach((btn) => {
+        btn.addEventListener("click", async () => {
+          const parts = btn.dataset.printPlate.split("|");
+          await queuePlateTicket(parts[0], parts[1]);
+          window.alert("Ticket del plato enviado a la cola de impresiones.");
+        });
+      });
+      list.querySelectorAll("[data-drag-item]").forEach((row) => {
+        row.addEventListener("dragstart", (event) => {
+          const payload = {
+            tableId: row.dataset.tableId,
+            plateId: row.dataset.plateId,
+            lineKey: row.dataset.lineKey
+          };
+          state.draggingLine = payload;
+          row.classList.add("opacity-50");
+          event.dataTransfer.effectAllowed = "move";
+          event.dataTransfer.setData("text/plain", JSON.stringify(payload));
+        });
+        row.addEventListener("dragend", () => {
+          state.draggingLine = null;
+          row.classList.remove("opacity-50");
+          list.querySelectorAll("[data-drop-plate]").forEach((target) => {
+            target.classList.remove("border-primary", "bg-primary/10");
+          });
+        });
+      });
+      list.querySelectorAll("[data-drop-plate]").forEach((target) => {
+        target.addEventListener("dragover", (event) => {
+          event.preventDefault();
+          event.dataTransfer.dropEffect = "move";
+          target.classList.add("border-primary", "bg-primary/10");
+        });
+        target.addEventListener("dragleave", () => {
+          target.classList.remove("border-primary", "bg-primary/10");
+        });
+        target.addEventListener("drop", (event) => {
+          event.preventDefault();
+          target.classList.remove("border-primary", "bg-primary/10");
+          const dropParts = target.dataset.dropPlate.split("|");
+          const fallbackPayload = state.draggingLine;
+          let payload = fallbackPayload;
+          const raw = event.dataTransfer.getData("text/plain");
+          if (raw) {
+            try {
+              payload = JSON.parse(raw);
+            } catch (_) {
+            }
+          }
+          if (!payload) return;
+          if (payload.tableId !== dropParts[0]) return;
+          moveLineBetweenPlates(payload.tableId, payload.plateId, dropParts[1], payload.lineKey);
         });
       });
       document.getElementById("order-total").textContent = formatMoney(tableTotal(table));
