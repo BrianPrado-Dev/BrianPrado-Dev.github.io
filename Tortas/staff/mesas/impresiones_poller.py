@@ -85,6 +85,36 @@ def format_with_right(left: str, right: str, width: int = LINE_WIDTH) -> list[st
 
 def build_ticket_text(ticket: dict[str, Any]) -> str:
     ticket_type = str(ticket.get("type", "ticket")).strip().lower()
+    if ticket_type == "historial":
+        lines: list[str] = []
+        lines.append("HISTORIAL MESAS")
+        lines.append("=" * LINE_WIDTH)
+        lines.extend(wrap_line(f"Fecha: {current_date_text()}"))
+        lines.append("")
+
+        records = ticket.get("history", [])
+        if not isinstance(records, list) or not records:
+            lines.append("Sin registros")
+        else:
+            for record in records:
+                table_number = record.get("tableNumber", "-")
+                lines.extend(wrap_line(f"Mesa {table_number}"))
+                items = record.get("items", [])
+                if not isinstance(items, list) or not items:
+                    lines.extend(wrap_line("- Sin productos"))
+                else:
+                    for item in items:
+                        qty = item.get("qty", 1)
+                        name = item.get("name", "Item")
+                        lines.extend(wrap_line(f"- {qty}x {name}"))
+                total = record.get("total", 0)
+                lines.extend(format_with_right("TOTAL:", f"${total}"))
+                lines.append("-" * LINE_WIDTH)
+
+        lines.extend(wrap_line(f"Mesera: {ticket.get('mesera', 'Sin nombre')}"))
+        lines.append("")
+        return "\n".join(lines)
+
     table_number = ticket.get("tableNumber", "-")
     mesera = ticket.get("mesera", "Sin nombre")
     total = ticket.get("total", 0)

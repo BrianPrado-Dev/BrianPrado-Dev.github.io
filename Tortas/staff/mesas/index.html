@@ -127,6 +127,12 @@
       </div>
       <div class="bg-surface-container-low rounded-3xl p-5">
         <p class="text-sm text-on-surface-variant mb-3">Registros de mesas limpiadas.</p>
+        <div class="mb-4">
+          <button id="print-history-button" class="bg-primary text-white px-4 py-2 rounded-xl font-semibold hover:opacity-90 flex items-center gap-2">
+            <span class="material-symbols-outlined">print</span>
+            Imprimir historial
+          </button>
+        </div>
         <div id="history-list" class="space-y-3"></div>
       </div>
     </section>
@@ -581,6 +587,90 @@
       return `$${amount.toLocaleString("es-MX")}`;
     }
 
+    function parseHistoryItem(itemLine) {
+      const line = String(itemLine || "").trim();
+      const qtyMatch = line.match(/^(\d+)\s*x\s*/i);
+      const qty = qtyMatch ? Number(qtyMatch[1]) : 1;
+      const withoutQty = line.replace(/^(\d+)\s*x\s*/i, "");
+      const withoutVariant = withoutQty.replace(/\s*\([^)]*\)\s*/g, " ").replace(/\s+/g, " ").trim();
+      return { qty, name: withoutVariant || "Item" };
+    }
+
+    function summarizeHistoryRecordItems(record) {
+      const counter = {};
+      const plates = Array.isArray(record.plates) ? record.plates : [];
+      plates.forEach((plate) => {
+        const items = Array.isArray(plate.items) ? plate.items : [];
+        items.forEach((itemLine) => {
+          const { qty, name } = parseHistoryItem(itemLine);
+          counter[name] = (counter[name] || 0) + qty;
+        });
+      });
+      return Object.entries(counter)
+        .sort(([a], [b]) => a.localeCompare(b, "es"))
+        .map(([name, qty]) => `${qty}x ${name}`);
+    }
+
+    function buildHistoryPrintText() {
+      const lines = [];
+      lines.push("HISTORIAL DE MESAS");
+      lines.push("==============================");
+      lines.push(`Fecha: ${new Date().toLocaleDateString("es-MX")}`);
+      lines.push("");
+
+      state.history.forEach((record) => {
+        lines.push(`Mesa ${record.tableNumber}`);
+        const summaryItems = summarizeHistoryRecordItems(record);
+        if (!summaryItems.length) {
+          lines.push("- Sin productos");
+        } else {
+          summaryItems.forEach((item) => lines.push(`- ${item}`));
+        }
+        lines.push(`Total: ${formatMoney(Number(record.totalBeforeClear) || 0)}`);
+        lines.push("------------------------------");
+      });
+
+      return lines.join("\n");
+    }
+
+    function createHistoryPrintData() {
+      return {
+        id: `historial_${Date.now()}`,
+        type: "historial",
+        tableId: "historial",
+        tableNumber: 0,
+        mesera: state.meseraNombre,
+        createdAt: new Date().toISOString(),
+        history: state.history.map((record) => {
+          const items = summarizeHistoryRecordItems(record).map((entry) => {
+            const parsed = parseHistoryItem(entry);
+            return { name: parsed.name, qty: parsed.qty };
+          });
+          return {
+            tableNumber: record.tableNumber,
+            items,
+            total: Number(record.totalBeforeClear) || 0
+          };
+        })
+      };
+    }
+
+    async function printHistorySummary() {
+      if (!state.history.length) {
+        window.alert("No hay historial para imprimir.");
+        return;
+      }
+      const historyTicket = createHistoryPrintData();
+      state.printQueue.unshift(historyTicket);
+      persistPrintQueue();
+      try {
+        await enqueueRemote(historyTicket);
+        window.alert("Historial enviado a la cola de impresión.");
+      } catch (_) {
+        window.alert("No se pudo enviar el historial a la cola de impresión.");
+      }
+    }
+
     function nextTableNumber() {
       const nums = state.tables.map((t) => t.number);
       let candidate = 1;
@@ -1006,6 +1096,7 @@
         showView("tables");
         renderTables();
       });
+      document.getElementById("print-history-button").addEventListener("click", printHistorySummary);
     }
 
     loadPrintQueue();
