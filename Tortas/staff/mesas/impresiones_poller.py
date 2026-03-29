@@ -19,8 +19,8 @@ from typing import Any
 
 import requests
 
-SUPABASE_URL = os.getenv("SUPABASE_URL", "https://TU-PROYECTO.supabase.co")
-SUPABASE_SERVICE_KEY = os.getenv("SUPABASE_SERVICE_KEY", "TU_SUPABASE_SERVICE_KEY")
+SUPABASE_URL = "https://zazifirbccucazaottlo.supabase.co"
+SUPABASE_SERVICE_KEY = os.getenv("SUPABASE_SERVICE_KEY", "")
 SUPABASE_TABLE = "impresiones_queue"
 POLL_SECONDS = 2
 MAX_AGE_SECONDS = 120
