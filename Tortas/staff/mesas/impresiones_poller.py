@@ -12,14 +12,16 @@ Uso:
 from __future__ import annotations
 
 import os
-import tempfile
 import time
 from datetime import datetime, timezone
 from typing import Any
 
 import requests
+import win32print
+import win32ui
+from win32con import FW_NORMAL
 
-SUPABASE_URL = "https://zazifirbccucazaottlo.supabase.co"
+SUPABASE_URL = os.getenv("SUPABASE_URL", "https://TU-PROYECTO.supabase.co")
 SUPABASE_SERVICE_KEY = os.getenv("SUPABASE_SERVICE_KEY", "")
 SUPABASE_TABLE = "impresiones_queue"
 POLL_SECONDS = 2
@@ -99,17 +101,30 @@ def build_ticket_text(ticket: dict[str, Any]) -> str:
 
 
 def print_text_windows(text: str) -> None:
-    with tempfile.NamedTemporaryFile(delete=False, suffix=".txt", mode="w", encoding="utf-8") as tmp:
-        tmp.write(text)
-        tmp_path = tmp.name
+    printer_name = win32print.GetDefaultPrinter()
+    if not printer_name:
+        raise RuntimeError("No hay impresora predeterminada configurada")
+
+    hprinter = win32print.OpenPrinter(printer_name)
+    hdc = win32ui.CreateDC()
     try:
-        os.startfile(tmp_path, "print")
+        hdc.CreatePrinterDC(printer_name)
+        hdc.StartDoc("Ticket Dona Susy")
+        hdc.StartPage()
+
+        # Replica el formato de Main.py para tickets termicos legibles.
+        font = win32ui.CreateFont({"name": "Arial", "height": 30, "weight": FW_NORMAL})
+        hdc.SelectObject(font)
+
+        y = 20
+        for line in text.split("\n"):
+            hdc.TextOut(20, y, line.rstrip())
+            y += 30
+
+        hdc.EndPage()
+        hdc.EndDoc()
     finally:
-        time.sleep(2)
-        try:
-            os.remove(tmp_path)
-        except OSError:
-            pass
+        win32print.ClosePrinter(hprinter)
 
 
 def fetch_pending_rows() -> list[dict[str, Any]]:
