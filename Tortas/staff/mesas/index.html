@@ -169,6 +169,19 @@
     </div>
   </div>
 
+  <div id="number-modal" class="hidden fixed inset-0 z-50 bg-black/40 p-4 flex items-center justify-center">
+    <div class="bg-surface-container-low rounded-3xl p-5 w-full max-w-md shadow-[0_20px_40px_rgba(27,29,14,0.25)]">
+      <h3 id="number-modal-title" class="font-headline font-bold text-2xl mb-4">Ingresa cantidad</h3>
+      <label id="number-modal-label" for="number-modal-input" class="block text-sm font-semibold mb-2 text-on-surface">Cantidad</label>
+      <input id="number-modal-input" type="text" inputmode="decimal" class="w-full px-4 py-3 rounded-xl border border-outline-variant bg-white/90 text-base mb-2" placeholder="Ej. 300" />
+      <p id="number-modal-error" class="hidden text-sm text-red-700 mb-3">Ingresa un número mayor a 0.</p>
+      <div class="grid grid-cols-2 gap-2">
+        <button id="number-modal-confirm" class="w-full bg-primary text-white px-4 py-2 rounded-xl font-semibold hover:opacity-90">Aceptar</button>
+        <button id="number-modal-cancel" class="w-full bg-red-100 text-red-700 px-4 py-2 rounded-xl font-semibold hover:bg-red-200">Cancelar</button>
+      </div>
+    </div>
+  </div>
+
   <script>
     const STORAGE_KEY = "dona_susy_mesas_v2";
     const PRINT_QUEUE_KEY = "dona_susy_print_queue_v1";
@@ -183,11 +196,12 @@
 
     const MENU = {
       comida: [
-        { id: "torta_ahogada", name: "Torta Ahogada", price: 55, note: "Carnitas, Buche, Lengua" },
+        { id: "torta_ahogada", name: "Torta Ahogada", price: 55, note: "Carnitas, Buche, Lengua, Mixta" },
+        { id: "torta_mini", name: "Torta Mini", price: 28, note: "Carnitas, Buche, Lengua, Mixta" },
         { id: "taco_dorado_sencillo", name: "Taco Dorado Sencillo", price: 10, note: "Papa, Frijol, Requesón y Picadillo" },
-        { id: "taco_dorado_carne", name: "Taco Dorado con Carne", price: 25, note: "Carnitas, Buche, Lengua" },
-        { id: "taco_blandito", name: "Taco Blandito", price: 25, note: "Carnitas, Buche, Lengua" },
-        { id: "kilo_carne", name: "Kilo de Carne", price: 300, note: "Carnitas, Buche, Lengua" }
+        { id: "taco_dorado_carne", name: "Taco Dorado con Carne", price: 25, note: "Carnitas, Buche, Lengua, Mixta" },
+        { id: "taco_blandito", name: "Taco Blandito", price: 25, note: "Carnitas, Buche, Lengua, Mixta" },
+        { id: "kilo_carne", name: "Kilo de Carne", price: 300, note: "Carnitas, Buche, Lengua, Mixta" }
       ],
       paquetes: [
         { id: "paquete_1", name: "Paquete #1", price: 80, note: "1 Torta + 1 Taco Dorado Sencillo + 1 Refresco (o Agua Fresca)" },
@@ -420,6 +434,85 @@
       return variant ? ` (${variant})` : "";
     }
 
+    function parseKiloCarneTotalFromVariant(variant) {
+      const match = String(variant || "").match(/Total:\$([0-9]+(?:\.[0-9]+)?)/i);
+      if (!match) return null;
+      const total = Number(match[1]);
+      return Number.isFinite(total) ? total : null;
+    }
+
+    function getLineUnitPrice(line) {
+      if (!line || !ITEM_INDEX[line.itemId]) return 0;
+      if (line.itemId === "kilo_carne") {
+        const parsedTotal = parseKiloCarneTotalFromVariant(line.variant);
+        if (parsedTotal !== null) return parsedTotal;
+      }
+      return ITEM_INDEX[line.itemId].price;
+    }
+
+    function getLineSubtotal(line) {
+      return getLineUnitPrice(line) * line.qty;
+    }
+
+    function askPositiveNumber(title, unitLabel) {
+      return new Promise((resolve) => {
+        const modal = document.getElementById("number-modal");
+        const titleEl = document.getElementById("number-modal-title");
+        const labelEl = document.getElementById("number-modal-label");
+        const inputEl = document.getElementById("number-modal-input");
+        const errorEl = document.getElementById("number-modal-error");
+        const confirmBtn = document.getElementById("number-modal-confirm");
+        const cancelBtn = document.getElementById("number-modal-cancel");
+
+        titleEl.textContent = title;
+        labelEl.textContent = `Ingresa cantidad en ${unitLabel}`;
+        inputEl.value = "";
+        errorEl.classList.add("hidden");
+        modal.classList.remove("hidden");
+        setTimeout(() => inputEl.focus(), 0);
+
+        const cleanup = () => {
+          modal.classList.add("hidden");
+          confirmBtn.removeEventListener("click", onConfirm);
+          cancelBtn.removeEventListener("click", onCancel);
+          inputEl.removeEventListener("keydown", onKeyDown);
+        };
+
+        const onCancel = () => {
+          cleanup();
+          resolve(null);
+        };
+
+        const onConfirm = () => {
+          const normalized = inputEl.value.replace(",", ".").trim();
+          const parsed = Number(normalized);
+          if (!Number.isFinite(parsed) || parsed <= 0) {
+            errorEl.classList.remove("hidden");
+            inputEl.focus();
+            inputEl.select();
+            return;
+          }
+          cleanup();
+          resolve(parsed);
+        };
+
+        const onKeyDown = (event) => {
+          if (event.key === "Enter") {
+            event.preventDefault();
+            onConfirm();
+          }
+          if (event.key === "Escape") {
+            event.preventDefault();
+            onCancel();
+          }
+        };
+
+        confirmBtn.addEventListener("click", onConfirm);
+        cancelBtn.addEventListener("click", onCancel);
+        inputEl.addEventListener("keydown", onKeyDown);
+      });
+    }
+
     function makeLineKey(itemId, variant) {
       return `${itemId}__${variant || "base"}`;
     }
@@ -485,14 +578,33 @@
     }
 
     async function askVariantForItem(itemId) {
-      const carne = ["Carnitas", "Buche", "Lengua"];
+      const carne = ["Carnitas", "Buche", "Lengua", "Mixta"];
+      const modoKiloCarne = ["Por gramos", "Por dinero"];
       const tacoSabor = ["Papa", "Frijol", "Requesón", "Picadillo"];
       const refresco = ["Coca", "Coca Light", "Fanta", "Manzana", "Sprite"];
       const aguas = ["Horchata", "Jamaica"];
       const cerveza = ["Clara", "Oscura"];
 
-      if (["torta_ahogada", "taco_blandito", "kilo_carne"].includes(itemId)) {
+      if (["torta_ahogada", "torta_mini", "taco_blandito"].includes(itemId)) {
         return await chooseOption("Selecciona tipo", carne);
+      }
+      if (itemId === "kilo_carne") {
+        const tipoCarne = await chooseOption("Kilo de Carne - Selecciona tipo", carne);
+        if (tipoCarne === null) return null;
+        const modo = await chooseOption("Kilo de Carne - ¿Cómo lo piden?", modoKiloCarne);
+        if (modo === null) return null;
+        const precioPorKilo = ITEM_INDEX.kilo_carne.price;
+        const gramosPorKilo = 1000;
+        if (modo === "Por gramos") {
+          const gramos = await askPositiveNumber("Kilo de Carne - Cantidad", "gramos");
+          if (gramos === null) return null;
+          const total = (gramos * precioPorKilo) / gramosPorKilo;
+          return `Carne:${tipoCarne} | Modo:Por gramos | Cantidad:${gramos}g | Total:$${total.toFixed(2)}`;
+        }
+        const dinero = await askPositiveNumber("Kilo de Carne - Cantidad", "pesos");
+        if (dinero === null) return null;
+        const gramos = (dinero * gramosPorKilo) / precioPorKilo;
+        return `Carne:${tipoCarne} | Modo:Por dinero | Cantidad:$${dinero.toFixed(2)} | Equiv:${gramos.toFixed(2)}g | Total:$${dinero.toFixed(2)}`;
       }
       if (itemId === "taco_dorado_sencillo") {
         return await chooseOption("Selecciona sabor del taco", tacoSabor);
@@ -578,7 +690,7 @@
 
     function tableTotal(table) {
       return table.plates.reduce((tableSum, plate) => {
-        const plateTotal = getPlateLineItems(plate).reduce((sum, line) => sum + ITEM_INDEX[line.itemId].price * line.qty, 0);
+        const plateTotal = getPlateLineItems(plate).reduce((sum, line) => sum + getLineSubtotal(line), 0);
         return tableSum + plateTotal;
       }, 0);
     }
@@ -803,8 +915,8 @@
               name: ITEM_INDEX[line.itemId].name,
               variant: line.variant,
               qty: line.qty,
-              price: ITEM_INDEX[line.itemId].price,
-              subtotal: ITEM_INDEX[line.itemId].price * line.qty
+              price: getLineUnitPrice(line),
+              subtotal: getLineSubtotal(line)
             }))
         })),
         total: tableTotal(table)
@@ -992,7 +1104,7 @@
         }
         const rows = entries.map((line) => {
           const item = ITEM_INDEX[line.itemId];
-          const subtotal = item.price * line.qty;
+          const subtotal = getLineSubtotal(line);
           return `
             <div class="flex items-center justify-between text-base mt-2 gap-2">
               <span class="flex-1 font-medium">${line.qty}x ${item.name}${formatVariant(line.variant)}</span>
