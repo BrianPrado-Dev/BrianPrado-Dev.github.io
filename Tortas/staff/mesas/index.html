@@ -204,8 +204,8 @@
         { id: "kilo_carne", name: "Kilo de Carne", price: 300, note: "Carnitas, Buche, Lengua, Mixta" }
       ],
       paquetes: [
-        { id: "paquete_1", name: "Paquete #1", price: 80, note: "1 Torta + 1 Taco Dorado Sencillo + 1 Refresco (o Agua Fresca)" },
-        { id: "paquete_2", name: "Paquete #2", price: 85, note: "1 Torta + 2 Tacos Dorados Sencillos + 1 Refresco (o Agua Fresca)" },
+        { id: "paquete_1", name: "Paquete #1", price: 85, note: "1 Torta + 1 Taco Dorado Sencillo + 1 Refresco (o Agua Fresca)" },
+        { id: "paquete_2", name: "Paquete #2", price: 90, note: "1 Torta + 2 Tacos Dorados Sencillos + 1 Refresco (o Agua Fresca)" },
         { id: "paquete_3", name: "Paquete #3", price: 205, note: "3 Tortas + 5 Tacos Dorados Sencillos" },
         { id: "paquete_4", name: "Paquete #4", price: 320, note: "5 Tortas + 6 Tacos Dorados Sencillos" },
         { id: "paquete_5", name: "Paquete #5", price: 630, note: "10 Tortas + 10 Tacos Dorados Sencillos" }
@@ -214,7 +214,7 @@
         { id: "refresco_taparosca", name: "Refresco Taparosca", price: 30 },
         { id: "refresco_retornable", name: "Refresco Retornable", price: 28 },
         { id: "agua_fresca_1lt", name: "Agua Fresca 1LT", price: 25 },
-        { id: "agua_500ml", name: "Agua 500ml", price: 15 },
+        { id: "agua_500ml", name: "Agua Fresca 500ml", price: 15 },
         { id: "cerveza_corona_500ml", name: "Cerveza Corona 500ml", price: 25 },
         { id: "caguama_mega", name: "Caguama Mega", price: 70 }
       ]
@@ -626,7 +626,7 @@
         return await chooseOption("Selecciona tipo de cerveza", cerveza);
       }
       if (itemId === "agua_500ml") {
-        return "Natural";
+        return await chooseOption("Selecciona sabor de agua fresca", aguas);
       }
       if (itemId === "caguama_mega") {
         return "Única";
