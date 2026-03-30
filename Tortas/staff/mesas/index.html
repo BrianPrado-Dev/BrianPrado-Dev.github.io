@@ -254,7 +254,9 @@
       menuSectionsOpen: { comida: true, paquetes: false, bebidas: false },
       meseraNombre: localStorage.getItem(WAITER_NAME_KEY) || "Sin nombre",
       draggingLine: null,
-      switchableProfiles: []
+      switchableProfiles: [],
+      startedAsBrian: String(localStorage.getItem(WAITER_NAME_KEY) || "").trim().toLowerCase() === "brian",
+      brianReentryBlocked: false
     };
 
     function todayKey() {
@@ -1606,9 +1608,13 @@
         if (!response.ok) return;
         const data = await response.json();
         const users = Array.isArray(data.users) ? data.users : [];
-        state.switchableProfiles = users
+        const allNames = users
           .map((u) => String(u.username || "").trim())
-          .filter((name) => name && name.toLowerCase() !== "brian");
+          .filter((name) => name);
+        state.switchableProfiles = allNames.filter((name) => {
+          if (name.toLowerCase() !== "brian") return true;
+          return state.startedAsBrian;
+        });
         renderProfileSwitcher();
       } catch (_) {
       }
@@ -1637,6 +1643,16 @@
       document.getElementById("profile-switch-select").addEventListener("change", (event) => {
         const selected = String(event.target.value || "").trim();
         if (!selected) return;
+        const currentIsBrian = String(state.meseraNombre).trim().toLowerCase() === "brian";
+        const selectedIsBrian = selected.toLowerCase() === "brian";
+        if (currentIsBrian && !selectedIsBrian && state.startedAsBrian) {
+          state.brianReentryBlocked = true;
+        }
+        if (selectedIsBrian && state.brianReentryBlocked) {
+          renderProfileSwitcher();
+          showToast("No tienes permisos para acceder a ese perfil.", "error");
+          return;
+        }
         state.meseraNombre = selected;
         localStorage.setItem(WAITER_NAME_KEY, selected);
         renderLoggedUser();
