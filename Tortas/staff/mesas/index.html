@@ -869,8 +869,9 @@
         };
 
         if (kind === "comanda") {
-          playTone(now, 280, 0.14, "triangle", 0.09);
-          playTone(now + 0.16, 220, 0.2, "triangle", 0.09);
+          playTone(now, 640, 0.09, "sine", 0.075);
+          playTone(now + 0.11, 540, 0.09, "sine", 0.075);
+          playTone(now + 0.22, 460, 0.12, "sine", 0.075);
           return;
         }
 
