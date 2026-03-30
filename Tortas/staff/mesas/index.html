@@ -49,12 +49,18 @@
   </style>
 </head>
 <body class="paper-texture min-h-screen font-body text-on-surface">
-  <header class="bg-[#fbfbe2] flex justify-between items-center px-6 py-4 w-full sticky top-0 z-40 shadow-[0_12px_24px_rgba(27,29,14,0.08)]">
+  <header class="bg-[#fbfbe2] flex justify-between items-center gap-3 px-6 py-4 w-full sticky top-0 z-40 shadow-[0_12px_24px_rgba(27,29,14,0.08)]">
     <div class="flex items-center gap-3">
       <span class="material-symbols-outlined text-primary" style="font-size: 28px;">restaurant</span>
       <h1 class="font-headline font-bold text-2xl tracking-tight text-primary">Tortas Doña Susy</h1>
     </div>
-    <p id="current-user-label" class="text-xs uppercase tracking-widest text-on-surface-variant">Usuario: -</p>
+    <div class="flex items-center gap-3">
+      <p id="current-user-label" class="text-xs uppercase tracking-widest text-on-surface-variant">Usuario: -</p>
+      <div id="header-plate-wrapper" class="hidden items-center gap-2 bg-surface-container-highest/90 rounded-xl px-3 py-2 shadow-[0_8px_16px_rgba(27,29,14,0.12)]">
+        <label for="plate-select" class="text-xs font-semibold whitespace-nowrap">Plato actual</label>
+        <select id="plate-select" class="rounded-lg border-outline-variant bg-white/90 text-sm px-2 py-1 min-w-[140px]"></select>
+      </div>
+    </div>
   </header>
 
   <main class="px-6 pt-8 pb-28 max-w-6xl mx-auto">
@@ -100,15 +106,15 @@
         <h2 id="detail-title" class="font-headline font-black text-3xl">Mesa</h2>
       </div>
 
-      <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <div class="bg-surface-container-low rounded-3xl p-5 space-y-5">
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-6 items-start">
+        <div class="bg-surface-container-low rounded-3xl p-5 space-y-5 self-start">
           <h3 class="font-headline font-bold text-2xl">Menú</h3>
           <div id="menu-sections" class="space-y-6"></div>
         </div>
 
         <div class="bg-surface-container-low rounded-3xl p-5 flex flex-col self-start">
           <h3 class="font-headline font-bold text-2xl mb-4">Pedido actual (por plato)</h3>
-          <div id="order-list" class="space-y-3 overflow-y-auto pr-1 max-h-[48vh] md:max-h-[60vh]"></div>
+          <div id="order-list" class="space-y-3 overflow-y-auto pr-1"></div>
           <div class="border-t border-outline-variant mt-6 pt-4 flex justify-between items-center">
             <span class="font-headline font-bold text-xl">Total</span>
             <span id="order-total" class="font-headline font-black text-3xl text-primary">$0</span>
@@ -149,10 +155,6 @@
         Agregar plato
       </button>
       <div class="flex flex-col items-end gap-2">
-        <div class="flex items-center gap-2 bg-surface-container-highest/90 rounded-xl px-3 py-2 shadow-[0_8px_16px_rgba(27,29,14,0.12)]">
-          <label for="plate-select" class="text-xs font-semibold whitespace-nowrap">Plato actual</label>
-          <select id="plate-select" class="rounded-lg border-outline-variant bg-white/90 text-sm px-2 py-1 min-w-[140px]"></select>
-        </div>
         <button id="print-comanda-button" class="bg-surface-container-highest text-on-surface px-5 py-3 rounded-2xl font-semibold hover:bg-primary hover:text-white flex items-center gap-2 shadow-[0_10px_20px_rgba(27,29,14,0.15)]">
           <span class="material-symbols-outlined">receipt_long</span>
           Imprimir comanda
@@ -256,6 +258,7 @@
       return {
         id: `mesa_${number}`,
         number,
+        customName: "",
         isDefault,
         createdOn,
         plates: [createPlate(1)]
@@ -278,6 +281,7 @@
       }));
       return {
         ...table,
+        customName: typeof table.customName === "string" ? table.customName : "",
         plates: cleanPlates
       };
     }
@@ -419,6 +423,11 @@
 
     function getTableById(id) {
       return state.tables.find((t) => t.id === id) || null;
+    }
+
+    function getTableDisplayName(table) {
+      const customName = String(table?.customName || "").trim();
+      return customName || `Mesa ${table.number}`;
     }
 
     function getPlateById(table, plateId) {
@@ -781,6 +790,20 @@
       return `${firstPlateWithItems.name}: ${base}`;
     }
 
+    function tableItemsSummary(table) {
+      const counter = {};
+      table.plates.forEach((plate) => {
+        getPlateLineItems(plate).forEach((line) => {
+          const itemName = ITEM_INDEX[line.itemId].name;
+          const key = itemName;
+          counter[key] = (counter[key] || 0) + line.qty;
+        });
+      });
+      return Object.entries(counter)
+        .sort(([a], [b]) => a.localeCompare(b, "es"))
+        .map(([label, qty]) => `${qty}x ${label}`);
+    }
+
     function tableTotal(table) {
       return table.plates.reduce((tableSum, plate) => {
         const plateTotal = getPlateLineItems(plate).reduce((sum, line) => sum + getLineSubtotal(line), 0);
@@ -904,7 +927,7 @@
     function clearTable(tableId) {
       const table = getTableById(tableId);
       if (!table) return;
-      const confirmed = window.confirm(`¿Seguro que quieres limpiar la Mesa ${table.number}? Se borrará todo el pedido.`);
+      const confirmed = window.confirm(`¿Seguro que quieres limpiar ${getTableDisplayName(table)}? Se borrará todo el pedido.`);
       if (!confirmed) return;
       pushHistoryRecord(table);
       table.plates = [createPlate(1)];
@@ -943,6 +966,19 @@
       persistState();
       renderDetail();
       renderTables();
+    }
+
+    function renameTable(tableId) {
+      const table = getTableById(tableId);
+      if (!table) return;
+      const input = window.prompt("Escribe el nombre de la mesa:", String(table.customName || ""));
+      if (input === null) return;
+      table.customName = input.trim();
+      persistState();
+      renderTables();
+      if (state.selectedTableId === tableId) {
+        renderDetail();
+      }
     }
 
     function removeItemFromPlate(tableId, plateId, lineKey) {
@@ -1134,12 +1170,14 @@
       const history = document.getElementById("history-view");
       const addTableButton = document.getElementById("add-table-button");
       const detailActionsBar = document.getElementById("detail-actions-bar");
+      const headerPlateWrapper = document.getElementById("header-plate-wrapper");
 
       tables.classList.add("hidden");
       detail.classList.add("hidden");
       history.classList.add("hidden");
       addTableButton.classList.add("hidden");
       detailActionsBar.classList.add("hidden");
+      headerPlateWrapper.classList.add("hidden");
 
       if (view === "tables") {
         tables.classList.remove("hidden");
@@ -1147,6 +1185,8 @@
       } else if (view === "detail") {
         detail.classList.remove("hidden");
         detailActionsBar.classList.remove("hidden");
+        headerPlateWrapper.classList.remove("hidden");
+        headerPlateWrapper.classList.add("flex");
       } else if (view === "history") {
         history.classList.remove("hidden");
       }
@@ -1174,24 +1214,37 @@
         const occupied = tableHasItems(table);
         const statusClass = occupied ? "bg-primary text-white" : "bg-on-surface-variant/10 text-on-surface-variant";
         const cardRing = occupied ? "ring-2 ring-primary/20" : "ring-1 ring-outline-variant/40";
+        const compactItems = tableItemsSummary(table);
         const removeButton = table.isDefault
           ? ""
           : `<button data-remove="${table.id}" class="text-xs px-2 py-1 rounded-lg bg-white/60 hover:bg-red-100 text-red-700">Eliminar</button>`;
         const clearButton = occupied
           ? `<button data-clear="${table.id}" class="bg-amber-100 text-amber-900 px-3 py-2 rounded-xl font-semibold hover:bg-amber-200">Limpiar</button>`
           : "";
+        const compactItemsHtml = compactItems.length
+          ? compactItems.map((line) => `<p class="text-xs text-on-surface break-words">${line}</p>`).join("")
+          : `<p class="text-xs text-on-surface-variant">Sin productos</p>`;
 
         return `
           <article class="bg-surface-container-low rounded-3xl p-5 ${cardRing} flex flex-col gap-4">
             <div class="flex items-start justify-between gap-2">
               <div>
-                <h3 class="font-headline font-extrabold text-3xl text-primary">Mesa ${table.number}</h3>
+                <h3 class="font-headline font-extrabold text-3xl text-primary">${getTableDisplayName(table)}</h3>
                 <p class="text-sm text-on-surface-variant">${tableSummary(table)}</p>
               </div>
-              <div class="flex items-center gap-2">
-                <span class="${statusClass} text-[10px] font-black px-3 py-1 rounded-full uppercase tracking-widest">${occupied ? "Ocupada" : "Libre"}</span>
+              <div class="flex flex-col items-end gap-1">
+                <div class="flex items-center gap-2">
+                  <span class="${statusClass} text-[10px] font-black px-3 py-1 rounded-full uppercase tracking-widest">${occupied ? "Ocupada" : "Libre"}</span>
+                </div>
+                <button data-rename="${table.id}" class="w-6 h-6 rounded-md bg-surface-container-highest hover:bg-primary hover:text-white flex items-center justify-center" title="Cambiar nombre de mesa">
+                  <span class="material-symbols-outlined text-sm">edit</span>
+                </button>
                 ${removeButton}
               </div>
+            </div>
+            <div class="bg-white/55 rounded-2xl p-3">
+              <p class="text-[11px] uppercase tracking-widest font-bold text-on-surface-variant mb-2">Resumen mesa</p>
+              <div class="space-y-1">${compactItemsHtml}</div>
             </div>
             <div class="flex items-center justify-between gap-2">
               <span class="text-sm font-semibold text-on-surface-variant">${formatMoney(tableTotal(table))}</span>
@@ -1211,6 +1264,9 @@
 
       grid.querySelectorAll("[data-remove]").forEach((btn) => {
         btn.addEventListener("click", () => removeExtraTable(btn.dataset.remove));
+      });
+      grid.querySelectorAll("[data-rename]").forEach((btn) => {
+        btn.addEventListener("click", () => renameTable(btn.dataset.rename));
       });
 
       grid.querySelectorAll("[data-print]").forEach((btn) => {
@@ -1401,7 +1457,7 @@
       if (!getPlateById(table, state.selectedPlateId)) {
         state.selectedPlateId = table.plates[0].id;
       }
-      document.getElementById("detail-title").textContent = `Mesa ${table.number} - ${tableHasItems(table) ? "Ocupada" : "Libre"}`;
+      document.getElementById("detail-title").textContent = `${getTableDisplayName(table)} - ${tableHasItems(table) ? "Ocupada" : "Libre"}`;
       renderPlateSelect(table);
       renderMenuSections(table);
       renderOrderList(table);
