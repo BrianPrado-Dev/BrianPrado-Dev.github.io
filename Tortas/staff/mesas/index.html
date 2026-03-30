@@ -1335,6 +1335,12 @@
       const caguamaBeerBg = "https://chedrauimx.vtexassets.com/arquivos/ids/66107882/7501064101205_02.jpg?v=639102544347830000";
       const agua1LtBg = "https://static.wixstatic.com/media/4d09e7_f81bdd07b4b1430d89021fcadb342dea~mv2.jpg/v1/fill/w_476,h_528,al_c,q_80,usm_0.66_1.00_0.01,enc_avif,quality_auto/4d09e7_f81bdd07b4b1430d89021fcadb342dea~mv2.jpg";
       const agua500Bg = "https://mercadofacil.mx/wp-content/uploads/2023/03/IMG-20230322-WA0014.jpg";
+      const tortaAhogadaBg = "https://i.pinimg.com/736x/84/0d/3e/840d3ee9ef51cd7a21cf77fdd1f834de.jpg";
+      const tortaMiniBg = "https://lossaboresdemexico.com/wp-content/uploads/2021/05/image-1.jpeg";
+      const tacoDoradoBg = "https://live.staticflickr.com/5493/11908135565_1c710b0ab2_b.jpg";
+      const tacoSencilloBg = "https://i.pinimg.com/474x/66/e8/62/66e862a60d77a5936a5a45b47345c474.jpg";
+      const tacoBlanditoBg = "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQqfkb1nq8K3jtL1VjPLTMLRX_LuNdnZgd0og&s";
+      const kiloCarneBg = "https://www.cocinadelirante.com/sites/default/files/images/2023/08/carnitas-sin-freir-para-tortas-ahogadas.jpg";
       const beverageImageByItemId = {
         refresco_taparosca: cocaFamilyBg,
         refresco_retornable: cocaRetornableBg,
@@ -1342,6 +1348,14 @@
         caguama_mega: caguamaBeerBg,
         agua_fresca_1lt: agua1LtBg,
         agua_500ml: agua500Bg
+      };
+      const foodImageByItemId = {
+        torta_ahogada: tortaAhogadaBg,
+        torta_mini: tortaMiniBg,
+        taco_dorado_sencillo: tacoSencilloBg,
+        taco_dorado_carne: tacoDoradoBg,
+        taco_blandito: tacoBlanditoBg,
+        kilo_carne: kiloCarneBg
       };
       const getItemCardBgClass = (sectionKey, index) => {
         const palette = itemCardPalette[sectionKey] || itemCardPalette.comida;
@@ -1352,16 +1366,23 @@
         const itemsHtml = MENU[key].map((item, index) => {
           const qty = getItemQtyInPlate(plate, item.id);
           const cardBgClass = getItemCardBgClass(key, index);
-          const imageBg = beverageImageByItemId[item.id] || "";
+          const imageBg = beverageImageByItemId[item.id] || foodImageByItemId[item.id] || "";
           const hasImageBg = Boolean(imageBg);
-          const isDrinkItem = key === "bebidas";
-          const needsRedBadge = isDrinkItem;
+          const needsRedBadge = true;
           const highlightedTitle = item.id === "refresco_retornable"
             ? item.name.replace("Retornable", "<span class='bg-white text-primary px-1 rounded font-black tracking-wide'>RETORNABLE</span>")
             : item.id === "agua_fresca_1lt"
               ? item.name.replace("Grande", "<span class='bg-white text-primary px-1 rounded font-black tracking-wide'>GRANDE</span>")
               : item.id === "agua_500ml"
                 ? item.name.replace("Chica", "<span class='bg-white text-primary px-1 rounded font-black tracking-wide'>CHICA</span>")
+                : item.id === "torta_mini"
+                  ? item.name.replace("Mini", "<span class='bg-white text-primary px-1 rounded font-black tracking-wide'>MINI</span>")
+                  : item.id === "taco_dorado_carne"
+                    ? item.name.replace("con Carne", "<span class='bg-white text-primary px-1 rounded font-black tracking-wide'>CON CARNE</span>")
+                    : item.id === "taco_dorado_sencillo"
+                      ? item.name.replace("Sencillo", "<span class='bg-white text-primary px-1 rounded font-black tracking-wide'>SENCILLO</span>")
+                      : item.id === "taco_blandito"
+                        ? item.name.replace("Blandito", "<span class='bg-white text-primary px-1 rounded font-black tracking-wide'>BLANDITO</span>")
                 : item.name;
           const cardStyle = hasImageBg
             ? `background-image: linear-gradient(rgba(27,29,14,0.40), rgba(27,29,14,0.40)), url('${imageBg}'); background-size: cover; background-position: center;`
