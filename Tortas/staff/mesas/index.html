@@ -157,7 +157,11 @@
         <span class="material-symbols-outlined">add_circle</span>
         Agregar plato
       </button>
-      <div class="flex flex-col items-end gap-2">
+      <div class="flex items-center gap-2">
+        <button id="print-ticket-detail-button" class="bg-emerald-600 text-white px-5 py-3 rounded-2xl font-semibold hover:bg-emerald-700 flex items-center gap-2 shadow-[0_10px_20px_rgba(5,150,105,0.28)]">
+          <span class="material-symbols-outlined">payments</span>
+          Imprimir ticket
+        </button>
         <button id="print-comanda-button" class="bg-surface-container-highest text-on-surface px-5 py-3 rounded-2xl font-semibold hover:bg-primary hover:text-white flex items-center gap-2 shadow-[0_10px_20px_rgba(27,29,14,0.15)]">
           <span class="material-symbols-outlined">receipt_long</span>
           Imprimir comanda
@@ -194,6 +198,8 @@
       </div>
     </div>
   </div>
+
+  <div id="toast-container" class="fixed inset-0 z-[70] flex items-center justify-center pointer-events-none p-6"></div>
 
   <script>
     const STORAGE_KEY = "dona_susy_mesas_v2";
@@ -824,6 +830,22 @@
       return `$${amount.toLocaleString("es-MX")}`;
     }
 
+    function showToast(message, type = "info") {
+      const container = document.getElementById("toast-container");
+      if (!container) return;
+      const toneClass = type === "error"
+        ? "bg-red-100/95 text-red-900 border-red-400"
+        : "bg-emerald-100/95 text-emerald-900 border-emerald-400";
+      const toast = document.createElement("div");
+      toast.className = `pointer-events-none w-full max-w-xl px-8 py-6 rounded-2xl border-2 shadow-[0_20px_40px_rgba(27,29,14,0.28)] text-center text-2xl font-black tracking-wide ${toneClass}`;
+      toast.textContent = message;
+      container.innerHTML = "";
+      container.appendChild(toast);
+      setTimeout(() => {
+        toast.remove();
+      }, 2200);
+    }
+
     function parseHistoryItem(itemLine) {
       const line = String(itemLine || "").trim();
       const qtyMatch = line.match(/^(\d+)\s*x\s*/i);
@@ -894,7 +916,7 @@
 
     async function printHistorySummary() {
       if (!state.history.length) {
-        window.alert("No hay historial para imprimir.");
+        showToast("No hay historial para imprimir.", "error");
         return;
       }
       const historyTicket = createHistoryPrintData();
@@ -902,9 +924,9 @@
       persistPrintQueue();
       try {
         await enqueueRemote(historyTicket);
-        window.alert("Historial enviado a la cola de impresión.");
+        showToast("Historial enviado a la cola de impresión.");
       } catch (_) {
-        window.alert("No se pudo enviar el historial a la cola de impresión.");
+        showToast("No se pudo enviar el historial a la cola de impresión.", "error");
       }
     }
 
@@ -1278,7 +1300,7 @@
       grid.querySelectorAll("[data-print]").forEach((btn) => {
         btn.addEventListener("click", async () => {
           await queueTableTicket(btn.dataset.print);
-          window.alert("Ticket enviado a la cola de impresiones.");
+          showToast("Ticket enviado a la cola de impresiones.");
         });
       });
 
@@ -1302,21 +1324,32 @@
         ["paquetes", "Paquetes"],
         ["bebidas", "Bebidas"]
       ];
+      const itemCardPalette = {
+        comida: ["bg-[#f8e8e7]", "bg-[#f7efe3]", "bg-[#efe9d7]", "bg-[#f5e3d0]"],
+        paquetes: ["bg-[#efe5cf]", "bg-[#e8e1c8]", "bg-[#f0e8d8]", "bg-[#e6dcc1]"],
+        bebidas: ["bg-[#e2eee7]", "bg-[#d9e7e9]", "bg-[#e8efe0]", "bg-[#dfe8d8]"]
+      };
+      const getItemCardBgClass = (sectionKey, index) => {
+        const palette = itemCardPalette[sectionKey] || itemCardPalette.comida;
+        return palette[index % palette.length];
+      };
 
       container.innerHTML = sectionEntries.map(([key, title]) => {
-        const itemsHtml = MENU[key].map((item) => {
+        const itemsHtml = MENU[key].map((item, index) => {
           const qty = getItemQtyInPlate(plate, item.id);
+          const cardBgClass = getItemCardBgClass(key, index);
           return `
-            <div class="bg-white/50 rounded-2xl p-3 flex items-center justify-between gap-2">
+            <button data-item-card="${item.id}" class="group aspect-square ${cardBgClass} border-2 border-outline-variant/60 rounded-2xl p-2 flex flex-col justify-between text-left hover:bg-primary hover:text-white hover:border-primary transition-colors active:scale-[0.98]">
               <div>
-                <p class="font-semibold">${item.name} <span class="text-primary">${formatMoney(item.price)}</span></p>
-                ${item.note ? `<p class="text-xs text-on-surface-variant">${item.note}</p>` : ""}
+                <p class="font-semibold leading-tight">${item.name}</p>
+                <p class="text-sm font-bold text-primary group-hover:text-white">${formatMoney(item.price)}</p>
+                ${item.note ? `<p class="text-[11px] mt-1 text-on-surface-variant group-hover:text-white/90">${item.note}</p>` : ""}
               </div>
-              <div class="flex items-center gap-2">
-                <span class="min-w-8 text-center font-bold">${qty}</span>
-                <button data-item-plus="${item.id}" class="w-8 h-8 rounded-lg bg-primary text-white hover:opacity-90 font-bold">+</button>
+              <div class="flex items-center justify-between pt-2">
+                <span class="text-xs uppercase tracking-wider opacity-80">Cantidad</span>
+                <span class="min-w-8 text-center text-lg font-black">${qty}</span>
               </div>
-            </div>
+            </button>
           `;
         }).join("");
 
@@ -1326,13 +1359,13 @@
               <h4 class="font-headline font-bold text-xl">${title}</h4>
               <span class="material-symbols-outlined text-on-surface-variant">expand_more</span>
             </summary>
-            <div class="space-y-2 px-1 pb-1">${itemsHtml}</div>
+            <div class="grid grid-cols-2 gap-2 px-1 pb-1">${itemsHtml}</div>
           </details>
         `;
       }).join("");
 
-      container.querySelectorAll("[data-item-plus]").forEach((btn) => {
-        btn.addEventListener("click", () => addItemWithVariant(table.id, plate.id, btn.dataset.itemPlus));
+      container.querySelectorAll("[data-item-card]").forEach((btn) => {
+        btn.addEventListener("click", () => addItemWithVariant(table.id, plate.id, btn.dataset.itemCard));
       });
       container.querySelectorAll("[data-menu-section]").forEach((details) => {
         details.addEventListener("toggle", () => {
@@ -1401,7 +1434,7 @@
         btn.addEventListener("click", async () => {
           const parts = btn.dataset.printPlate.split("|");
           await queuePlateTicket(parts[0], parts[1]);
-          window.alert("Ticket del plato enviado a la cola de impresiones.");
+          showToast("Ticket del plato enviado a la cola de impresiones.");
         });
       });
       list.querySelectorAll("[data-drag-item]").forEach((row) => {
@@ -1529,10 +1562,16 @@
       document.getElementById("add-table-button").addEventListener("click", addExtraTable);
       document.getElementById("back-button").addEventListener("click", closeTableDetail);
       document.getElementById("add-plate-button").addEventListener("click", addPlateToSelectedTable);
+      document.getElementById("print-ticket-detail-button").addEventListener("click", async () => {
+        if (state.selectedTableId) {
+          await queueTableTicket(state.selectedTableId);
+          showToast("Ticket enviado a la cola de impresiones.");
+        }
+      });
       document.getElementById("print-comanda-button").addEventListener("click", async () => {
         if (state.selectedTableId) {
           await queueKitchenComanda(state.selectedTableId);
-          window.alert("Comanda enviada a la cola de impresiones.");
+          showToast("Comanda enviada a la cola de impresiones.");
         }
       });
       document.getElementById("plate-select").addEventListener("change", (event) => {
