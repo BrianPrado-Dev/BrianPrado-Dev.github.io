@@ -1152,6 +1152,17 @@
       }
     }
 
+    function resetTransientUiState() {
+      state.draggingLine = null;
+      const variantModal = document.getElementById("variant-modal");
+      const numberModal = document.getElementById("number-modal");
+      if (variantModal) variantModal.classList.add("hidden");
+      if (numberModal) numberModal.classList.add("hidden");
+      document.querySelectorAll("[data-drop-plate]").forEach((target) => {
+        target.classList.remove("border-primary", "bg-primary/10");
+      });
+    }
+
     function renderTables() {
       const grid = document.getElementById("tables-grid");
       const active = state.tables.filter((table) => tableHasItems(table)).length;
@@ -1449,6 +1460,13 @@
         renderTables();
       });
       document.getElementById("print-history-button").addEventListener("click", printHistorySummary);
+      document.addEventListener("visibilitychange", () => {
+        if (document.visibilityState === "visible") {
+          resetTransientUiState();
+        }
+      });
+      window.addEventListener("focus", resetTransientUiState);
+      window.addEventListener("pageshow", resetTransientUiState);
     }
 
     loadPrintQueue();
