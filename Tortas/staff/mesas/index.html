@@ -848,6 +848,50 @@
       }, 2200);
     }
 
+    function playNotificationSound(kind = "ticket") {
+      try {
+        const AudioCtx = window.AudioContext || window.webkitAudioContext;
+        if (!AudioCtx) return;
+        const audioCtx = new AudioCtx();
+        const now = audioCtx.currentTime;
+        const playTone = (start, freq, duration, type = "sine", volume = 0.08) => {
+          const osc = audioCtx.createOscillator();
+          const gain = audioCtx.createGain();
+          osc.type = type;
+          osc.frequency.setValueAtTime(freq, start);
+          gain.gain.setValueAtTime(0.0001, start);
+          gain.gain.exponentialRampToValueAtTime(volume, start + 0.01);
+          gain.gain.exponentialRampToValueAtTime(0.0001, start + duration);
+          osc.connect(gain);
+          gain.connect(audioCtx.destination);
+          osc.start(start);
+          osc.stop(start + duration + 0.02);
+        };
+
+        if (kind === "comanda") {
+          playTone(now, 280, 0.14, "triangle", 0.09);
+          playTone(now + 0.16, 220, 0.2, "triangle", 0.09);
+          return;
+        }
+
+        if (kind === "history") {
+          playTone(now, 700, 0.12, "sine", 0.07);
+          playTone(now + 0.14, 880, 0.16, "sine", 0.07);
+          return;
+        }
+
+        if (kind === "forbidden") {
+          playTone(now, 180, 0.18, "triangle", 0.11);
+          playTone(now + 0.2, 130, 0.24, "triangle", 0.11);
+          return;
+        }
+
+        playTone(now, 520, 0.1, "square", 0.07);
+        playTone(now + 0.12, 740, 0.14, "square", 0.07);
+      } catch (_) {
+      }
+    }
+
     function parseHistoryItem(itemLine) {
       const line = String(itemLine || "").trim();
       const qtyMatch = line.match(/^(\d+)\s*x\s*/i);
@@ -926,6 +970,7 @@
       persistPrintQueue();
       try {
         await enqueueRemote(historyTicket);
+        playNotificationSound("history");
         showToast("Historial enviado a la cola de impresión.");
       } catch (_) {
         showToast("No se pudo enviar el historial a la cola de impresión.", "error");
@@ -1164,6 +1209,7 @@
       persistPrintQueue();
       try {
         await enqueueRemote(ticket);
+        playNotificationSound("ticket");
       } catch (_) {
       }
     }
@@ -1176,6 +1222,7 @@
       persistPrintQueue();
       try {
         await enqueueRemote(comanda);
+        playNotificationSound("comanda");
       } catch (_) {
       }
     }
@@ -1190,6 +1237,7 @@
       persistPrintQueue();
       try {
         await enqueueRemote(ticket);
+        playNotificationSound("ticket");
       } catch (_) {
       }
     }
@@ -1650,6 +1698,7 @@
         }
         if (selectedIsBrian && state.brianReentryBlocked) {
           renderProfileSwitcher();
+          playNotificationSound("forbidden");
           showToast("No tienes permisos para acceder a ese perfil.", "error");
           return;
         }
@@ -1659,7 +1708,8 @@
       });
       document.getElementById("open-history-button").addEventListener("click", () => {
         if (!userCanAccessHistory()) {
-          window.alert("No tienes permisos para acceder al Historial.");
+          playNotificationSound("forbidden");
+          showToast("No tienes permisos para acceder al Historial.", "error");
           return;
         }
         renderHistory();
