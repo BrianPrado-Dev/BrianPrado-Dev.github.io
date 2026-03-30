@@ -55,7 +55,10 @@
       <h1 class="font-headline font-bold text-2xl tracking-tight text-primary">Tortas Doña Susy</h1>
     </div>
     <div class="flex items-center gap-3">
-      <p id="current-user-label" class="text-xs uppercase tracking-widest text-on-surface-variant">Usuario: -</p>
+      <div class="flex items-center gap-2">
+        <p id="current-user-label" class="text-xs uppercase tracking-widest text-on-surface-variant">Usuario: -</p>
+        <select id="profile-switch-select" class="hidden rounded-lg border-outline-variant bg-white/90 text-xs px-2 py-1 min-w-[110px]"></select>
+      </div>
       <div id="header-plate-wrapper" class="hidden items-center gap-2 bg-surface-container-highest/90 rounded-xl px-3 py-2 shadow-[0_8px_16px_rgba(27,29,14,0.12)]">
         <label for="plate-select" class="text-xs font-semibold whitespace-nowrap">Plato actual</label>
         <select id="plate-select" class="rounded-lg border-outline-variant bg-white/90 text-sm px-2 py-1 min-w-[140px]"></select>
@@ -197,6 +200,7 @@
     const PRINT_QUEUE_KEY = "dona_susy_print_queue_v1";
     const HISTORY_KEY = "dona_susy_history_v1";
     const WAITER_NAME_KEY = "dona_susy_mesera_nombre";
+    const USERS_FILE_PATH = "../users.json";
     const PRINT_PROVIDER = "supabase"; // "supabase" | "local-api"
     const PRINT_API_URL = "http://192.168.1.171:8000/api/impresiones";
     const SUPABASE_URL = "https://zazifirbccucazaottlo.supabase.co";
@@ -243,7 +247,8 @@
       history: [],
       menuSectionsOpen: { comida: true, paquetes: false, bebidas: false },
       meseraNombre: localStorage.getItem(WAITER_NAME_KEY) || "Sin nombre",
-      draggingLine: null
+      draggingLine: null,
+      switchableProfiles: []
     };
 
     function todayKey() {
@@ -931,6 +936,7 @@
       if (!confirmed) return;
       pushHistoryRecord(table);
       table.plates = [createPlate(1)];
+      table.customName = "";
       if (state.selectedTableId === tableId) {
         state.selectedPlateId = table.plates[0].id;
       }
@@ -1487,6 +1493,36 @@
     function renderLoggedUser() {
       const userLabel = document.getElementById("current-user-label");
       userLabel.textContent = `Usuario: ${state.meseraNombre}`;
+      renderProfileSwitcher();
+    }
+
+    function renderProfileSwitcher() {
+      const select = document.getElementById("profile-switch-select");
+      if (!select) return;
+      const options = state.switchableProfiles;
+      if (!options.length) {
+        select.classList.add("hidden");
+        select.innerHTML = "";
+        return;
+      }
+      select.innerHTML = options
+        .map((name) => `<option value="${name}" ${name === state.meseraNombre ? "selected" : ""}>${name}</option>`)
+        .join("");
+      select.classList.remove("hidden");
+    }
+
+    async function loadSwitchableProfiles() {
+      try {
+        const response = await fetch(USERS_FILE_PATH, { cache: "no-store" });
+        if (!response.ok) return;
+        const data = await response.json();
+        const users = Array.isArray(data.users) ? data.users : [];
+        state.switchableProfiles = users
+          .map((u) => String(u.username || "").trim())
+          .filter((name) => name && name.toLowerCase() !== "brian");
+        renderProfileSwitcher();
+      } catch (_) {
+      }
     }
 
     function setupEvents() {
@@ -1502,6 +1538,13 @@
       document.getElementById("plate-select").addEventListener("change", (event) => {
         state.selectedPlateId = event.target.value;
         renderDetail();
+      });
+      document.getElementById("profile-switch-select").addEventListener("change", (event) => {
+        const selected = String(event.target.value || "").trim();
+        if (!selected) return;
+        state.meseraNombre = selected;
+        localStorage.setItem(WAITER_NAME_KEY, selected);
+        renderLoggedUser();
       });
       document.getElementById("open-history-button").addEventListener("click", () => {
         if (!userCanAccessHistory()) {
@@ -1530,6 +1573,7 @@
     loadState();
     setupEvents();
     renderLoggedUser();
+    loadSwitchableProfiles();
     renderTables();
     showView("tables");
   </script>
