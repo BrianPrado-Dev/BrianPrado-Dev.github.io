@@ -233,8 +233,8 @@
       bebidas: [
         { id: "refresco_taparosca", name: "Refresco Taparosca", price: 30 },
         { id: "refresco_retornable", name: "Refresco Retornable", price: 28 },
-        { id: "agua_fresca_1lt", name: "Agua Fresca 1LT", price: 25 },
-        { id: "agua_500ml", name: "Agua Fresca 500ml", price: 15 },
+        { id: "agua_fresca_1lt", name: "Agua Fresca Grande", price: 25 },
+        { id: "agua_500ml", name: "Agua Fresca Chica", price: 15 },
         { id: "cerveza_corona_500ml", name: "Cerveza Corona 500ml", price: 25 },
         { id: "caguama_mega", name: "Caguama Mega", price: 70 }
       ]
@@ -1329,6 +1329,20 @@
         paquetes: ["bg-[#efe5cf]", "bg-[#e8e1c8]", "bg-[#f0e8d8]", "bg-[#e6dcc1]"],
         bebidas: ["bg-[#e2eee7]", "bg-[#d9e7e9]", "bg-[#e8efe0]", "bg-[#dfe8d8]"]
       };
+      const cocaFamilyBg = "https://photos.tryotter.com/cdn-cgi/image/fit=crop,width=492,height=267,quality=60,format=auto/menu-photos/f547ac6c-fc51-4e7f-a279-0ffe24487e8f.jpeg";
+      const cocaRetornableBg = "https://m.media-amazon.com/images/I/61rzLJr0mAL._AC_UF894,1000_QL80_.jpg";
+      const coronaBeerBg = "https://m.media-amazon.com/images/I/51lcAj5hBlL.jpg";
+      const caguamaBeerBg = "https://chedrauimx.vtexassets.com/arquivos/ids/66107882/7501064101205_02.jpg?v=639102544347830000";
+      const agua1LtBg = "https://static.wixstatic.com/media/4d09e7_f81bdd07b4b1430d89021fcadb342dea~mv2.jpg/v1/fill/w_476,h_528,al_c,q_80,usm_0.66_1.00_0.01,enc_avif,quality_auto/4d09e7_f81bdd07b4b1430d89021fcadb342dea~mv2.jpg";
+      const agua500Bg = "https://mercadofacil.mx/wp-content/uploads/2023/03/IMG-20230322-WA0014.jpg";
+      const beverageImageByItemId = {
+        refresco_taparosca: cocaFamilyBg,
+        refresco_retornable: cocaRetornableBg,
+        cerveza_corona_500ml: coronaBeerBg,
+        caguama_mega: caguamaBeerBg,
+        agua_fresca_1lt: agua1LtBg,
+        agua_500ml: agua500Bg
+      };
       const getItemCardBgClass = (sectionKey, index) => {
         const palette = itemCardPalette[sectionKey] || itemCardPalette.comida;
         return palette[index % palette.length];
@@ -1338,12 +1352,33 @@
         const itemsHtml = MENU[key].map((item, index) => {
           const qty = getItemQtyInPlate(plate, item.id);
           const cardBgClass = getItemCardBgClass(key, index);
+          const imageBg = beverageImageByItemId[item.id] || "";
+          const hasImageBg = Boolean(imageBg);
+          const isDrinkItem = key === "bebidas";
+          const needsRedBadge = isDrinkItem;
+          const highlightedTitle = item.id === "refresco_retornable"
+            ? item.name.replace("Retornable", "<span class='bg-white text-primary px-1 rounded font-black tracking-wide'>RETORNABLE</span>")
+            : item.id === "agua_fresca_1lt"
+              ? item.name.replace("Grande", "<span class='bg-white text-primary px-1 rounded font-black tracking-wide'>GRANDE</span>")
+              : item.id === "agua_500ml"
+                ? item.name.replace("Chica", "<span class='bg-white text-primary px-1 rounded font-black tracking-wide'>CHICA</span>")
+                : item.name;
+          const cardStyle = hasImageBg
+            ? `background-image: linear-gradient(rgba(27,29,14,0.40), rgba(27,29,14,0.40)), url('${imageBg}'); background-size: cover; background-position: center;`
+            : "";
+          const textToneClass = hasImageBg ? "text-white" : "text-on-surface";
+          const noteToneClass = hasImageBg ? "text-white/85" : "text-on-surface-variant group-hover:text-white/90";
+          const priceToneClass = hasImageBg ? "text-white" : "text-primary group-hover:text-white";
+          const redBadgeStart = needsRedBadge ? `<div class="inline-block bg-primary/90 text-white px-2 py-1 rounded-lg">` : "";
+          const redBadgeEnd = needsRedBadge ? `</div>` : "";
           return `
-            <button data-item-card="${item.id}" class="group aspect-square ${cardBgClass} border-2 border-outline-variant/60 rounded-2xl p-2 flex flex-col justify-between text-left hover:bg-primary hover:text-white hover:border-primary transition-colors active:scale-[0.98]">
+            <button data-item-card="${item.id}" style="${cardStyle}" class="group aspect-square ${cardBgClass} border-2 border-outline-variant/60 rounded-2xl p-2 flex flex-col justify-between text-left ${textToneClass} hover:bg-primary hover:text-white hover:border-primary transition-colors active:scale-[0.98]">
               <div>
-                <p class="font-semibold leading-tight">${item.name}</p>
-                <p class="text-sm font-bold text-primary group-hover:text-white">${formatMoney(item.price)}</p>
-                ${item.note ? `<p class="text-[11px] mt-1 text-on-surface-variant group-hover:text-white/90">${item.note}</p>` : ""}
+                ${redBadgeStart}
+                <p class="font-semibold leading-tight">${highlightedTitle}</p>
+                <p class="text-sm font-bold ${priceToneClass}">${formatMoney(item.price)}</p>
+                ${redBadgeEnd}
+                ${item.note ? `<p class="text-[11px] mt-1 ${noteToneClass}">${item.note}</p>` : ""}
               </div>
               <div class="flex items-center justify-between pt-2">
                 <span class="text-xs uppercase tracking-wider opacity-80">Cantidad</span>
