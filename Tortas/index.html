@@ -951,6 +951,366 @@
         main {
             padding-bottom: 100px;
         }
+
+        /* === MOBILE OPTIMIZATIONS === */
+        @media (max-width: 480px) {
+            /* Header mobile */
+            header {
+                padding: 0.75rem 1rem;
+            }
+
+            .header-inner {
+                padding: 0.5rem 0.75rem;
+            }
+
+            .logo-img {
+                width: 40px;
+                height: 40px;
+            }
+
+            .logo-title {
+                font-size: 1rem;
+            }
+
+            .logo-subtitle {
+                font-size: 0.6rem;
+            }
+
+            /* Hero mobile */
+            .hero {
+                padding: 6rem 1rem 4rem;
+                min-height: auto;
+            }
+
+            .hero-badge {
+                padding: 0.4rem 0.8rem;
+                font-size: 0.65rem;
+                margin-bottom: 1rem;
+            }
+
+            .hero-title {
+                font-size: 2rem;
+                margin-bottom: 1rem;
+            }
+
+            .hero-description {
+                font-size: 0.95rem;
+                margin-bottom: 1.5rem;
+                line-height: 1.6;
+            }
+
+            .hero-cta {
+                flex-direction: column;
+                gap: 0.75rem;
+            }
+
+            .btn {
+                padding: 0.9rem 1.25rem;
+                font-size: 0.9rem;
+                width: 100%;
+                justify-content: center;
+            }
+
+            /* Featured card mobile */
+            .featured-card {
+                width: 100%;
+                max-width: 280px;
+            }
+
+            .featured-image img {
+                height: 180px;
+            }
+
+            .featured-content {
+                padding: 1rem;
+            }
+
+            .featured-title {
+                font-size: 1.1rem;
+            }
+
+            /* Bento section mobile */
+            .bento-section {
+                padding: 2.5rem 1rem 6rem;
+            }
+
+            .section-label {
+                font-size: 0.7rem;
+            }
+
+            .section-label::before,
+            .section-label::after {
+                width: 20px;
+            }
+
+            .section-title {
+                font-size: 1.6rem;
+            }
+
+            .bento-grid {
+                gap: 1rem;
+            }
+
+            .bento-card {
+                border-radius: 20px;
+            }
+
+            /* WhatsApp card mobile */
+            .bento-card.whatsapp {
+                min-height: 260px;
+                padding: 1.5rem;
+            }
+
+            .bento-card.whatsapp::before {
+                width: 140px;
+                height: 140px;
+                right: -20px;
+                bottom: -20px;
+            }
+
+            .bento-card-header .bento-icon {
+                width: 40px;
+                height: 40px;
+            }
+
+            .bento-card-content h3 {
+                font-size: 1.3rem;
+            }
+
+            .bento-card-content p {
+                font-size: 0.85rem;
+            }
+
+            .bento-arrow {
+                font-size: 0.8rem;
+                margin-top: 0.75rem;
+            }
+
+            /* Location card mobile */
+            .bento-card.location {
+                min-height: 260px;
+                padding: 1.5rem;
+            }
+
+            .bento-card.location::before {
+                width: 130px;
+                height: 130px;
+            }
+
+            /* Menu card mobile */
+            .bento-card.menu {
+                min-height: 160px;
+                padding: 1.5rem;
+            }
+
+            /* Staff card mobile */
+            .bento-card.staff {
+                padding: 2rem 1.5rem;
+            }
+
+            .bento-card.staff .bento-icon {
+                width: 60px;
+                height: 60px;
+                border-radius: 18px;
+                margin-bottom: 1rem;
+            }
+
+            .bento-card.staff .bento-icon .material-symbols-outlined {
+                font-size: 2rem;
+            }
+
+            .bento-card.staff h3 {
+                font-size: 1.25rem;
+            }
+
+            /* Info strip mobile */
+            .info-strip {
+                padding: 2rem 1rem;
+            }
+
+            .info-strip-inner {
+                grid-template-columns: repeat(2, 1fr);
+                gap: 1.5rem;
+            }
+
+            .info-item-icon {
+                width: 40px;
+                height: 40px;
+                border-radius: 12px;
+                margin-bottom: 0.75rem;
+            }
+
+            .info-item-icon .material-symbols-outlined {
+                font-size: 1.2rem;
+            }
+
+            .info-item h4 {
+                font-size: 1rem;
+            }
+
+            .info-item p {
+                font-size: 0.8rem;
+            }
+
+            /* Footer mobile */
+            footer {
+                padding: 3rem 1rem 1.5rem;
+            }
+
+            .footer-top {
+                gap: 2rem;
+                padding-bottom: 2rem;
+            }
+
+            .footer-logo {
+                font-size: 1.5rem;
+            }
+
+            .footer-brand p {
+                font-size: 0.85rem;
+            }
+
+            .footer-section h5 {
+                font-size: 0.75rem;
+                margin-bottom: 1rem;
+            }
+
+            .footer-section a {
+                font-size: 0.85rem;
+            }
+
+            .footer-bottom {
+                flex-direction: column;
+                text-align: center;
+                gap: 1rem;
+                padding-top: 1.5rem;
+            }
+
+            .footer-social a {
+                width: 40px;
+                height: 40px;
+            }
+
+            /* Bottom nav mobile */
+            .bottom-nav {
+                padding: 0.5rem 0.75rem 1rem;
+                border-top-left-radius: 24px;
+                border-top-right-radius: 24px;
+            }
+
+            .bottom-nav a {
+                padding: 0.5rem 0.75rem;
+                border-radius: 14px;
+            }
+
+            .bottom-nav a .material-symbols-outlined {
+                font-size: 1.3rem;
+            }
+
+            .bottom-nav a span:last-child {
+                font-size: 0.65rem;
+            }
+        }
+
+        /* Small phones (iPhone SE, etc) */
+        @media (max-width: 375px) {
+            .hero-title {
+                font-size: 1.75rem;
+            }
+
+            .hero-description {
+                font-size: 0.9rem;
+            }
+
+            .bento-card.whatsapp,
+            .bento-card.location {
+                min-height: 220px;
+            }
+
+            .bento-card-content h3 {
+                font-size: 1.15rem;
+            }
+
+            .section-title {
+                font-size: 1.4rem;
+            }
+
+            .info-strip-inner {
+                grid-template-columns: 1fr 1fr;
+            }
+
+            .footer-top {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* Tablet adjustments */
+        @media (min-width: 481px) and (max-width: 768px) {
+            .hero {
+                padding: 7rem 1.5rem 5rem;
+            }
+
+            .hero-title {
+                font-size: 2.5rem;
+            }
+
+            .hero-cta {
+                flex-wrap: wrap;
+            }
+
+            .btn {
+                flex: 1;
+                min-width: 140px;
+                justify-content: center;
+            }
+
+            .bento-card.whatsapp,
+            .bento-card.location {
+                min-height: 280px;
+            }
+
+            .info-strip-inner {
+                grid-template-columns: repeat(3, 1fr);
+            }
+        }
+
+        /* Touch device optimizations */
+        @media (hover: none) and (pointer: coarse) {
+            .bento-card:hover {
+                transform: none;
+            }
+
+            .bento-card:active {
+                transform: scale(0.98);
+            }
+
+            .btn-primary:hover {
+                transform: none;
+            }
+
+            .btn-primary:active {
+                transform: scale(0.97);
+            }
+
+            .footer-social a:hover {
+                transform: none;
+            }
+
+            .footer-social a:active {
+                transform: scale(0.95);
+            }
+        }
+
+        /* Safe area for notched phones */
+        @supports (padding-bottom: env(safe-area-inset-bottom)) {
+            .bottom-nav {
+                padding-bottom: calc(1rem + env(safe-area-inset-bottom));
+            }
+
+            main {
+                padding-bottom: calc(100px + env(safe-area-inset-bottom));
+            }
+        }
     </style>
 </head>
 <body>
