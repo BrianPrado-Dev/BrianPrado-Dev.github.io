@@ -417,6 +417,248 @@
       }
     }
 
+    /* === QUICK MENU SYSTEM (Tablet optimized) === */
+    .quick-menu {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .quick-menu-tabs {
+      display: flex;
+      gap: 8px;
+      background: rgba(255, 255, 255, 0.6);
+      padding: 6px;
+      border-radius: 16px;
+      overflow-x: auto;
+      -webkit-overflow-scrolling: touch;
+    }
+
+    .quick-menu-tab {
+      flex: 1;
+      min-width: 100px;
+      padding: 14px 20px;
+      border-radius: 12px;
+      border: none;
+      background: transparent;
+      font-size: 15px;
+      font-weight: 700;
+      color: #5b403d;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      white-space: nowrap;
+    }
+
+    .quick-menu-tab .material-symbols-outlined {
+      font-size: 22px;
+    }
+
+    .quick-menu-tab.active {
+      background: #a20513;
+      color: white;
+      box-shadow: 0 4px 12px rgba(162, 5, 19, 0.3);
+    }
+
+    .quick-menu-tab:active:not(.active) {
+      background: rgba(91, 64, 61, 0.15);
+    }
+
+    .quick-menu-panel {
+      display: none;
+      animation: fadeIn 0.2s ease;
+    }
+
+    .quick-menu-panel.active {
+      display: block;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(8px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .quick-menu-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 10px;
+    }
+
+    .quick-item {
+      background: linear-gradient(145deg, #fbfbe2 0%, #f5f5dc 100%);
+      border: 2px solid rgba(228, 190, 186, 0.5);
+      border-radius: 16px;
+      padding: 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      cursor: pointer;
+      transition: all 0.15s ease;
+      min-height: 100px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .quick-item:active {
+      transform: scale(0.97);
+      border-color: #a20513;
+    }
+
+    .quick-item.has-qty {
+      background: linear-gradient(145deg, #fef2f2 0%, #fee2e2 100%);
+      border-color: rgba(162, 5, 19, 0.4);
+    }
+
+    .quick-item-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 8px;
+    }
+
+    .quick-item-name {
+      font-size: 14px;
+      font-weight: 700;
+      color: #1b1d0e;
+      line-height: 1.3;
+      flex: 1;
+    }
+
+    .quick-item-badge {
+      background: #a20513;
+      color: white;
+      font-size: 11px;
+      font-weight: 800;
+      padding: 2px 8px;
+      border-radius: 8px;
+      white-space: nowrap;
+    }
+
+    .quick-item-price {
+      font-size: 18px;
+      font-weight: 800;
+      color: #a20513;
+    }
+
+    .quick-item-qty {
+      position: absolute;
+      top: 8px;
+      right: 8px;
+      width: 32px;
+      height: 32px;
+      background: #a20513;
+      color: white;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 16px;
+      font-weight: 800;
+      box-shadow: 0 2px 8px rgba(162, 5, 19, 0.4);
+    }
+
+    .quick-item-note {
+      font-size: 11px;
+      color: #5b403d;
+      opacity: 0.8;
+    }
+
+    /* Item with image background */
+    .quick-item.has-image {
+      background-size: cover;
+      background-position: center;
+      color: white;
+    }
+
+    .quick-item.has-image::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(to bottom, rgba(0,0,0,0.3) 0%, rgba(0,0,0,0.6) 100%);
+      border-radius: 14px;
+    }
+
+    .quick-item.has-image > * {
+      position: relative;
+      z-index: 1;
+    }
+
+    .quick-item.has-image .quick-item-name,
+    .quick-item.has-image .quick-item-price {
+      color: white;
+      text-shadow: 0 1px 3px rgba(0,0,0,0.5);
+    }
+
+    .quick-item.has-image .quick-item-note {
+      color: rgba(255,255,255,0.9);
+    }
+
+    /* Tablet optimizations for menu */
+    @media (min-width: 600px) and (max-width: 1024px) {
+      .quick-menu-tabs {
+        padding: 8px;
+      }
+
+      .quick-menu-tab {
+        padding: 16px 24px;
+        font-size: 16px;
+      }
+
+      .quick-menu-grid {
+        grid-template-columns: repeat(3, 1fr);
+        gap: 12px;
+      }
+
+      .quick-item {
+        padding: 18px;
+        min-height: 110px;
+      }
+
+      .quick-item-name {
+        font-size: 15px;
+      }
+
+      .quick-item-price {
+        font-size: 20px;
+      }
+    }
+
+    /* Large tablet */
+    @media (min-width: 900px) {
+      .quick-menu-grid {
+        grid-template-columns: repeat(3, 1fr);
+      }
+    }
+
+    /* Phone fallback */
+    @media (max-width: 599px) {
+      .quick-menu-tab {
+        padding: 12px 16px;
+        font-size: 13px;
+        min-width: 80px;
+      }
+
+      .quick-menu-tab .material-symbols-outlined {
+        font-size: 18px;
+      }
+
+      .quick-item {
+        padding: 12px;
+        min-height: 90px;
+      }
+
+      .quick-item-name {
+        font-size: 13px;
+      }
+
+      .quick-item-price {
+        font-size: 16px;
+      }
+    }
+
   </style>
 </head>
 <body class="paper-texture min-h-screen font-body text-on-surface">
@@ -627,6 +869,7 @@
       printQueue: [],
       history: [],
       menuSectionsOpen: { comida: true, paquetes: false, bebidas: false },
+      activeMenuSection: "comida",
       meseraNombre: localStorage.getItem(WAITER_NAME_KEY) || "Sin nombre",
       draggingLine: null,
       switchableProfiles: [],
@@ -1779,113 +2022,113 @@
     function renderMenuSections(table) {
       const plate = getPlateById(table, state.selectedPlateId) || table.plates[0];
       const container = document.getElementById("menu-sections");
-      const sectionEntries = [
-        ["comida", "Comida"],
-        ["paquetes", "Paquetes"],
-        ["bebidas", "Bebidas"]
+      
+      const sections = [
+        { key: "comida", title: "Comida", icon: "lunch_dining" },
+        { key: "paquetes", title: "Paquetes", icon: "inventory_2" },
+        { key: "bebidas", title: "Bebidas", icon: "local_drink" }
       ];
-      const itemCardPalette = {
-        comida: ["bg-[#f8e8e7]", "bg-[#f7efe3]", "bg-[#efe9d7]", "bg-[#f5e3d0]"],
-        paquetes: ["bg-[#efe5cf]", "bg-[#e8e1c8]", "bg-[#f0e8d8]", "bg-[#e6dcc1]"],
-        bebidas: ["bg-[#e2eee7]", "bg-[#d9e7e9]", "bg-[#e8efe0]", "bg-[#dfe8d8]"]
-      };
-      const cocaFamilyBg = "https://photos.tryotter.com/cdn-cgi/image/fit=crop,width=492,height=267,quality=60,format=auto/menu-photos/f547ac6c-fc51-4e7f-a279-0ffe24487e8f.jpeg";
-      const cocaRetornableBg = "https://m.media-amazon.com/images/I/61rzLJr0mAL._AC_UF894,1000_QL80_.jpg";
-      const coronaBeerBg = "https://m.media-amazon.com/images/I/51lcAj5hBlL.jpg";
-      const caguamaBeerBg = "https://chedrauimx.vtexassets.com/arquivos/ids/66107882/7501064101205_02.jpg?v=639102544347830000";
-      const agua1LtBg = "https://static.wixstatic.com/media/4d09e7_f81bdd07b4b1430d89021fcadb342dea~mv2.jpg/v1/fill/w_476,h_528,al_c,q_80,usm_0.66_1.00_0.01,enc_avif,quality_auto/4d09e7_f81bdd07b4b1430d89021fcadb342dea~mv2.jpg";
-      const agua500Bg = "https://mercadofacil.mx/wp-content/uploads/2023/03/IMG-20230322-WA0014.jpg";
-      const tortaAhogadaBg = "https://i.pinimg.com/736x/84/0d/3e/840d3ee9ef51cd7a21cf77fdd1f834de.jpg";
-      const tortaMiniBg = "https://lossaboresdemexico.com/wp-content/uploads/2021/05/image-1.jpeg";
-      const tacoDoradoBg = "https://live.staticflickr.com/5493/11908135565_1c710b0ab2_b.jpg";
-      const tacoSencilloBg = "https://i.pinimg.com/474x/66/e8/62/66e862a60d77a5936a5a45b47345c474.jpg";
-      const tacoBlanditoBg = "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQqfkb1nq8K3jtL1VjPLTMLRX_LuNdnZgd0og&s";
-      const kiloCarneBg = "https://www.cocinadelirante.com/sites/default/files/images/2023/08/carnitas-sin-freir-para-tortas-ahogadas.jpg";
-      const beverageImageByItemId = {
-        refresco_taparosca: cocaFamilyBg,
-        refresco_retornable: cocaRetornableBg,
-        cerveza_corona_500ml: coronaBeerBg,
-        caguama_mega: caguamaBeerBg,
-        agua_fresca_1lt: agua1LtBg,
-        agua_500ml: agua500Bg
-      };
-      const foodImageByItemId = {
-        torta_ahogada: tortaAhogadaBg,
-        torta_mini: tortaMiniBg,
-        taco_dorado_sencillo: tacoSencilloBg,
-        taco_dorado_carne: tacoDoradoBg,
-        taco_blandito: tacoBlanditoBg,
-        kilo_carne: kiloCarneBg
-      };
-      const getItemCardBgClass = (sectionKey, index) => {
-        const palette = itemCardPalette[sectionKey] || itemCardPalette.comida;
-        return palette[index % palette.length];
+
+      const imageMap = {
+        refresco_taparosca: "https://photos.tryotter.com/cdn-cgi/image/fit=crop,width=492,height=267,quality=60,format=auto/menu-photos/f547ac6c-fc51-4e7f-a279-0ffe24487e8f.jpeg",
+        refresco_retornable: "https://m.media-amazon.com/images/I/61rzLJr0mAL._AC_UF894,1000_QL80_.jpg",
+        cerveza_corona_500ml: "https://m.media-amazon.com/images/I/51lcAj5hBlL.jpg",
+        caguama_mega: "https://chedrauimx.vtexassets.com/arquivos/ids/66514361-800-auto?v=639106884254170000&width=800&height=auto&aspect=true",
+        agua_fresca_1lt: "https://static.wixstatic.com/media/4d09e7_f81bdd07b4b1430d89021fcadb342dea~mv2.jpg/v1/fill/w_476,h_528,al_c,q_80,usm_0.66_1.00_0.01,enc_avif,quality_auto/4d09e7_f81bdd07b4b1430d89021fcadb342dea~mv2.jpg",
+        agua_500ml: "https://mercadofacil.mx/wp-content/uploads/2023/03/IMG-20230322-WA0014.jpg",
+        torta_ahogada: "https://i.pinimg.com/736x/84/0d/3e/840d3ee9ef51cd7a21cf77fdd1f834de.jpg",
+        torta_mini: "https://lossaboresdemexico.com/wp-content/uploads/2021/05/image-1.jpeg",
+        taco_dorado_sencillo: "https://i.pinimg.com/474x/66/e8/62/66e862a60d77a5936a5a45b47345c474.jpg",
+        taco_dorado_carne: "https://live.staticflickr.com/5493/11908135565_1c710b0ab2_b.jpg",
+        taco_blandito: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQqfkb1nq8K3jtL1VjPLTMLRX_LuNdnZgd0og&s",
+        kilo_carne: "https://www.cocinadelirante.com/sites/default/files/images/2023/08/carnitas-sin-freir-para-tortas-ahogadas.jpg"
       };
 
-      container.innerHTML = sectionEntries.map(([key, title]) => {
-        const itemsHtml = MENU[key].map((item, index) => {
+      // Get active tab or default to first
+      const activeSection = state.activeMenuSection || sections[0].key;
+
+      // Build tabs
+      const tabsHtml = sections.map(s => `
+        <button class="quick-menu-tab ${s.key === activeSection ? 'active' : ''}" data-menu-tab="${s.key}">
+          <span class="material-symbols-outlined">${s.icon}</span>
+          ${s.title}
+        </button>
+      `).join("");
+
+      // Build panels
+      const panelsHtml = sections.map(s => {
+        const itemsHtml = MENU[s.key].map(item => {
           const qty = getItemQtyInPlate(plate, item.id);
-          const cardBgClass = getItemCardBgClass(key, index);
-          const imageBg = beverageImageByItemId[item.id] || foodImageByItemId[item.id] || "";
-          const hasImageBg = Boolean(imageBg);
-          const needsRedBadge = true;
-          const highlightedTitle = item.id === "refresco_retornable"
-            ? item.name.replace("Retornable", "<span class='bg-white text-primary px-1 rounded font-black tracking-wide'>RETORNABLE</span>")
-            : item.id === "agua_fresca_1lt"
-              ? item.name.replace("Grande", "<span class='bg-white text-primary px-1 rounded font-black tracking-wide'>GRANDE</span>")
-              : item.id === "agua_500ml"
-                ? item.name.replace("Chica", "<span class='bg-white text-primary px-1 rounded font-black tracking-wide'>CHICA</span>")
-                : item.id === "torta_mini"
-                  ? item.name.replace("Mini", "<span class='bg-white text-primary px-1 rounded font-black tracking-wide'>MINI</span>")
-                  : item.id === "taco_dorado_carne"
-                    ? item.name.replace("con Carne", "<span class='bg-white text-primary px-1 rounded font-black tracking-wide'>CON CARNE</span>")
-                    : item.id === "taco_dorado_sencillo"
-                      ? item.name.replace("Sencillo", "<span class='bg-white text-primary px-1 rounded font-black tracking-wide'>SENCILLO</span>")
-                      : item.id === "taco_blandito"
-                        ? item.name.replace("Blandito", "<span class='bg-white text-primary px-1 rounded font-black tracking-wide'>BLANDITO</span>")
-                : item.name;
-          const cardStyle = hasImageBg
-            ? `background-image: linear-gradient(rgba(27,29,14,0.40), rgba(27,29,14,0.40)), url('${imageBg}'); background-size: cover; background-position: center;`
-            : "";
-          const textToneClass = hasImageBg ? "text-white" : "text-on-surface";
-          const noteToneClass = hasImageBg ? "text-white/85" : "text-on-surface-variant group-hover:text-white/90";
-          const priceToneClass = hasImageBg ? "text-white" : "text-primary group-hover:text-white";
-          const redBadgeStart = needsRedBadge ? `<div class="inline-block bg-primary/90 text-white px-2 py-1 rounded-lg">` : "";
-          const redBadgeEnd = needsRedBadge ? `</div>` : "";
+          const image = imageMap[item.id];
+          const hasImage = Boolean(image);
+          const imageStyle = hasImage ? `background-image: url('${image}');` : "";
+
+          // Highlight special words in item name
+          let displayName = item.name;
+          const highlights = {
+            "Retornable": "RETORNABLE",
+            "Grande": "GRANDE", 
+            "Chica": "CHICA",
+            "Mini": "MINI",
+            "con Carne": "CON CARNE",
+            "Sencillo": "SENCILLO",
+            "Blandito": "BLANDITO"
+          };
+          for (const [key, val] of Object.entries(highlights)) {
+            if (displayName.includes(key)) {
+              displayName = displayName.replace(key, `<span class="quick-item-badge">${val}</span>`);
+              break;
+            }
+          }
+
           return `
-            <button data-item-card="${item.id}" style="${cardStyle}" class="group aspect-square ${cardBgClass} border-2 border-outline-variant/60 rounded-2xl p-2 flex flex-col justify-between text-left ${textToneClass} hover:bg-primary hover:text-white hover:border-primary transition-colors active:scale-[0.98]">
-              <div>
-                ${redBadgeStart}
-                <p class="font-semibold leading-tight">${highlightedTitle}</p>
-                <p class="text-sm font-bold ${priceToneClass}">${formatMoney(item.price)}</p>
-                ${redBadgeEnd}
-                ${item.note ? `<p class="text-[11px] mt-1 ${noteToneClass}">${item.note}</p>` : ""}
+            <div class="quick-item ${hasImage ? 'has-image' : ''} ${qty > 0 ? 'has-qty' : ''}" 
+                 data-quick-item="${item.id}" 
+                 style="${imageStyle}">
+              ${qty > 0 ? `<div class="quick-item-qty">${qty}</div>` : ''}
+              <div class="quick-item-header">
+                <span class="quick-item-name">${displayName}</span>
               </div>
-              <div class="flex items-center justify-between pt-2">
-                <span class="text-xs uppercase tracking-wider opacity-80">Cantidad</span>
-                <span class="min-w-8 text-center text-lg font-black">${qty}</span>
-              </div>
-            </button>
+              <div class="quick-item-price">${formatMoney(item.price)}</div>
+              ${item.note ? `<div class="quick-item-note">${item.note}</div>` : ''}
+            </div>
           `;
         }).join("");
 
         return `
-          <details data-menu-section="${key}" class="bg-white/45 rounded-2xl p-2" ${state.menuSectionsOpen[key] ? "open" : ""}>
-            <summary class="list-none cursor-pointer flex items-center justify-between px-2 py-2">
-              <h4 class="font-headline font-bold text-xl">${title}</h4>
-              <span class="material-symbols-outlined text-on-surface-variant">expand_more</span>
-            </summary>
-            <div class="grid grid-cols-2 gap-2 px-1 pb-1">${itemsHtml}</div>
-          </details>
+          <div class="quick-menu-panel ${s.key === activeSection ? 'active' : ''}" data-menu-panel="${s.key}">
+            <div class="quick-menu-grid">${itemsHtml}</div>
+          </div>
         `;
       }).join("");
 
-      container.querySelectorAll("[data-item-card]").forEach((btn) => {
-        btn.addEventListener("click", () => addItemWithVariant(table.id, plate.id, btn.dataset.itemCard));
+      container.innerHTML = `
+        <div class="quick-menu">
+          <div class="quick-menu-tabs">${tabsHtml}</div>
+          ${panelsHtml}
+        </div>
+      `;
+
+      // Tab switching
+      container.querySelectorAll("[data-menu-tab]").forEach(tab => {
+        tab.addEventListener("click", () => {
+          const key = tab.dataset.menuTab;
+          state.activeMenuSection = key;
+          
+          // Update tabs
+          container.querySelectorAll(".quick-menu-tab").forEach(t => t.classList.remove("active"));
+          tab.classList.add("active");
+          
+          // Update panels
+          container.querySelectorAll(".quick-menu-panel").forEach(p => p.classList.remove("active"));
+          container.querySelector(`[data-menu-panel="${key}"]`).classList.add("active");
+        });
       });
-      container.querySelectorAll("[data-menu-section]").forEach((details) => {
-        details.addEventListener("toggle", () => {
-          state.menuSectionsOpen[details.dataset.menuSection] = details.open;
+
+      // Item click handlers
+      container.querySelectorAll("[data-quick-item]").forEach(item => {
+        item.addEventListener("click", () => {
+          addItemWithVariant(table.id, plate.id, item.dataset.quickItem);
         });
       });
     }
