@@ -914,6 +914,10 @@
       startedAsBrian: String(localStorage.getItem(WAITER_NAME_KEY) || "").trim().toLowerCase() === "brian",
       brianReentryBlocked: false
     };
+    const DRAG_SCROLL_EDGE_PX = 120;
+    const DRAG_SCROLL_MAX_SPEED = 24;
+    let dragScrollVelocity = 0;
+    let dragScrollAnimationFrame = null;
 
     function todayKey() {
       return new Date().toISOString().slice(0, 10);
@@ -1951,8 +1955,80 @@
       }
     }
 
+    function getOrderListElement() {
+      return document.getElementById("order-list");
+    }
+
+    function stopDragAutoScroll() {
+      dragScrollVelocity = 0;
+      if (dragScrollAnimationFrame !== null) {
+        cancelAnimationFrame(dragScrollAnimationFrame);
+        dragScrollAnimationFrame = null;
+      }
+    }
+
+    function runDragAutoScroll() {
+      if (!dragScrollVelocity) {
+        dragScrollAnimationFrame = null;
+        return;
+      }
+      const list = getOrderListElement();
+      if (!list) {
+        stopDragAutoScroll();
+        return;
+      }
+      const maxScrollTop = Math.max(0, list.scrollHeight - list.clientHeight);
+      if (!maxScrollTop) {
+        stopDragAutoScroll();
+        return;
+      }
+      const nextTop = Math.min(maxScrollTop, Math.max(0, list.scrollTop + dragScrollVelocity));
+      if (nextTop === list.scrollTop) {
+        stopDragAutoScroll();
+        return;
+      }
+      list.scrollTop = nextTop;
+      dragScrollAnimationFrame = requestAnimationFrame(runDragAutoScroll);
+    }
+
+    function setDragAutoScrollFromY(clientY) {
+      const list = getOrderListElement();
+      if (!list) return;
+      const rect = list.getBoundingClientRect();
+      if (!rect.height) return;
+      let velocity = 0;
+      if (clientY >= rect.top && clientY <= rect.top + DRAG_SCROLL_EDGE_PX) {
+        const ratio = (DRAG_SCROLL_EDGE_PX - (clientY - rect.top)) / DRAG_SCROLL_EDGE_PX;
+        velocity = -Math.max(1, Math.round(ratio * DRAG_SCROLL_MAX_SPEED));
+      } else if (clientY <= rect.bottom && clientY >= rect.bottom - DRAG_SCROLL_EDGE_PX) {
+        const ratio = (DRAG_SCROLL_EDGE_PX - (rect.bottom - clientY)) / DRAG_SCROLL_EDGE_PX;
+        velocity = Math.max(1, Math.round(ratio * DRAG_SCROLL_MAX_SPEED));
+      }
+      dragScrollVelocity = velocity;
+      if (!dragScrollVelocity) {
+        stopDragAutoScroll();
+        return;
+      }
+      if (dragScrollAnimationFrame === null) {
+        dragScrollAnimationFrame = requestAnimationFrame(runDragAutoScroll);
+      }
+    }
+
+    function handleGlobalDragScroll(event) {
+      if (!state.draggingLine) return;
+      if (typeof event.clientY !== "number") return;
+      setDragAutoScrollFromY(event.clientY);
+    }
+
+    function handleGlobalTouchDragScroll(event) {
+      if (!state.draggingLine) return;
+      if (!event.touches || !event.touches.length) return;
+      setDragAutoScrollFromY(event.touches[0].clientY);
+    }
+
     function resetTransientUiState() {
       state.draggingLine = null;
+      stopDragAutoScroll();
       const variantModal = document.getElementById("variant-modal");
       const numberModal = document.getElementById("number-modal");
       if (variantModal) variantModal.classList.add("hidden");
@@ -2323,6 +2399,7 @@
         });
         row.addEventListener("dragend", () => {
           state.draggingLine = null;
+          stopDragAutoScroll();
           row.classList.remove("opacity-50");
           list.querySelectorAll("[data-drop-plate]").forEach((target) => {
             target.classList.remove("border-primary", "bg-primary/10");
@@ -2333,6 +2410,7 @@
         target.addEventListener("dragover", (event) => {
           event.preventDefault();
           event.dataTransfer.dropEffect = "move";
+          setDragAutoScrollFromY(event.clientY);
           target.classList.add("border-primary", "bg-primary/10");
         });
         target.addEventListener("dragleave", () => {
@@ -2340,6 +2418,7 @@
         });
         target.addEventListener("drop", (event) => {
           event.preventDefault();
+          stopDragAutoScroll();
           target.classList.remove("border-primary", "bg-primary/10");
           const dropParts = target.dataset.dropPlate.split("|");
           const fallbackPayload = state.draggingLine;
@@ -2499,6 +2578,8 @@
       const keepAliveTouch = () => {
         lastInteraction = Date.now();
       };
+      document.addEventListener("dragover", handleGlobalDragScroll);
+      document.addEventListener("touchmove", handleGlobalTouchDragScroll, { passive: true });
       document.addEventListener("touchstart", keepAliveTouch, { passive: true });
       document.addEventListener("click", keepAliveTouch, { passive: true });
       
