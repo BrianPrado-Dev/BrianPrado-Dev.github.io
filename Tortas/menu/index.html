@@ -1,350 +1,1306 @@
 <!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="utf-8"/>
+    <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+    <title>Menú - Tortas Doña Susy</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;600;700;800;900&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet"/>
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+    <style>
+        :root {
+            --color-cream: #faf8f3;
+            --color-cream-dark: #f0ebe0;
+            --color-red: #b91c1c;
+            --color-red-dark: #991b1b;
+            --color-red-light: #dc2626;
+            --color-gold: #d4a574;
+            --color-gold-light: #e8c9a0;
+            --color-brown: #3d2314;
+            --color-brown-light: #5c3a2a;
+            --color-text: #2d1810;
+            --color-text-muted: #6b5c54;
+            --shadow-soft: 0 4px 20px rgba(61, 35, 20, 0.08);
+            --shadow-medium: 0 8px 30px rgba(61, 35, 20, 0.12);
+            --shadow-strong: 0 20px 50px rgba(61, 35, 20, 0.2);
+        }
 
-<html class="light" lang="es"><head>
-<meta charset="utf-8"/>
-<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
-<title>Menú - Tortas Doña Susy</title>
-<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
-<link href="https://fonts.googleapis.com/css2?family=Epilogue:wght@700;800;900&amp;family=Be+Vietnam+Pro:wght@400;500;600&amp;display=swap" rel="stylesheet"/>
-<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
-<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
-<script id="tailwind-config">
-      tailwind.config = {
-        darkMode: "class",
-        theme: {
-          extend: {
-            colors: {
-              "on-primary-fixed": "#410003",
-              "outline-variant": "#e4beba",
-              "on-secondary-container": "#75221e",
-              "on-secondary": "#ffffff",
-              "primary-container": "#c62828",
-              "on-primary-fixed-variant": "#93000e",
-              "primary": "#a20513",
-              "secondary": "#9e403a",
-              "tertiary-fixed-dim": "#88ceff",
-              "secondary-fixed": "#ffdad6",
-              "primary-fixed": "#ffdad6",
-              "on-error": "#ffffff",
-              "surface-container-low": "#f5f5dc",
-              "on-tertiary-fixed-variant": "#004c6e",
-              "secondary-fixed-dim": "#ffb4ac",
-              "error-container": "#ffdad6",
-              "tertiary-fixed": "#c8e6ff",
-              "on-surface-variant": "#5b403d",
-              "on-primary-container": "#ffe0dd",
-              "surface-tint": "#b91d20",
-              "surface-dim": "#dbdcc3",
-              "error": "#ba1a1a",
-              "surface-container-lowest": "#ffffff",
-              "outline": "#8f706c",
-              "inverse-on-surface": "#f2f2d9",
-              "surface-variant": "#e4e4cc",
-              "surface-bright": "#fbfbe2",
-              "background": "#fbfbe2",
-              "tertiary": "#00557a",
-              "surface-container-high": "#eaead1",
-              "inverse-surface": "#303221",
-              "on-background": "#1b1d0e",
-              "on-tertiary-container": "#d1eaff",
-              "on-secondary-fixed-variant": "#7f2924",
-              "tertiary-container": "#006e9d",
-              "inverse-primary": "#ffb4ac",
-              "on-secondary-fixed": "#410003",
-              "primary-fixed-dim": "#ffb4ac",
-              "secondary-container": "#fe8a80",
-              "on-tertiary-fixed": "#001e2f",
-              "on-tertiary": "#ffffff",
-              "on-primary": "#ffffff",
-              "on-error-container": "#93000a",
-              "surface-container": "#efefd7",
-              "surface": "#fbfbe2",
-              "on-surface": "#1b1d0e",
-              "surface-container-highest": "#e4e4cc"
-            },
-            fontFamily: {
-              "headline": ["Epilogue"],
-              "body": ["Be Vietnam Pro"],
-              "label": ["Be Vietnam Pro"]
-            },
-            borderRadius: {"DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px"},
-          },
-        },
-      }
-    </script>
-<style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html {
+            scroll-behavior: smooth;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: var(--color-cream);
+            color: var(--color-text);
+            line-height: 1.6;
+            overflow-x: hidden;
+        }
+
         .material-symbols-outlined {
             font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
         }
-        .hide-scrollbar::-webkit-scrollbar {
+
+        /* === TEXTURE === */
+        .texture-overlay {
+            position: fixed;
+            inset: 0;
+            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 400 400' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
+            opacity: 0.03;
+            pointer-events: none;
+            z-index: 1000;
+        }
+
+        /* === HEADER === */
+        header {
+            position: fixed;
+            top: 0;
+            width: 100%;
+            z-index: 100;
+            padding: 1rem 1.5rem;
+            background: rgba(250, 248, 243, 0.95);
+            backdrop-filter: blur(20px);
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        header.scrolled {
+            box-shadow: var(--shadow-soft);
+        }
+
+        .header-inner {
+            max-width: 800px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            text-decoration: none;
+        }
+
+        .logo-img {
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 2px solid var(--color-gold);
+            box-shadow: 0 4px 12px rgba(212, 165, 116, 0.3);
+        }
+
+        .logo-text {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .logo-title {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.15rem;
+            font-weight: 700;
+            color: var(--color-red);
+            letter-spacing: -0.02em;
+        }
+
+        .logo-subtitle {
+            font-size: 0.65rem;
+            color: var(--color-gold);
+            text-transform: uppercase;
+            letter-spacing: 0.12em;
+            font-weight: 600;
+        }
+
+        .header-cta {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            background: linear-gradient(135deg, var(--color-red), var(--color-red-dark));
+            color: white;
+            padding: 0.6rem 1rem;
+            border-radius: 50px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            text-decoration: none;
+            box-shadow: 0 4px 15px rgba(185, 28, 28, 0.3);
+            transition: all 0.3s ease;
+        }
+
+        .header-cta:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(185, 28, 28, 0.4);
+        }
+
+        .header-cta .material-symbols-outlined {
+            font-size: 1.1rem;
+        }
+
+        /* === MAIN === */
+        main {
+            padding: 6.5rem 1.5rem 8rem;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        /* === CATEGORY NAVIGATION === */
+        .category-nav {
+            position: sticky;
+            top: 76px;
+            z-index: 50;
+            background: rgba(250, 248, 243, 0.9);
+            backdrop-filter: blur(15px);
+            margin: 0 -1.5rem;
+            padding: 1rem 1.5rem;
+            border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+        }
+
+        .category-nav-inner {
+            display: flex;
+            gap: 0.5rem;
+            overflow-x: auto;
+            scrollbar-width: none;
+            -ms-overflow-style: none;
+        }
+
+        .category-nav-inner::-webkit-scrollbar {
             display: none;
         }
+
+        .category-chip {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.4rem;
+            white-space: nowrap;
+            padding: 0.6rem 1.25rem;
+            border-radius: 50px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            text-decoration: none;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            border: 1px solid transparent;
+        }
+
+        .category-chip.active {
+            background: linear-gradient(135deg, var(--color-red), var(--color-red-dark));
+            color: white;
+            box-shadow: 0 4px 15px rgba(185, 28, 28, 0.25);
+        }
+
+        .category-chip:not(.active) {
+            background: white;
+            color: var(--color-text);
+            border-color: var(--color-cream-dark);
+        }
+
+        .category-chip:not(.active):hover {
+            border-color: var(--color-gold);
+            background: var(--color-cream);
+        }
+
+        /* === HERO CAROUSEL === */
+        .hero-section {
+            margin-bottom: 3rem;
+        }
+
+        .hero-label {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            background: linear-gradient(135deg, var(--color-gold-light), var(--color-gold));
+            color: var(--color-brown);
+            padding: 0.4rem 0.9rem;
+            border-radius: 50px;
+            font-size: 0.7rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            margin-bottom: 1rem;
+            box-shadow: 0 4px 12px rgba(212, 165, 116, 0.3);
+        }
+
+        .carousel-container {
+            position: relative;
+            overflow: hidden;
+            border-radius: 24px;
+            box-shadow: var(--shadow-strong);
+        }
+
+        .carousel-track {
+            display: flex;
+            transition: transform 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .carousel-slide {
+            min-width: 100%;
+            position: relative;
+            aspect-ratio: 16/10;
+        }
+
+        .carousel-slide img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .carousel-overlay {
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(to top, rgba(45, 24, 16, 0.95) 0%, rgba(45, 24, 16, 0.4) 50%, rgba(0,0,0,0.1) 100%);
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-end;
+            padding: 2rem;
+        }
+
+        .carousel-badge {
+            position: absolute;
+            top: 1.25rem;
+            right: 1.25rem;
+            background: white;
+            color: var(--color-red);
+            padding: 0.4rem 0.9rem;
+            border-radius: 50px;
+            font-size: 0.7rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            display: flex;
+            align-items: center;
+            gap: 0.3rem;
+            box-shadow: var(--shadow-medium);
+        }
+
+        .carousel-content h2 {
+            font-family: 'Playfair Display', serif;
+            font-size: 2rem;
+            font-weight: 700;
+            color: white;
+            margin-bottom: 0.5rem;
+        }
+
+        .carousel-content p {
+            color: rgba(255, 255, 255, 0.85);
+            font-size: 0.95rem;
+            margin-bottom: 1rem;
+        }
+
+        .carousel-price {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            background: linear-gradient(135deg, var(--color-gold-light), var(--color-gold));
+            color: var(--color-brown);
+            padding: 0.6rem 1.25rem;
+            border-radius: 50px;
+            font-family: 'Playfair Display', serif;
+            font-size: 1.5rem;
+            font-weight: 700;
+            box-shadow: 0 4px 15px rgba(212, 165, 116, 0.4);
+        }
+
+        .carousel-dots {
+            position: absolute;
+            bottom: 1rem;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            gap: 0.5rem;
+            z-index: 10;
+        }
+
+        .carousel-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.4);
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .carousel-dot.active {
+            background: white;
+            width: 24px;
+            border-radius: 4px;
+        }
+
+        .carousel-arrows {
+            position: absolute;
+            top: 50%;
+            left: 0;
+            right: 0;
+            transform: translateY(-50%);
+            display: flex;
+            justify-content: space-between;
+            padding: 0 0.75rem;
+            pointer-events: none;
+        }
+
+        .carousel-arrow {
+            width: 44px;
+            height: 44px;
+            background: rgba(255, 255, 255, 0.9);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--color-brown);
+            cursor: pointer;
+            pointer-events: auto;
+            transition: all 0.3s ease;
+            border: none;
+            box-shadow: var(--shadow-soft);
+        }
+
+        .carousel-arrow:hover {
+            background: white;
+            transform: scale(1.1);
+        }
+
+        /* === SECTION STYLES === */
+        .menu-section {
+            margin-bottom: 3rem;
+        }
+
+        .section-header {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .section-icon {
+            width: 48px;
+            height: 48px;
+            background: linear-gradient(135deg, var(--color-red), var(--color-red-dark));
+            border-radius: 14px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            box-shadow: 0 6px 20px rgba(185, 28, 28, 0.25);
+        }
+
+        .section-icon .material-symbols-outlined {
+            font-size: 1.5rem;
+            font-variation-settings: 'FILL' 1;
+        }
+
+        .section-title-group {
+            flex: 1;
+        }
+
+        .section-title {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--color-brown);
+            letter-spacing: -0.02em;
+        }
+
+        .section-subtitle {
+            font-size: 0.8rem;
+            color: var(--color-text-muted);
+        }
+
+        .section-divider {
+            height: 2px;
+            background: linear-gradient(to right, var(--color-gold), transparent);
+            flex: 1;
+            max-width: 100px;
+        }
+
+        /* === MENU ITEMS === */
+        .menu-grid {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .menu-item {
+            background: white;
+            border-radius: 20px;
+            padding: 1.25rem 1.5rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 1rem;
+            border: 1px solid rgba(0, 0, 0, 0.04);
+            box-shadow: var(--shadow-soft);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .menu-item:hover {
+            transform: translateY(-4px);
+            box-shadow: var(--shadow-medium);
+            border-color: var(--color-gold-light);
+        }
+
+        .menu-item-info {
+            flex: 1;
+        }
+
+        .menu-item-name {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: var(--color-brown);
+            margin-bottom: 0.25rem;
+        }
+
+        .menu-item-description {
+            font-size: 0.85rem;
+            color: var(--color-text-muted);
+        }
+
+        .menu-item-price {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: var(--color-red);
+            white-space: nowrap;
+        }
+
+        /* Featured menu item */
+        .menu-item.featured {
+            background: linear-gradient(135deg, var(--color-cream), white);
+            border: 2px solid var(--color-gold-light);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .menu-item.featured::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: linear-gradient(90deg, var(--color-gold), var(--color-gold-light));
+        }
+
+        .featured-badge {
+            position: absolute;
+            top: -1px;
+            right: 1rem;
+            background: linear-gradient(135deg, var(--color-gold-light), var(--color-gold));
+            color: var(--color-brown);
+            padding: 0.25rem 0.75rem;
+            border-radius: 0 0 8px 8px;
+            font-size: 0.65rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        /* === PACKAGES GRID === */
+        .packages-subsection {
+            margin-bottom: 2rem;
+        }
+
+        .packages-subsection:last-child {
+            margin-bottom: 0;
+        }
+
+        .packages-subsection-title {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-family: 'Playfair Display', serif;
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: var(--color-brown);
+            margin-bottom: 1rem;
+            padding: 0.5rem 1rem;
+            background: var(--color-cream-dark);
+            border-radius: 50px;
+        }
+
+        .packages-subsection-title .material-symbols-outlined {
+            color: var(--color-gold);
+        }
+
+        .packages-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 1rem;
+        }
+
+        @media (max-width: 600px) {
+            .packages-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .package-card {
+            background: white;
+            border-radius: 20px;
+            padding: 1.5rem;
+            border: 1px solid rgba(0, 0, 0, 0.04);
+            box-shadow: var(--shadow-soft);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            display: flex;
+            flex-direction: column;
+            min-height: 180px;
+        }
+
+        .package-card:hover {
+            transform: translateY(-6px);
+            box-shadow: var(--shadow-medium);
+        }
+
+        .package-card.popular {
+            background: linear-gradient(145deg, var(--color-brown), var(--color-brown-light));
+            color: white;
+            border: none;
+        }
+
+        .package-card.popular .package-description {
+            color: rgba(255, 255, 255, 0.8);
+        }
+
+        .package-card.popular .package-price {
+            color: var(--color-gold-light);
+        }
+
+        .package-card.family {
+            grid-column: span 2;
+            background: linear-gradient(135deg, var(--color-red), var(--color-red-dark));
+            color: white;
+            border: none;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .package-card.family::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            right: -50%;
+            width: 100%;
+            height: 100%;
+            background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 60%);
+        }
+
+        .package-card.family .package-description {
+            color: rgba(255, 255, 255, 0.85);
+        }
+
+        .package-card.family .package-price {
+            color: var(--color-gold-light);
+        }
+
+        @media (max-width: 600px) {
+            .package-card.family {
+                grid-column: span 1;
+            }
+        }
+
+        .package-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 0.75rem;
+        }
+
+        .package-number {
+            font-size: 0.7rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            opacity: 0.6;
+        }
+
+        .package-badge {
+            background: var(--color-gold);
+            color: var(--color-brown);
+            padding: 0.2rem 0.6rem;
+            border-radius: 50px;
+            font-size: 0.6rem;
+            font-weight: 700;
+            text-transform: uppercase;
+        }
+
+        .package-card.popular .package-badge,
+        .package-card.family .package-badge {
+            background: white;
+            color: var(--color-red);
+        }
+
+        .package-description {
+            font-size: 0.85rem;
+            color: var(--color-text-muted);
+            flex: 1;
+        }
+
+        .package-price {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--color-red);
+            margin-top: 1rem;
+        }
+
+        /* === DRINKS SECTION === */
+        .drinks-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 1rem;
+        }
+
+        @media (max-width: 500px) {
+            .drinks-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .drink-item {
+            background: white;
+            border-radius: 16px;
+            padding: 1.25rem;
+            border: 1px solid rgba(0, 0, 0, 0.04);
+            box-shadow: var(--shadow-soft);
+            transition: all 0.3s ease;
+        }
+
+        .drink-item:hover {
+            transform: translateY(-3px);
+            box-shadow: var(--shadow-medium);
+        }
+
+        .drink-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 0.5rem;
+        }
+
+        .drink-name {
+            font-weight: 600;
+            color: var(--color-brown);
+            font-size: 0.95rem;
+        }
+
+        .drink-price {
+            font-family: 'Playfair Display', serif;
+            font-weight: 700;
+            color: var(--color-red);
+            font-size: 1.1rem;
+        }
+
+        .drink-description {
+            font-size: 0.8rem;
+            color: var(--color-text-muted);
+        }
+
+        /* === FLOATING CTA === */
+        .floating-cta {
+            position: fixed;
+            bottom: 6.5rem;
+            right: 1.5rem;
+            z-index: 90;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            background: linear-gradient(135deg, #25d366, #128c7e);
+            color: white;
+            padding: 1rem 1.5rem;
+            border-radius: 60px;
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 0.9rem;
+            box-shadow: 0 8px 30px rgba(37, 211, 102, 0.4);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .floating-cta:hover {
+            transform: translateY(-4px) scale(1.02);
+            box-shadow: 0 12px 40px rgba(37, 211, 102, 0.5);
+        }
+
+        .floating-cta .material-symbols-outlined {
+            font-size: 1.3rem;
+            font-variation-settings: 'FILL' 1;
+        }
+
+        /* === BOTTOM NAV === */
+        .bottom-nav {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            z-index: 100;
+            padding: 0.75rem 1rem 1.25rem;
+            background: rgba(250, 248, 243, 0.95);
+            backdrop-filter: blur(20px);
+            border-top-left-radius: 28px;
+            border-top-right-radius: 28px;
+            box-shadow: 0 -10px 40px rgba(61, 35, 20, 0.1);
+        }
+
+        .bottom-nav-inner {
+            max-width: 400px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: center;
+            gap: 0.5rem;
+        }
+
+        .bottom-nav a {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 0.6rem 1rem;
+            border-radius: 16px;
+            text-decoration: none;
+            color: var(--color-text-muted);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .bottom-nav a:active {
+            transform: scale(0.95);
+        }
+
+        .bottom-nav a.active {
+            background: linear-gradient(135deg, var(--color-red), var(--color-red-dark));
+            color: white;
+            box-shadow: 0 8px 20px rgba(185, 28, 28, 0.3);
+        }
+
+        .bottom-nav a .material-symbols-outlined {
+            font-size: 1.4rem;
+            margin-bottom: 0.2rem;
+        }
+
+        .bottom-nav a.active .material-symbols-outlined {
+            font-variation-settings: 'FILL' 1;
+        }
+
+        .bottom-nav a span:last-child {
+            font-size: 0.7rem;
+            font-weight: 600;
+        }
+
+        /* === ANIMATIONS === */
+        .fade-up {
+            opacity: 0;
+            transform: translateY(30px);
+            transition: all 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .fade-up.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        /* Stagger animations */
+        .menu-item:nth-child(1) { transition-delay: 0.05s; }
+        .menu-item:nth-child(2) { transition-delay: 0.1s; }
+        .menu-item:nth-child(3) { transition-delay: 0.15s; }
+        .package-card:nth-child(1) { transition-delay: 0.05s; }
+        .package-card:nth-child(2) { transition-delay: 0.1s; }
+        .package-card:nth-child(3) { transition-delay: 0.15s; }
+        .package-card:nth-child(4) { transition-delay: 0.2s; }
+        .package-card:nth-child(5) { transition-delay: 0.25s; }
     </style>
-<style>
-    body {
-      min-height: max(884px, 100dvh);
-    }
-  </style>
-  </head>
-<body class="bg-background text-on-surface font-body selection:bg-primary-container selection:text-white overflow-x-hidden">
-<!-- TopAppBar -->
-<header class="w-full top-0 sticky z-50 bg-[#fbfbe2] dark:bg-stone-900 flex items-center justify-between px-6 py-4 w-full shadow-none">
-<div class="flex items-center gap-4">
-<img alt="Logo Tortas Doña Susy" class="w-14 h-14 rounded-full object-cover" src="logo.webp"/>
-<h1 class="font-['Epilogue'] font-bold text-xl tracking-tight text-[#a20513] dark:text-[#c62828] italic">Tortas Doña Susy</h1>
-</div>
-<div class="flex items-center">
-<span class="material-symbols-outlined text-[#a20513] dark:text-[#c62828] hover:opacity-80 transition-opacity cursor-pointer" data-icon="account_circle">account_circle</span>
-</div>
-</header>
-<main class="pb-24 max-w-2xl mx-auto px-6">
-<!-- Category Chips -->
-<div class="flex gap-3 overflow-x-auto py-6 hide-scrollbar">
-<a class="whitespace-nowrap bg-primary text-on-primary rounded-full px-6 py-2 font-label text-sm font-medium shadow-sm transition-all active:scale-95" href="#tortas">Tortas</a>
-<a class="whitespace-nowrap bg-surface-container-highest text-on-surface-variant rounded-full px-6 py-2 font-label text-sm font-medium hover:bg-surface-container-high transition-all active:scale-95" href="#tacos">Tacos</a>
-<a class="whitespace-nowrap bg-surface-container-highest text-on-surface-variant rounded-full px-6 py-2 font-label text-sm font-medium hover:bg-surface-container-high transition-all active:scale-95" href="#paquetes">Paquetes</a>
-<a class="whitespace-nowrap bg-surface-container-highest text-on-surface-variant rounded-full px-6 py-2 font-label text-sm font-medium hover:bg-surface-container-high transition-all active:scale-95" href="#bebidas">Bebidas</a>
-</div>
-<!-- Featured Promo -->
-<div class="mb-10">
-<span class="bg-primary-container text-white text-[10px] font-bold tracking-widest uppercase px-2 py-1 rounded">Recomendado</span>
-<div class="mt-3 flex overflow-x-hidden snap-x snap-mandatory hide-scrollbar" id="recommendedCarousel">
-<article class="min-w-full shrink-0 snap-center rounded-3xl bg-surface-container-highest text-white p-8 shadow-xl relative overflow-hidden" data-slide="1">
-<img alt="Platillo de comida mexicana con tacos" class="absolute inset-0 w-full h-full object-cover" src="https://dynamic-media-cdn.tripadvisor.com/media/photo-o/0f/fe/9f/a4/las-mejores-tortas-ahogadas.jpg?w=600&h=400&s=1"/>
-<div class="absolute inset-0 bg-black/45"></div>
-<div class="relative z-10">
-<h2 class="font-headline font-bold text-3xl leading-tight">Paquete #1</h2>
-<p class="text-sm mt-2 opacity-90 font-medium">1 Torta + 1 Taco Dorado + Refresco</p>
-<span class="font-headline font-black text-2xl mt-4 block">$80</span>
-</div>
-</article>
-<article class="min-w-full shrink-0 snap-center rounded-3xl bg-surface-container-highest text-white p-8 shadow-xl relative overflow-hidden" data-slide="2">
-<img alt="Platillo mexicano tradicional" class="absolute inset-0 w-full h-full object-cover" src="https://editorialtelevisa.brightspotcdn.com/dims4/default/5edb229/2147483647/strip/true/crop/1195x672+3+0/resize/1440x810!/quality/90/?url=https%3A%2F%2Fk2-prod-editorial-televisa.s3.us-east-1.amazonaws.com%2Fbrightspot%2Fwp-content%2Fuploads%2F2022%2F10%2Ftorta-ahogada.jpg"/>
-<div class="absolute inset-0 bg-black/45"></div>
-<div class="relative z-10">
-<h2 class="font-headline font-bold text-3xl leading-tight">Paquete #2</h2>
-<p class="text-sm mt-2 opacity-90 font-medium">1 Torta + 2 Tacos + Refresco</p>
-<span class="font-headline font-black text-2xl mt-4 block">$85</span>
-</div>
-</article>
-<article class="min-w-full shrink-0 snap-center rounded-3xl bg-surface-container-highest text-white p-8 shadow-xl relative overflow-hidden" data-slide="3">
-<img alt="Antojitos mexicanos servidos" class="absolute inset-0 w-full h-full object-cover" src="https://dynamic-media-cdn.tripadvisor.com/media/photo-o/0a/50/48/7d/tortas-ahogadas-las-famosas.jpg?w=900&h=500&s=1"/>
-<div class="absolute inset-0 bg-black/45"></div>
-<div class="relative z-10">
-<h2 class="font-headline font-bold text-3xl leading-tight">Paquete #3</h2>
-<p class="text-sm mt-2 opacity-90 font-medium">3 Tortas + 5 Tacos Dorados</p>
-<span class="font-headline font-black text-2xl mt-4 block">$205</span>
-</div>
-</article>
-<article class="min-w-full shrink-0 snap-center rounded-3xl bg-surface-container-highest text-white p-8 shadow-xl relative overflow-hidden" data-slide="4">
-<img alt="Comida mexicana en mesa" class="absolute inset-0 w-full h-full object-cover" src="https://media.admagazine.com/photos/6500efc37021aeab60241530/master/w_1600%2Cc_limit/tortas-ahogadas.jpg"/>
-<div class="absolute inset-0 bg-black/45"></div>
-<div class="relative z-10">
-<h2 class="font-headline font-bold text-3xl leading-tight">Paquete #4</h2>
-<p class="text-sm mt-2 opacity-90 font-medium">5 Tortas + 6 Tacos Dorados</p>
-<span class="font-headline font-black text-2xl mt-4 block">$320</span>
-</div>
-</article>
-<article class="min-w-full shrink-0 snap-center rounded-3xl bg-surface-container-highest text-white p-8 shadow-xl relative overflow-hidden" data-slide="5">
-<img alt="Platillo mexicano estilo casero" class="absolute inset-0 w-full h-full object-cover" src="https://offloadmedia.feverup.com/guadalajarasecreta.com/wp-content/uploads/2021/11/15175423/Photo-Collage-22-1024x683.jpg"/>
-<div class="absolute inset-0 bg-black/45"></div>
-<div class="relative z-10">
-<h2 class="font-headline font-bold text-3xl leading-tight">Paquete #5</h2>
-<p class="text-sm mt-2 opacity-90 font-medium">10 Tortas + 10 Tacos Dorados</p>
-<span class="font-headline font-black text-2xl mt-4 block">$630</span>
-</div>
-</article>
-</div>
-</div>
-<!-- Section: Tortas -->
-<section class="mb-12" id="tortas">
-<div class="flex items-baseline justify-between mb-6">
-<h3 class="font-headline font-extrabold text-2xl tracking-tight ml-2">Tortas</h3>
-<div class="h-[2px] flex-grow mx-4 bg-outline-variant/15"></div>
-</div>
-<div class="space-y-6">
-<!-- Torta Item -->
-<div class="bg-surface-container-low rounded-2xl p-5 flex justify-between items-start">
-<div class="flex-1 pr-4">
-<h4 class="font-headline font-bold text-lg text-on-surface">Torta Ahogada</h4>
-<p class="text-sm text-on-surface-variant mt-1">Elige: Carnitas, Buche o Lengua</p>
-</div>
-<div class="flex flex-col items-end">
-<span class="font-headline font-black text-primary text-xl">$55</span>
-</div>
-</div>
-<!-- Kilo Item -->
-<div class="bg-surface-container-low rounded-2xl p-5 flex justify-between items-start">
-<div class="flex-1 pr-4">
-<h4 class="font-headline font-bold text-lg text-on-surface">Kilo de Carne</h4>
-<p class="text-sm text-on-surface-variant mt-1">Carnitas, Buche o Lengua. Ideal para compartir.</p>
-</div>
-<div class="flex flex-col items-end">
-<span class="font-headline font-black text-primary text-xl">$300</span>
-</div>
-</div>
-</div>
-</section>
-<!-- Section: Tacos -->
-<section class="mb-12" id="tacos">
-<div class="flex items-baseline justify-between mb-6">
-<h3 class="font-headline font-extrabold text-2xl tracking-tight ml-2">Tacos</h3>
-<div class="h-[2px] flex-grow mx-4 bg-outline-variant/15"></div>
-</div>
-<div class="grid grid-cols-1 gap-4">
-<div class="p-5 border-b border-outline-variant/15 flex justify-between items-center bg-white/40 rounded-xl">
-<div>
-<h4 class="font-headline font-bold text-base">Taco Dorado Sencillo</h4>
-<p class="text-xs text-on-surface-variant">Papa, Frijol y Requesón</p>
-</div>
-<span class="font-headline font-bold text-primary">$10</span>
-</div>
-<div class="p-5 border-b border-outline-variant/15 flex justify-between items-center bg-white/40 rounded-xl">
-<div>
-<h4 class="font-headline font-bold text-base">Taco Dorado con Carne</h4>
-<p class="text-xs text-on-surface-variant">Carnitas, Buche, Lengua</p>
-</div>
-<span class="font-headline font-bold text-primary">$25</span>
-</div>
-<div class="p-5 flex justify-between items-center bg-white/40 rounded-xl">
-<div>
-<h4 class="font-headline font-bold text-base">Taco Blandito</h4>
-<p class="text-xs text-on-surface-variant">Carnitas, Buche, Lengua</p>
-</div>
-<span class="font-headline font-bold text-primary">$25</span>
-</div>
-</div>
-</section>
-<!-- Section: Paquetes -->
-<section class="mb-12" id="paquetes">
-<div class="flex items-baseline justify-between mb-6">
-<h3 class="font-headline font-extrabold text-2xl tracking-tight ml-2">Paquetes</h3>
-<div class="h-[2px] flex-grow mx-4 bg-outline-variant/15"></div>
-</div>
-<div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-<div class="p-5 rounded-3xl bg-surface-container-low border border-outline-variant/10 flex flex-col justify-between min-h-[170px]">
-<div>
-<h4 class="font-headline font-bold">Paquete #1</h4>
-<p class="text-xs text-on-surface-variant mt-1">1 Torta + 1 Taco Dorado + Refresco</p>
-</div>
-<div class="flex items-end justify-between mt-3">
-<span class="bg-primary-container text-white text-[10px] px-3 py-1 rounded-full font-bold">POPULAR</span>
-<span class="font-headline font-bold text-primary text-xl">$80</span>
-</div>
-</div>
-<div class="p-5 rounded-3xl bg-surface-container-low border border-outline-variant/10 flex flex-col justify-between min-h-[170px]">
-<div>
-<h4 class="font-headline font-bold">Paquete #2</h4>
-<p class="text-xs text-on-surface-variant mt-1">1 Torta + 2 Tacos + Refresco</p>
-</div>
-<div class="flex items-end justify-between mt-3">
-<span class="bg-primary-container text-white text-[10px] px-3 py-1 rounded-full font-bold">POPULAR</span>
-<span class="font-headline font-bold text-primary text-xl">$85</span>
-</div>
-</div>
-<div class="p-5 rounded-3xl bg-surface-container-low border border-outline-variant/10 flex flex-col justify-between min-h-[170px]">
-<div>
-<h4 class="font-headline font-bold">Paquete #3</h4>
-<p class="text-xs text-on-surface-variant mt-1">3 Tortas + 5 Tacos Dorados</p>
-</div>
-<span class="font-headline font-bold text-primary text-xl mt-3">$205</span>
-</div>
-<div class="p-5 rounded-3xl bg-surface-container-low border border-outline-variant/10 flex flex-col justify-between min-h-[170px]">
-<div>
-<h4 class="font-headline font-bold">Paquete #4</h4>
-<p class="text-xs text-on-surface-variant mt-1">5 Tortas + 6 Tacos Dorados</p>
-</div>
-<span class="font-headline font-bold text-primary text-xl mt-3">$320</span>
-</div>
-<div class="p-5 rounded-3xl bg-surface-container-low border border-outline-variant/10 flex flex-col justify-between min-h-[170px] sm:col-span-2">
-<div>
-<h4 class="font-headline font-bold">Paquete #5 (Familiar)</h4>
-<p class="text-xs text-on-surface-variant mt-1">10 Tortas + 10 Tacos Dorados</p>
-</div>
-<span class="font-headline font-bold text-primary text-xl mt-3">$630</span>
-</div>
-</div>
-</section>
-<!-- Section: Bebidas -->
-<section class="mb-8" id="bebidas">
-<div class="flex items-baseline justify-between mb-6">
-<h3 class="font-headline font-extrabold text-2xl tracking-tight ml-2">Bebidas</h3>
-<div class="h-[2px] flex-grow mx-4 bg-outline-variant/15"></div>
-</div>
-<div class="space-y-3">
-<div class="flex justify-between items-center px-2">
-<div>
-<span class="font-medium">Refresco Taparosca</span>
-<p class="text-xs text-on-surface-variant">Sabores: Coca, Fanta, Manza, Sprite</p>
-</div>
-<span class="font-headline font-bold text-primary">$30</span>
-</div>
-<div class="flex justify-between items-center px-2">
-<div>
-<span class="font-medium">Refresco retornable</span>
-<p class="text-xs text-on-surface-variant">Sabores: Coca, Fanta, Manza, Sprite</p>
-</div>
-<span class="font-headline font-bold text-primary">$28</span>
-</div>
-<div class="flex justify-between items-center px-2">
-<div>
-<span class="font-medium">Agua Fresca 1LT</span>
-<p class="text-xs text-on-surface-variant">Sabores: Horchata, Jamaica</p>
-</div>
-<span class="font-headline font-bold text-primary">$25</span>
-</div>
-<div class="flex justify-between items-center px-2">
-<div>
-<span class="font-medium">Agua Fresca 500ml</span>
-<p class="text-xs text-on-surface-variant">Sabores: Horchata, Jamaica</p>
-</div>
-<span class="font-headline font-bold text-primary">$15</span>
-</div>
-<div class="flex justify-between items-center px-2">
-<div>
-<span class="font-medium">Cerveza Corona 500ml</span>
-<p class="text-xs text-on-surface-variant">Presentación: Clara, Oscura</p>
-</div>
-<span class="font-headline font-bold text-primary">$25</span>
-</div>
-<div class="flex justify-between items-center px-2">
-<span class="font-medium">Caguama Mega</span>
-<span class="font-headline font-bold text-primary">$70</span>
-</div>
-</div>
-</section>
-</main>
-<!-- BottomNavBar -->
-<nav class="fixed bottom-0 left-0 w-full flex justify-around items-center px-4 pb-6 pt-3 bg-[#fbfbe2]/85 dark:bg-stone-900/85 backdrop-blur-md z-50 rounded-t-3xl shadow-[0_-4px_24px_rgba(27,29,14,0.06)] border-t border-[#e4beba]/15">
-<a class="flex flex-col items-center justify-center text-stone-500 dark:text-stone-400 px-5 py-1.5 hover:bg-[#f5f5dc] dark:hover:bg-stone-800 rounded-full transition-all" href="../index.html">
-<span class="material-symbols-outlined" data-icon="home">home</span>
-<span class="font-['Be_Vietnam_Pro'] font-medium text-[12px]">Inicio</span>
-</a>
-<a class="flex flex-col items-center justify-center bg-[#c62828] text-white rounded-full px-5 py-1.5 transition-all shadow-lg scale-110 -translate-y-2" href="#">
-<span class="material-symbols-outlined" data-icon="restaurant_menu">restaurant_menu</span>
-<span class="font-['Be_Vietnam_Pro'] font-medium text-[12px]">Menú</span>
-</a>
-<a class="flex flex-col items-center justify-center text-stone-500 dark:text-stone-400 px-5 py-1.5 hover:bg-[#f5f5dc] dark:hover:bg-stone-800 rounded-full transition-all" href="https://wa.me/message/VBNRTP6HAEZVO1" target="_blank">
-<span class="material-symbols-outlined" data-icon="chat">chat</span>
-<span class="font-['Be_Vietnam_Pro'] font-medium text-[12px]">Ordena Ahora</span>
-</a>
-</nav>
-<!-- Floating Cart Badge (Custom Element as per Design System) -->
-<a class="fixed bottom-28 right-6 z-40 bg-primary text-white px-6 py-4 rounded-full shadow-2xl flex items-center gap-3 backdrop-blur-md bg-opacity-90 active:scale-95 transition-transform duration-300" href="https://wa.me/message/VBNRTP6HAEZVO1" target="_blank">
-<span class="material-symbols-outlined" data-icon="chat">chat</span>
-<span class="font-bold text-sm">Ordena Ahora</span>
-</a>
-<script>
-  (function () {
-    var carousel = document.getElementById("recommendedCarousel");
-    if (!carousel) return;
-    var slides = carousel.querySelectorAll("[data-slide]");
-    if (!slides.length) return;
-    var index = 0;
-    setInterval(function () {
-      index = (index + 1) % slides.length;
-      carousel.scrollTo({ left: index * carousel.clientWidth, behavior: "smooth" });
-    }, 3500);
-  })();
-</script>
-</body></html>
+</head>
+<body>
+    <div class="texture-overlay"></div>
+
+    <!-- Header -->
+    <header id="header">
+        <div class="header-inner">
+            <a href="../index.html" class="logo">
+                <img src="logo.webp" alt="Logo Tortas Doña Susy" class="logo-img">
+                <div class="logo-text">
+                    <span class="logo-title">Doña Susy</span>
+                    <span class="logo-subtitle">Menú</span>
+                </div>
+            </a>
+            <a href="https://wa.me/message/VBNRTP6HAEZVO1" target="_blank" class="header-cta">
+                <span class="material-symbols-outlined">chat</span>
+                Ordenar
+            </a>
+        </div>
+    </header>
+
+    <main>
+        <!-- Category Navigation -->
+        <nav class="category-nav">
+            <div class="category-nav-inner">
+                <a href="#tortas" class="category-chip active">
+                    <span class="material-symbols-outlined" style="font-size: 1rem;">lunch_dining</span>
+                    Tortas
+                </a>
+                <a href="#tacos" class="category-chip">
+                    <span class="material-symbols-outlined" style="font-size: 1rem;">kebab_dining</span>
+                    Tacos
+                </a>
+                <a href="#paquetes" class="category-chip">
+                    <span class="material-symbols-outlined" style="font-size: 1rem;">inventory_2</span>
+                    Paquetes
+                </a>
+                <a href="#bebidas" class="category-chip">
+                    <span class="material-symbols-outlined" style="font-size: 1rem;">local_cafe</span>
+                    Bebidas
+                </a>
+            </div>
+        </nav>
+
+        <!-- Featured Carousel -->
+        <section class="hero-section fade-up">
+            <div class="hero-label">
+                <span class="material-symbols-outlined" style="font-size: 1rem;">star</span>
+                Recomendados del Chef
+            </div>
+            <div class="carousel-container">
+                <div class="carousel-track" id="carouselTrack">
+                    <div class="carousel-slide" data-slide="1">
+                        <img src="https://dynamic-media-cdn.tripadvisor.com/media/photo-o/0f/fe/9f/a4/las-mejores-tortas-ahogadas.jpg?w=600&h=400&s=1" alt="Paquete 1">
+                        <div class="carousel-overlay">
+                            <div class="carousel-badge">
+                                <span class="material-symbols-outlined" style="font-size: 0.9rem;">local_fire_department</span>
+                                Más vendido
+                            </div>
+                            <div class="carousel-content">
+                                <h2>Paquete #1</h2>
+                                <p>1 Torta + 1 Taco Dorado + Refresco</p>
+                                <span class="carousel-price">$80</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="carousel-slide" data-slide="2">
+                        <img src="https://editorialtelevisa.brightspotcdn.com/dims4/default/5edb229/2147483647/strip/true/crop/1195x672+3+0/resize/1440x810!/quality/90/?url=https%3A%2F%2Fk2-prod-editorial-televisa.s3.us-east-1.amazonaws.com%2Fbrightspot%2Fwp-content%2Fuploads%2F2022%2F10%2Ftorta-ahogada.jpg" alt="Paquete 2">
+                        <div class="carousel-overlay">
+                            <div class="carousel-badge">
+                                <span class="material-symbols-outlined" style="font-size: 0.9rem;">thumb_up</span>
+                                Popular
+                            </div>
+                            <div class="carousel-content">
+                                <h2>Paquete #2</h2>
+                                <p>1 Torta + 2 Tacos + Refresco</p>
+                                <span class="carousel-price">$85</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="carousel-slide" data-slide="3">
+                        <img src="https://dynamic-media-cdn.tripadvisor.com/media/photo-o/0a/50/48/7d/tortas-ahogadas-las-famosas.jpg?w=900&h=500&s=1" alt="Paquete 3">
+                        <div class="carousel-overlay">
+                            <div class="carousel-badge">
+                                <span class="material-symbols-outlined" style="font-size: 0.9rem;">groups</span>
+                                Para compartir
+                            </div>
+                            <div class="carousel-content">
+                                <h2>Paquete #3</h2>
+                                <p>3 Tortas + 5 Tacos Dorados</p>
+                                <span class="carousel-price">$205</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="carousel-slide" data-slide="4">
+                        <img src="https://media.admagazine.com/photos/6500efc37021aeab60241530/master/w_1600%2Cc_limit/tortas-ahogadas.jpg" alt="Paquete 4">
+                        <div class="carousel-overlay">
+                            <div class="carousel-badge">
+                                <span class="material-symbols-outlined" style="font-size: 0.9rem;">celebration</span>
+                                Ideal para reuniones
+                            </div>
+                            <div class="carousel-content">
+                                <h2>Paquete #4</h2>
+                                <p>5 Tortas + 6 Tacos Dorados</p>
+                                <span class="carousel-price">$320</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="carousel-slide" data-slide="5">
+                        <img src="https://offloadmedia.feverup.com/guadalajarasecreta.com/wp-content/uploads/2021/11/15175423/Photo-Collage-22-1024x683.jpg" alt="Paquete 5">
+                        <div class="carousel-overlay">
+                            <div class="carousel-badge">
+                                <span class="material-symbols-outlined" style="font-size: 0.9rem;">family_restroom</span>
+                                Familiar
+                            </div>
+                            <div class="carousel-content">
+                                <h2>Paquete #5</h2>
+                                <p>10 Tortas + 10 Tacos Dorados</p>
+                                <span class="carousel-price">$630</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="carousel-dots">
+                    <div class="carousel-dot active" data-index="0"></div>
+                    <div class="carousel-dot" data-index="1"></div>
+                    <div class="carousel-dot" data-index="2"></div>
+                    <div class="carousel-dot" data-index="3"></div>
+                    <div class="carousel-dot" data-index="4"></div>
+                </div>
+                <div class="carousel-arrows">
+                    <button class="carousel-arrow" id="prevBtn">
+                        <span class="material-symbols-outlined">chevron_left</span>
+                    </button>
+                    <button class="carousel-arrow" id="nextBtn">
+                        <span class="material-symbols-outlined">chevron_right</span>
+                    </button>
+                </div>
+            </div>
+        </section>
+
+        <!-- Tortas Section -->
+        <section class="menu-section fade-up" id="tortas">
+            <div class="section-header">
+                <div class="section-icon">
+                    <span class="material-symbols-outlined">lunch_dining</span>
+                </div>
+                <div class="section-title-group">
+                    <h3 class="section-title">Tortas</h3>
+                    <p class="section-subtitle">Nuestra especialidad desde 2004</p>
+                </div>
+                <div class="section-divider"></div>
+            </div>
+            <div class="menu-grid">
+                <div class="menu-item featured">
+                    <span class="featured-badge">Especialidad</span>
+                    <div class="menu-item-info">
+                        <h4 class="menu-item-name">Torta Ahogada</h4>
+                        <p class="menu-item-description">Elige: Carnitas, Buche o Lengua</p>
+                    </div>
+                    <span class="menu-item-price">$55</span>
+                </div>
+                <div class="menu-item">
+                    <div class="menu-item-info">
+                        <h4 class="menu-item-name">Kilo de Carne</h4>
+                        <p class="menu-item-description">Carnitas, Buche o Lengua. Ideal para compartir.</p>
+                    </div>
+                    <span class="menu-item-price">$300</span>
+                </div>
+            </div>
+        </section>
+
+        <!-- Tacos Section -->
+        <section class="menu-section fade-up" id="tacos">
+            <div class="section-header">
+                <div class="section-icon">
+                    <span class="material-symbols-outlined">kebab_dining</span>
+                </div>
+                <div class="section-title-group">
+                    <h3 class="section-title">Tacos</h3>
+                    <p class="section-subtitle">Dorados y blanditos</p>
+                </div>
+                <div class="section-divider"></div>
+            </div>
+            <div class="menu-grid">
+                <div class="menu-item">
+                    <div class="menu-item-info">
+                        <h4 class="menu-item-name">Taco Dorado Sencillo</h4>
+                        <p class="menu-item-description">Papa, Frijol y Requesón</p>
+                    </div>
+                    <span class="menu-item-price">$10</span>
+                </div>
+                <div class="menu-item">
+                    <div class="menu-item-info">
+                        <h4 class="menu-item-name">Taco Dorado con Carne</h4>
+                        <p class="menu-item-description">Carnitas, Buche, Lengua</p>
+                    </div>
+                    <span class="menu-item-price">$25</span>
+                </div>
+                <div class="menu-item">
+                    <div class="menu-item-info">
+                        <h4 class="menu-item-name">Taco Blandito</h4>
+                        <p class="menu-item-description">Carnitas, Buche, Lengua</p>
+                    </div>
+                    <span class="menu-item-price">$25</span>
+                </div>
+            </div>
+        </section>
+
+        <!-- Paquetes Section -->
+        <section class="menu-section fade-up" id="paquetes">
+            <div class="section-header">
+                <div class="section-icon">
+                    <span class="material-symbols-outlined">inventory_2</span>
+                </div>
+                <div class="section-title-group">
+                    <h3 class="section-title">Paquetes</h3>
+                    <p class="section-subtitle">Las mejores combinaciones</p>
+                </div>
+                <div class="section-divider"></div>
+            </div>
+
+            <!-- Paquetes Individuales -->
+            <div class="packages-subsection">
+                <h4 class="packages-subsection-title">
+                    <span class="material-symbols-outlined" style="font-size: 1.1rem;">person</span>
+                    Individuales
+                </h4>
+                <div class="packages-grid">
+                    <div class="package-card popular">
+                        <div class="package-header">
+                            <span class="package-number">Paquete #1</span>
+                            <span class="package-badge">Popular</span>
+                        </div>
+                        <p class="package-description">1 Torta + 1 Taco Dorado + Refresco</p>
+                        <span class="package-price">$80</span>
+                    </div>
+                    <div class="package-card popular">
+                        <div class="package-header">
+                            <span class="package-number">Paquete #2</span>
+                            <span class="package-badge">Popular</span>
+                        </div>
+                        <p class="package-description">1 Torta + 2 Tacos + Refresco</p>
+                        <span class="package-price">$85</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Paquetes Familiares -->
+            <div class="packages-subsection">
+                <h4 class="packages-subsection-title">
+                    <span class="material-symbols-outlined" style="font-size: 1.1rem;">groups</span>
+                    Familiares
+                </h4>
+                <div class="packages-grid">
+                    <div class="package-card">
+                        <div class="package-header">
+                            <span class="package-number">Paquete #3</span>
+                        </div>
+                        <p class="package-description">3 Tortas + 5 Tacos Dorados</p>
+                        <span class="package-price">$205</span>
+                    </div>
+                    <div class="package-card">
+                        <div class="package-header">
+                            <span class="package-number">Paquete #4</span>
+                        </div>
+                        <p class="package-description">5 Tortas + 6 Tacos Dorados</p>
+                        <span class="package-price">$320</span>
+                    </div>
+                    <div class="package-card family">
+                        <div class="package-header">
+                            <span class="package-number">Paquete #5</span>
+                            <span class="package-badge">Mejor valor</span>
+                        </div>
+                        <p class="package-description">10 Tortas + 10 Tacos Dorados — Ideal para fiestas y eventos</p>
+                        <span class="package-price">$630</span>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Bebidas Section -->
+        <section class="menu-section fade-up" id="bebidas">
+            <div class="section-header">
+                <div class="section-icon">
+                    <span class="material-symbols-outlined">local_cafe</span>
+                </div>
+                <div class="section-title-group">
+                    <h3 class="section-title">Bebidas</h3>
+                    <p class="section-subtitle">Refrescos y aguas frescas</p>
+                </div>
+                <div class="section-divider"></div>
+            </div>
+            <div class="drinks-grid">
+                <div class="drink-item">
+                    <div class="drink-header">
+                        <span class="drink-name">Refresco Taparosca</span>
+                        <span class="drink-price">$30</span>
+                    </div>
+                    <p class="drink-description">Coca, Fanta, Manzana, Sprite</p>
+                </div>
+                <div class="drink-item">
+                    <div class="drink-header">
+                        <span class="drink-name">Refresco Retornable</span>
+                        <span class="drink-price">$28</span>
+                    </div>
+                    <p class="drink-description">Coca, Fanta, Manzana, Sprite</p>
+                </div>
+                <div class="drink-item">
+                    <div class="drink-header">
+                        <span class="drink-name">Agua Fresca 1LT</span>
+                        <span class="drink-price">$25</span>
+                    </div>
+                    <p class="drink-description">Horchata, Jamaica</p>
+                </div>
+                <div class="drink-item">
+                    <div class="drink-header">
+                        <span class="drink-name">Agua Fresca 500ml</span>
+                        <span class="drink-price">$15</span>
+                    </div>
+                    <p class="drink-description">Horchata, Jamaica</p>
+                </div>
+                <div class="drink-item">
+                    <div class="drink-header">
+                        <span class="drink-name">Cerveza Corona</span>
+                        <span class="drink-price">$25</span>
+                    </div>
+                    <p class="drink-description">Clara u Oscura (500ml)</p>
+                </div>
+                <div class="drink-item">
+                    <div class="drink-header">
+                        <span class="drink-name">Caguama Mega</span>
+                        <span class="drink-price">$70</span>
+                    </div>
+                    <p class="drink-description">Presentación especial</p>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- Floating CTA -->
+    <a href="https://wa.me/message/VBNRTP6HAEZVO1" target="_blank" class="floating-cta">
+        <span class="material-symbols-outlined">chat</span>
+        Ordena Ahora
+    </a>
+
+    <!-- Bottom Navigation -->
+    <nav class="bottom-nav">
+        <div class="bottom-nav-inner">
+            <a href="../index.html">
+                <span class="material-symbols-outlined">home</span>
+                <span>Inicio</span>
+            </a>
+            <a href="#" class="active">
+                <span class="material-symbols-outlined">restaurant_menu</span>
+                <span>Menú</span>
+            </a>
+            <a href="https://wa.me/message/VBNRTP6HAEZVO1" target="_blank">
+                <span class="material-symbols-outlined">chat</span>
+                <span>Ordenar</span>
+            </a>
+        </div>
+    </nav>
+
+    <script>
+        // Header scroll effect
+        const header = document.getElementById('header');
+        window.addEventListener('scroll', () => {
+            if (window.scrollY > 20) {
+                header.classList.add('scrolled');
+            } else {
+                header.classList.remove('scrolled');
+            }
+        });
+
+        // Carousel functionality
+        const track = document.getElementById('carouselTrack');
+        const dots = document.querySelectorAll('.carousel-dot');
+        const prevBtn = document.getElementById('prevBtn');
+        const nextBtn = document.getElementById('nextBtn');
+        const slides = track.querySelectorAll('.carousel-slide');
+        let currentIndex = 0;
+        let autoplayInterval;
+
+        function goToSlide(index) {
+            if (index < 0) index = slides.length - 1;
+            if (index >= slides.length) index = 0;
+            currentIndex = index;
+            track.style.transform = `translateX(-${currentIndex * 100}%)`;
+            dots.forEach((dot, i) => {
+                dot.classList.toggle('active', i === currentIndex);
+            });
+        }
+
+        function startAutoplay() {
+            autoplayInterval = setInterval(() => {
+                goToSlide(currentIndex + 1);
+            }, 4000);
+        }
+
+        function stopAutoplay() {
+            clearInterval(autoplayInterval);
+        }
+
+        prevBtn.addEventListener('click', () => {
+            stopAutoplay();
+            goToSlide(currentIndex - 1);
+            startAutoplay();
+        });
+
+        nextBtn.addEventListener('click', () => {
+            stopAutoplay();
+            goToSlide(currentIndex + 1);
+            startAutoplay();
+        });
+
+        dots.forEach((dot, index) => {
+            dot.addEventListener('click', () => {
+                stopAutoplay();
+                goToSlide(index);
+                startAutoplay();
+            });
+        });
+
+        startAutoplay();
+
+        // Touch swipe for carousel
+        let touchStartX = 0;
+        let touchEndX = 0;
+
+        track.addEventListener('touchstart', (e) => {
+            touchStartX = e.changedTouches[0].screenX;
+            stopAutoplay();
+        });
+
+        track.addEventListener('touchend', (e) => {
+            touchEndX = e.changedTouches[0].screenX;
+            if (touchStartX - touchEndX > 50) {
+                goToSlide(currentIndex + 1);
+            } else if (touchEndX - touchStartX > 50) {
+                goToSlide(currentIndex - 1);
+            }
+            startAutoplay();
+        });
+
+        // Category navigation active state
+        const categoryChips = document.querySelectorAll('.category-chip');
+        const sections = document.querySelectorAll('.menu-section');
+
+        function updateActiveCategory() {
+            let current = '';
+            sections.forEach(section => {
+                const sectionTop = section.offsetTop - 200;
+                if (window.scrollY >= sectionTop) {
+                    current = section.getAttribute('id');
+                }
+            });
+
+            categoryChips.forEach(chip => {
+                chip.classList.toggle('active', chip.getAttribute('href') === '#' + current);
+            });
+        }
+
+        window.addEventListener('scroll', updateActiveCategory);
+
+        // Fade in on scroll
+        const fadeElements = document.querySelectorAll('.fade-up');
+        const observerOptions = {
+            threshold: 0.1,
+            rootMargin: '0px 0px -50px 0px'
+        };
+
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('visible');
+                }
+            });
+        }, observerOptions);
+
+        fadeElements.forEach(el => observer.observe(el));
+
+        // Initial animation
+        document.addEventListener('DOMContentLoaded', () => {
+            const heroSection = document.querySelector('.hero-section');
+            if (heroSection) {
+                setTimeout(() => heroSection.classList.add('visible'), 100);
+            }
+        });
+    </script>
+</body>
+</html>

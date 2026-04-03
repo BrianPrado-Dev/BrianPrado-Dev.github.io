@@ -132,12 +132,15 @@ def build_ticket_text(ticket: dict[str, Any]) -> str:
     lines.extend(wrap_line(f"Fecha: {current_date_text()}"))
     lines.append("")
 
-    for plate in plates:
-        lines.extend(wrap_line(f"[{plate.get('name', 'Cliente')}]"))
+    for plate_idx, plate in enumerate(plates):
+        if ticket_type == "comanda":
+            lines.extend(wrap_line(f"PLATO {plate_idx + 1}"))
+        else:
+            lines.extend(wrap_line(f"[{plate.get('name', 'Cliente')}]"))
         items = plate.get("items", [])
         if not items:
             lines.extend(wrap_line("- Sin productos"))
-        for item in items:
+        for item_idx, item in enumerate(items):
             qty = item.get("qty", 0)
             name = item.get("name", "Item")
             variant = item.get("variant") or ""
@@ -146,9 +149,16 @@ def build_ticket_text(ticket: dict[str, Any]) -> str:
             item_text = f"{qty}x {name}{variant_text}"
             if ticket_type == "comanda":
                 lines.extend(wrap_line(f"- {item_text}"))
+                if item_idx < len(items) - 1:
+                    lines.append("-" * LINE_WIDTH)
             else:
                 lines.extend(format_with_right(item_text, f"${subtotal}"))
-        lines.append("")
+                if item_idx < len(items) - 1:
+                    lines.append("-" * LINE_WIDTH)
+        if ticket_type == "comanda" and plate_idx < len(plates) - 1:
+            lines.append("=" * LINE_WIDTH)
+        else:
+            lines.append("")
 
     lines.append("-" * LINE_WIDTH)
     if ticket_type != "comanda":
