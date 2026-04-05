@@ -924,7 +924,7 @@
     }
 
     function createPlate(index) {
-      return { id: `plato_${index}`, name: `Cliente ${index}`, order: {} };
+      return { id: `plato_${index}`, name: `Plato ${index}`, order: {} };
     }
 
     function createTable(number, isDefault, createdOn = todayKey()) {
@@ -1571,6 +1571,13 @@
           return;
         }
 
+        if (kind === "error") {
+          playTone(now, 200, 0.15, "sawtooth", 0.12);
+          playTone(now + 0.18, 150, 0.2, "sawtooth", 0.12);
+          playTone(now + 0.4, 100, 0.25, "sawtooth", 0.1);
+          return;
+        }
+
         playTone(now, 520, 0.1, "square", 0.07);
         playTone(now + 0.12, 740, 0.14, "square", 0.07);
       } catch (_) {
@@ -1809,6 +1816,24 @@
       renderTables();
     }
 
+    function duplicatePlate(tableId, plateId) {
+      const table = getTableById(tableId);
+      if (!table) return;
+      const sourcePlate = getPlateById(table, plateId);
+      if (!sourcePlate) return;
+      const nextIndex = table.plates.length + 1;
+      const newPlate = {
+        id: `plato_${nextIndex}_${Date.now()}`,
+        name: `Plato ${nextIndex}`,
+        order: JSON.parse(JSON.stringify(sourcePlate.order))
+      };
+      table.plates.push(newPlate);
+      state.selectedPlateId = newPlate.id;
+      persistState();
+      renderDetail();
+      renderTables();
+    }
+
     async function addItemWithVariant(tableId, plateId, itemId) {
       const table = getTableById(tableId);
       if (!table) return;
@@ -1842,9 +1867,10 @@
         tableNumber: table.number,
         mesera: state.meseraNombre,
         createdAt: timestamp,
-        plates: table.plates.map((plate) => ({
+        plateSeparator: "=========================",
+        plates: table.plates.map((plate, index) => ({
           id: plate.id,
-          name: plate.name,
+          name: `Plato ${index + 1}`,
           items: getPlateLineItems(plate)
             .map((line) => ({
               id: line.itemId,
@@ -1861,6 +1887,8 @@
 
     function createPlateTicketData(table, plate, type = "ticket") {
       const timestamp = new Date().toISOString();
+      const plateIndex = table.plates.findIndex((p) => p.id === plate.id);
+      const plateName = `Plato ${plateIndex + 1}`;
       return {
         id: `ticket_${table.id}_${plate.id}_${Date.now()}`,
         type,
@@ -1869,10 +1897,10 @@
         mesera: state.meseraNombre,
         createdAt: timestamp,
         plateId: plate.id,
-        plateName: plate.name,
+        plateName: plateName,
         plates: [{
           id: plate.id,
-          name: plate.name,
+          name: plateName,
           items: getPlateLineItems(plate).map((line) => ({
             id: line.itemId,
             name: ITEM_INDEX[line.itemId].name,
@@ -1888,7 +1916,12 @@
 
     async function queueTableTicket(tableId) {
       const table = getTableById(tableId);
-      if (!table) return;
+      if (!table) return false;
+      if (!tableHasItems(table)) {
+        playNotificationSound("error");
+        showToast("No se puede imprimir una mesa vacía", "error");
+        return false;
+      }
       const ticket = createTicketData(table, "ticket");
       state.printQueue.unshift(ticket);
       persistPrintQueue();
@@ -1897,11 +1930,17 @@
         playNotificationSound("ticket");
       } catch (_) {
       }
+      return true;
     }
 
     async function queueKitchenComanda(tableId) {
       const table = getTableById(tableId);
-      if (!table) return;
+      if (!table) return false;
+      if (!tableHasItems(table)) {
+        playNotificationSound("error");
+        showToast("No se puede imprimir una mesa vacía", "error");
+        return false;
+      }
       const comanda = createTicketData(table, "comanda");
       state.printQueue.unshift(comanda);
       persistPrintQueue();
@@ -1910,6 +1949,7 @@
         playNotificationSound("comanda");
       } catch (_) {
       }
+      return true;
     }
 
     async function queuePlateTicket(tableId, plateId) {
@@ -2140,8 +2180,10 @@
 
         g.querySelectorAll("[data-print]").forEach((btn) => {
           btn.addEventListener("click", async () => {
-            await queueTableTicket(btn.dataset.print);
-            showToast("Ticket enviado a la cola de impresiones.");
+            const success = await queueTableTicket(btn.dataset.print);
+            if (success) {
+              showToast("Ticket enviado a la cola de impresiones.");
+            }
           });
         });
 
@@ -2288,7 +2330,10 @@
                   ${isSelected ? '<span class="material-symbols-outlined text-lg">check_circle</span>' : '<span class="material-symbols-outlined text-lg opacity-50">radio_button_unchecked</span>'}
                   <p class="font-bold text-base">${plate.name}</p>
                 </div>
-                <button data-remove-plate="${table.id}|${plate.id}" class="px-3 py-1.5 rounded-lg bg-red-100 text-red-700 text-xs font-semibold hover:bg-red-200">Eliminar</button>
+                <div class="flex items-center gap-2">
+                  <button data-duplicate-plate="${table.id}|${plate.id}" class="px-3 py-1.5 rounded-lg bg-blue-100 text-blue-700 text-xs font-semibold hover:bg-blue-200">Duplicar</button>
+                  <button data-remove-plate="${table.id}|${plate.id}" class="px-3 py-1.5 rounded-lg bg-red-100 text-red-700 text-xs font-semibold hover:bg-red-200">Eliminar</button>
+                </div>
               </div>
               <div class="p-3">
                 <p class="text-sm text-on-surface-variant">Sin productos</p>
@@ -2332,7 +2377,10 @@
                 ${isSelected ? '<span class="material-symbols-outlined text-lg">check_circle</span>' : '<span class="material-symbols-outlined text-lg opacity-50">radio_button_unchecked</span>'}
                 <p class="font-bold text-base">${plate.name}</p>
               </div>
-              <button data-remove-plate="${table.id}|${plate.id}" class="px-3 py-1.5 rounded-lg bg-red-100 text-red-700 text-xs font-semibold hover:bg-red-200">Eliminar</button>
+              <div class="flex items-center gap-2">
+                <button data-duplicate-plate="${table.id}|${plate.id}" class="px-3 py-1.5 rounded-lg bg-blue-100 text-blue-700 text-xs font-semibold hover:bg-blue-200">Duplicar</button>
+                <button data-remove-plate="${table.id}|${plate.id}" class="px-3 py-1.5 rounded-lg bg-red-100 text-red-700 text-xs font-semibold hover:bg-red-200">Eliminar</button>
+              </div>
             </div>
             <div class="p-3">
               ${rows}
@@ -2350,8 +2398,9 @@
       // Click to select plate
       list.querySelectorAll("[data-select-plate]").forEach((header) => {
         header.addEventListener("click", (e) => {
-          // Don't trigger if clicking on the remove button
+          // Don't trigger if clicking on the remove or duplicate button
           if (e.target.closest("[data-remove-plate]")) return;
+          if (e.target.closest("[data-duplicate-plate]")) return;
           
           const plateId = header.dataset.selectPlate;
           state.selectedPlateId = plateId;
@@ -2376,6 +2425,14 @@
           e.stopPropagation(); // Prevent selecting plate when removing
           const parts = btn.dataset.removePlate.split("|");
           removePlate(parts[0], parts[1]);
+        });
+      });
+      list.querySelectorAll("[data-duplicate-plate]").forEach((btn) => {
+        btn.addEventListener("click", (e) => {
+          e.stopPropagation(); // Prevent selecting plate when duplicating
+          const parts = btn.dataset.duplicatePlate.split("|");
+          duplicatePlate(parts[0], parts[1]);
+          showToast("Plato duplicado");
         });
       });
       list.querySelectorAll("[data-print-plate]").forEach((btn) => {
@@ -2519,14 +2576,18 @@
       document.getElementById("add-plate-button").addEventListener("click", addPlateToSelectedTable);
       document.getElementById("print-ticket-detail-button").addEventListener("click", async () => {
         if (state.selectedTableId) {
-          await queueTableTicket(state.selectedTableId);
-          showToast("Ticket enviado a la cola de impresiones.");
+          const success = await queueTableTicket(state.selectedTableId);
+          if (success) {
+            showToast("Ticket enviado a la cola de impresiones.");
+          }
         }
       });
       document.getElementById("print-comanda-button").addEventListener("click", async () => {
         if (state.selectedTableId) {
-          await queueKitchenComanda(state.selectedTableId);
-          showToast("Comanda enviada a la cola de impresiones.");
+          const success = await queueKitchenComanda(state.selectedTableId);
+          if (success) {
+            showToast("Comanda enviada a la cola de impresiones.");
+          }
         }
       });
       document.getElementById("plate-select").addEventListener("change", (event) => {

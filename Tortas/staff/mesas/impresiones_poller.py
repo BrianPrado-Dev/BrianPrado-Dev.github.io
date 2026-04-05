@@ -133,10 +133,12 @@ def build_ticket_text(ticket: dict[str, Any]) -> str:
     lines.append("")
 
     for plate_idx, plate in enumerate(plates):
+        if plate_idx > 0:
+            lines.append("=" * LINE_WIDTH)
         if ticket_type == "comanda":
             lines.extend(wrap_line(f"PLATO {plate_idx + 1}"))
         else:
-            lines.extend(wrap_line(f"[{plate.get('name', 'Cliente')}]"))
+            lines.extend(wrap_line(f"Plato {plate_idx + 1}"))
         items = plate.get("items", [])
         if not items:
             lines.extend(wrap_line("- Sin productos"))
@@ -155,9 +157,7 @@ def build_ticket_text(ticket: dict[str, Any]) -> str:
                 lines.extend(format_with_right(item_text, f"${subtotal}"))
                 if item_idx < len(items) - 1:
                     lines.append("-" * LINE_WIDTH)
-        if ticket_type == "comanda" and plate_idx < len(plates) - 1:
-            lines.append("=" * LINE_WIDTH)
-        else:
+        if ticket_type != "comanda":
             lines.append("")
 
     lines.append("-" * LINE_WIDTH)
