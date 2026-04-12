@@ -854,6 +854,27 @@
     </div>
   </div>
 
+  <div id="custom-drink-modal" class="hidden fixed inset-0 z-50 bg-black/40 p-4 flex items-center justify-center">
+    <div class="bg-surface-container-low rounded-3xl p-5 w-full max-w-md shadow-[0_20px_40px_rgba(27,29,14,0.25)]">
+      <h3 class="font-headline font-bold text-2xl mb-4">Bebida "Otro"</h3>
+      <label for="custom-drink-name" class="block text-sm font-semibold mb-2 text-on-surface">Nombre del item</label>
+      <input id="custom-drink-name" type="text" class="w-full px-4 py-3 rounded-xl border border-outline-variant bg-white/90 text-base mb-3" placeholder="Ej. Michelada" />
+      <label for="custom-drink-price" class="block text-sm font-semibold mb-2 text-on-surface">Precio (pesos)</label>
+      <input id="custom-drink-price" type="text" inputmode="decimal" class="w-full px-4 py-3 rounded-xl border border-outline-variant bg-white/90 text-base mb-2" placeholder="Ej. 45" />
+      <label for="custom-drink-qty" class="block text-sm font-semibold mb-2 text-on-surface">Cantidad</label>
+      <div class="flex items-center gap-2 mb-2">
+        <button id="custom-drink-qty-dec" class="w-12 h-11 rounded-xl bg-red-100 text-red-700 font-bold hover:bg-red-200">-</button>
+        <input id="custom-drink-qty" type="text" inputmode="numeric" class="flex-1 px-4 py-3 rounded-xl border border-outline-variant bg-white/90 text-base text-center" placeholder="Ej. 2" />
+        <button id="custom-drink-qty-inc" class="w-12 h-11 rounded-xl bg-green-100 text-green-700 font-bold hover:bg-green-200">+</button>
+      </div>
+      <p id="custom-drink-modal-error" class="hidden text-sm text-red-700 mb-3">Completa nombre, precio y cantidad válidos mayores a 0.</p>
+      <div class="grid grid-cols-1 gap-2">
+        <button id="custom-drink-modal-confirm" class="w-full bg-emerald-600 text-white px-4 py-2 rounded-xl font-semibold hover:bg-emerald-700">Confirmar</button>
+        <button id="custom-drink-modal-cancel" class="w-full bg-red-100 text-red-700 px-4 py-2 rounded-xl font-semibold hover:bg-red-200">Cancelar</button>
+      </div>
+    </div>
+  </div>
+
   <div id="toast-container" class="fixed inset-0 z-[70] flex items-center justify-center pointer-events-none p-6"></div>
 
   <script>
@@ -891,7 +912,8 @@
         { id: "agua_fresca_1lt", name: "Agua Fresca Grande", price: 25 },
         { id: "agua_500ml", name: "Agua Fresca Chica", price: 15 },
         { id: "cerveza_corona_500ml", name: "Cerveza Corona 500ml", price: 25 },
-        { id: "caguama_mega", name: "Caguama Mega", price: 70 }
+        { id: "caguama_mega", name: "Caguama Mega", price: 70 },
+        { id: "bebida_otro", name: "Otro", price: 0, note: "Captura nombre y precio" }
       ]
     };
 
@@ -1057,7 +1079,7 @@
         plates: table.plates.map((plate) => ({
           name: plate.name,
           items: getPlateLineItems(plate)
-            .map((line) => `${line.qty}x ${ITEM_INDEX[line.itemId].name}${formatVariant(line.variant)}`)
+            .map((line) => `${line.qty}x ${getLineDisplayName(line)}${formatVariant(line.variant)}`)
         }))
       };
       state.history.unshift(record);
@@ -1156,13 +1178,49 @@
       return Number.isFinite(total) ? total : null;
     }
 
+    function parseCustomItemNameFromVariant(variant) {
+      const match = String(variant || "").match(/Nombre:\s*([^|]+)/i);
+      if (!match) return null;
+      const name = String(match[1] || "").trim();
+      return name || null;
+    }
+
+    function parseCustomItemPriceFromVariant(variant) {
+      const match = String(variant || "").match(/Precio:\$([0-9]+(?:\.[0-9]+)?)/i);
+      if (!match) return null;
+      const amount = Number(match[1]);
+      return Number.isFinite(amount) ? amount : null;
+    }
+
+    function getLineDisplayName(line) {
+      if (!line || !ITEM_INDEX[line.itemId]) return "";
+      if (line.itemId === "bebida_otro") {
+        return parseCustomItemNameFromVariant(line.variant) || ITEM_INDEX[line.itemId].name;
+      }
+      return ITEM_INDEX[line.itemId].name;
+    }
+
     function getLineUnitPrice(line) {
       if (!line || !ITEM_INDEX[line.itemId]) return 0;
       if (line.itemId === "kilo_carne") {
         const parsedTotal = parseKiloCarneTotalFromVariant(line.variant);
         if (parsedTotal !== null) return parsedTotal;
       }
-      return ITEM_INDEX[line.itemId].price;
+      if (line.itemId === "bebida_otro") {
+        const customPrice = parseCustomItemPriceFromVariant(line.variant);
+        if (customPrice !== null) return customPrice;
+      }
+      const basePrice = ITEM_INDEX[line.itemId].price;
+      if (line.itemId === "paquete_1" || line.itemId === "paquete_2") {
+        const variantText = String(line.variant || "").toLowerCase();
+        const hasBeer =
+          variantText.includes("bebida:cerveza clara") ||
+          variantText.includes("bebida: cerveza clara") ||
+          variantText.includes("bebida:cerveza obscura") ||
+          variantText.includes("bebida: cerveza obscura");
+        if (hasBeer) return basePrice + 5;
+      }
+      return basePrice;
     }
 
     function getLineSubtotal(line) {
@@ -1228,6 +1286,93 @@
       });
     }
 
+    function askCustomDrinkVariant(quantityState = null) {
+      return new Promise((resolve) => {
+        const modal = document.getElementById("custom-drink-modal");
+        const nameInput = document.getElementById("custom-drink-name");
+        const priceInput = document.getElementById("custom-drink-price");
+        const qtyInput = document.getElementById("custom-drink-qty");
+        const decBtn = document.getElementById("custom-drink-qty-dec");
+        const incBtn = document.getElementById("custom-drink-qty-inc");
+        const errorEl = document.getElementById("custom-drink-modal-error");
+        const confirmBtn = document.getElementById("custom-drink-modal-confirm");
+        const cancelBtn = document.getElementById("custom-drink-modal-cancel");
+
+        nameInput.value = "";
+        priceInput.value = "";
+        qtyInput.value = "1";
+        errorEl.classList.add("hidden");
+        modal.classList.remove("hidden");
+        setTimeout(() => nameInput.focus(), 0);
+
+        const cleanup = () => {
+          modal.classList.add("hidden");
+          confirmBtn.removeEventListener("click", onConfirm);
+          cancelBtn.removeEventListener("click", onCancel);
+          decBtn.removeEventListener("click", onDec);
+          incBtn.removeEventListener("click", onInc);
+          nameInput.removeEventListener("keydown", onKeyDown);
+          priceInput.removeEventListener("keydown", onKeyDown);
+          qtyInput.removeEventListener("keydown", onKeyDown);
+        };
+
+        const onCancel = () => {
+          cleanup();
+          resolve(null);
+        };
+
+        const onDec = () => {
+          const current = Number(String(qtyInput.value || "").trim());
+          const next = Number.isInteger(current) && current > 1 ? current - 1 : 1;
+          qtyInput.value = String(next);
+        };
+
+        const onInc = () => {
+          const current = Number(String(qtyInput.value || "").trim());
+          const safeCurrent = Number.isInteger(current) && current > 0 ? current : 1;
+          qtyInput.value = String(safeCurrent + 1);
+        };
+
+        const onConfirm = () => {
+          const cleanedName = String(nameInput.value || "").replace(/[|<>]/g, "").trim();
+          const normalizedPrice = String(priceInput.value || "").replace(",", ".").trim();
+          const normalizedQty = String(qtyInput.value || "").trim();
+          const parsedPrice = Number(normalizedPrice);
+          const parsedQty = Number(normalizedQty);
+          const isValidQty = Number.isInteger(parsedQty) && parsedQty > 0;
+          if (!cleanedName || !Number.isFinite(parsedPrice) || parsedPrice <= 0 || !isValidQty) {
+            errorEl.classList.remove("hidden");
+            return;
+          }
+          if (quantityState) {
+            quantityState.usedInModal = true;
+            quantityState.value = parsedQty;
+          }
+          cleanup();
+          resolve(`Nombre:${cleanedName} | Precio:$${parsedPrice.toFixed(2)}`);
+        };
+
+        const onKeyDown = (event) => {
+          if (event.key === "Enter") {
+            event.preventDefault();
+            onConfirm();
+          }
+          if (event.key === "Escape") {
+            event.preventDefault();
+            onCancel();
+          }
+        };
+
+        confirmBtn.addEventListener("click", onConfirm);
+        cancelBtn.addEventListener("click", onCancel);
+        decBtn.addEventListener("click", onDec);
+        incBtn.addEventListener("click", onInc);
+        nameInput.addEventListener("keydown", onKeyDown);
+        priceInput.addEventListener("keydown", onKeyDown);
+        qtyInput.addEventListener("keydown", onKeyDown);
+      });
+    }
+
     function makeLineKey(itemId, variant) {
       return `${itemId}__${variant || "base"}`;
     }
@@ -1249,6 +1394,8 @@
       if (opt.includes("fanta")) return "bg-orange-500 text-white hover:bg-orange-600";
       if (opt.includes("manzana")) return "bg-amber-700 text-white hover:bg-amber-800";
       if (opt.includes("sprite")) return "bg-green-600 text-white hover:bg-green-700";
+      if (opt.includes("cerveza clara")) return "bg-yellow-500 text-white hover:bg-yellow-600";
+      if (opt.includes("cerveza obscura")) return "bg-black text-white hover:bg-gray-900";
       return "bg-white/90 text-on-surface hover:bg-primary hover:text-white";
     }
 
@@ -1271,9 +1418,21 @@
         }
         let qty = quantityState ? quantityState.value : 1;
         titleEl.textContent = title;
-        optionsEl.innerHTML = options.map((option) => `
-          <button data-variant-choice="${option}" class="px-4 py-4 rounded-xl font-bold text-base text-left min-h-[64px] ${getOptionButtonClass(title, option)}">${option}</button>
-        `).join("");
+        optionsEl.innerHTML = options.map((option) => {
+          const opt = String(option).toLowerCase();
+          const isBeerWithExtra = opt.includes("cerveza clara") || opt.includes("cerveza obscura");
+          if (isBeerWithExtra) {
+            return `
+              <button data-variant-choice="${option}" class="px-4 py-4 rounded-xl font-bold text-left min-h-[64px] ${getOptionButtonClass(title, option)}">
+                <span class="block text-base">👑 ${option}</span>
+                <span class="block text-xs font-medium opacity-90 mt-1">+5</span>
+              </button>
+            `;
+          }
+          return `
+            <button data-variant-choice="${option}" class="px-4 py-4 rounded-xl font-bold text-base text-left min-h-[64px] ${getOptionButtonClass(title, option)}">${option}</button>
+          `;
+        }).join("");
         qtyEl.textContent = String(qty);
 
         modal.classList.remove("hidden");
@@ -1430,12 +1589,15 @@
       if (itemId === "caguama_mega") {
         return "Única";
       }
+      if (itemId === "bebida_otro") {
+        return await askCustomDrinkVariant(quantityState);
+      }
       if (itemId === "paquete_1") {
         const tipoCarne = await chooseOption("Paquete #1 - Tipo de carne de la torta", carne, quantityState);
         if (tipoCarne === null) return null;
         const saborTaco = await chooseOption("Paquete #1 - Sabor del taco dorado sencillo", tacoSabor, quantityState);
         if (saborTaco === null) return null;
-        let bebida = await chooseOption("Paquete #1 - Bebida", [...refresco, "Agua Fresca"], quantityState);
+        let bebida = await chooseOption("Paquete #1 - Bebida", [...refresco, "Agua Fresca", "Cerveza Clara", "Cerveza Obscura"], quantityState);
         if (bebida === null) return null;
         if (bebida === "Agua Fresca") {
           const saborAgua = await chooseOption("Paquete #1 - Sabor de agua fresca", aguas, quantityState);
@@ -1449,7 +1611,7 @@
         if (tipoCarne === null) return null;
         const saborTaco = await chooseOption("Paquete #2 - Sabor de los tacos dorados sencillos", tacoSabor, quantityState);
         if (saborTaco === null) return null;
-        let bebida = await chooseOption("Paquete #2 - Bebida", [...refresco, "Agua Fresca"], quantityState);
+        let bebida = await chooseOption("Paquete #2 - Bebida", [...refresco, "Agua Fresca", "Cerveza Clara", "Cerveza Obscura"], quantityState);
         if (bebida === null) return null;
         if (bebida === "Agua Fresca") {
           const saborAgua = await chooseOption("Paquete #2 - Sabor de agua fresca", aguas, quantityState);
@@ -1482,7 +1644,7 @@
       const entries = getPlateLineItems(firstPlateWithItems);
       const base = entries
         .slice(0, 3)
-        .map((line) => `${line.qty}x ${ITEM_INDEX[line.itemId].name}`)
+        .map((line) => `${line.qty}x ${getLineDisplayName(line)}`)
         .join(" • ");
       return `${firstPlateWithItems.name}: ${base}`;
     }
@@ -1491,7 +1653,7 @@
       const counter = {};
       table.plates.forEach((plate) => {
         getPlateLineItems(plate).forEach((line) => {
-          const itemName = ITEM_INDEX[line.itemId].name;
+          const itemName = getLineDisplayName(line);
           const key = itemName;
           counter[key] = (counter[key] || 0) + line.qty;
         });
@@ -1874,7 +2036,7 @@
           items: getPlateLineItems(plate)
             .map((line) => ({
               id: line.itemId,
-              name: ITEM_INDEX[line.itemId].name,
+              name: getLineDisplayName(line),
               variant: line.variant,
               qty: line.qty,
               price: getLineUnitPrice(line),
@@ -1903,7 +2065,7 @@
           name: plateName,
           items: getPlateLineItems(plate).map((line) => ({
             id: line.itemId,
-            name: ITEM_INDEX[line.itemId].name,
+            name: getLineDisplayName(line),
             variant: line.variant,
             qty: line.qty,
             price: getLineUnitPrice(line),
@@ -2214,7 +2376,7 @@
         refresco_taparosca: "https://photos.tryotter.com/cdn-cgi/image/fit=crop,width=492,height=267,quality=60,format=auto/menu-photos/f547ac6c-fc51-4e7f-a279-0ffe24487e8f.jpeg",
         refresco_retornable: "https://m.media-amazon.com/images/I/61rzLJr0mAL._AC_UF894,1000_QL80_.jpg",
         cerveza_corona_500ml: "https://m.media-amazon.com/images/I/51lcAj5hBlL.jpg",
-        caguama_mega: "https://chedrauimx.vtexassets.com/arquivos/ids/66514361-800-auto?v=639106884254170000&width=800&height=auto&aspect=true",
+        caguama_mega: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQcEgMQaxC1NJNJ5Bx-uJDeX5XpXmygkx8rnw&s",
         agua_fresca_1lt: "https://static.wixstatic.com/media/4d09e7_f81bdd07b4b1430d89021fcadb342dea~mv2.jpg/v1/fill/w_476,h_528,al_c,q_80,usm_0.66_1.00_0.01,enc_avif,quality_auto/4d09e7_f81bdd07b4b1430d89021fcadb342dea~mv2.jpg",
         agua_500ml: "https://mercadofacil.mx/wp-content/uploads/2023/03/IMG-20230322-WA0014.jpg",
         torta_ahogada: "https://i.pinimg.com/736x/84/0d/3e/840d3ee9ef51cd7a21cf77fdd1f834de.jpg",
@@ -2270,7 +2432,7 @@
               <div class="quick-item-header">
                 <span class="quick-item-name">${displayName}</span>
               </div>
-              <div class="quick-item-price">${formatMoney(item.price)}</div>
+              <div class="quick-item-price">${item.id === "bebida_otro" ? "" : formatMoney(item.price)}</div>
               ${item.note ? `<div class="quick-item-note">${item.note}</div>` : ''}
             </div>
           `;
@@ -2343,7 +2505,7 @@
           `;
         }
         const rows = entries.map((line, index) => {
-          const item = ITEM_INDEX[line.itemId];
+          const itemName = getLineDisplayName(line);
           const subtotal = getLineSubtotal(line);
           const variantHtml = line.variant ? `<div class="mt-2 flex flex-wrap">${formatVariantDetailed(line.variant)}</div>` : "";
           const isLast = index === entries.length - 1;
@@ -2355,7 +2517,7 @@
                 <div class="flex-1 min-w-0">
                   <div class="flex items-center gap-2 flex-wrap">
                     <span class="bg-primary text-white text-sm font-bold px-2.5 py-1 rounded-lg shrink-0">${line.qty}x</span>
-                    <span class="font-bold text-base">${item.name}</span>
+                    <span class="font-bold text-base">${itemName}</span>
                   </div>
                   ${variantHtml}
                 </div>
