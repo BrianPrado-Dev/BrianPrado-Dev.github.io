@@ -283,6 +283,111 @@
       min-height: 44px;
     }
 
+    .history-record {
+      background: linear-gradient(135deg, #fff7f7 0%, #ffffff 100%);
+      border-radius: 18px;
+      padding: 16px;
+      border: 2px solid rgba(162, 5, 19, 0.16);
+      box-shadow: 0 10px 22px rgba(27, 29, 14, 0.12);
+    }
+
+    .history-record-header {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 10px;
+      margin-bottom: 10px;
+    }
+
+    .history-record-title {
+      font-family: 'Epilogue', sans-serif;
+      font-size: 1.2rem;
+      font-weight: 900;
+      color: #a20513;
+      line-height: 1.1;
+    }
+
+    .history-record-subtitle {
+      font-size: 12px;
+      color: #3f2a28;
+      font-weight: 700;
+      margin-top: 2px;
+    }
+
+    .history-record-total {
+      font-family: 'Epilogue', sans-serif;
+      font-size: 1rem;
+      font-weight: 800;
+      color: #1b1d0e;
+      white-space: nowrap;
+    }
+
+    .history-plate {
+      border: 2px solid #f0d5d5;
+      border-radius: 12px;
+      background: #ffffff;
+      padding: 10px 12px;
+      margin-top: 10px;
+    }
+
+    .history-plate:nth-child(odd) {
+      background: #fffaf3;
+      border-color: #f3dfc0;
+    }
+
+    .history-plate-title {
+      font-size: 12px;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      font-weight: 800;
+      color: #7a1f1f;
+      margin-bottom: 8px;
+      border-bottom: 1px dashed rgba(122, 31, 31, 0.28);
+      padding-bottom: 4px;
+    }
+
+    .history-item {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 14px;
+      color: #1a120f;
+      line-height: 1.35;
+      margin-bottom: 6px;
+      padding: 6px 8px;
+      border-radius: 10px;
+      background: rgba(255, 255, 255, 0.9);
+      border: 1px solid rgba(122, 31, 31, 0.12);
+    }
+
+    .history-item:last-child {
+      margin-bottom: 0;
+    }
+
+    .history-item-qty {
+      min-width: 44px;
+      padding: 2px 6px;
+      border-radius: 999px;
+      text-align: center;
+      font-size: 12px;
+      font-weight: 900;
+      color: #ffffff;
+      background: #a20513;
+      letter-spacing: 0.03em;
+    }
+
+    .history-item-name {
+      font-weight: 700;
+      color: #1b1d0e;
+    }
+
+    .history-empty-item {
+      font-size: 13px;
+      font-weight: 700;
+      color: #6b4f4c;
+      padding: 6px 2px;
+    }
+
     .table-edit-btn {
       width: 44px;
       height: 44px;
@@ -805,6 +910,9 @@
   <button id="add-table-button" class="fixed right-6 bottom-8 w-16 h-16 bg-primary rounded-full flex items-center justify-center text-white shadow-[0_12px_24px_rgba(162,5,19,0.4)] active:scale-95 transition-transform z-40">
     <span class="material-symbols-outlined text-3xl">add</span>
   </button>
+  <div id="add-table-hint" style="bottom: 6.5rem;" class="fixed right-5 z-40 text-[11px] font-bold uppercase tracking-[0.08em] bg-white/95 text-primary px-3 py-1 rounded-full shadow-[0_8px_16px_rgba(27,29,14,0.2)] pointer-events-none">
+    Agregar mesa
+  </div>
 
   <div id="detail-actions-bar" class="hidden fixed bottom-6 left-6 right-6 z-40">
     <div class="flex items-center justify-between gap-3">
@@ -941,8 +1049,17 @@
     let dragScrollVelocity = 0;
     let dragScrollAnimationFrame = null;
 
+    function dateKeyFrom(value = new Date()) {
+      const date = value instanceof Date ? value : new Date(value);
+      if (Number.isNaN(date.getTime())) return "";
+      const year = date.getFullYear();
+      const month = String(date.getMonth() + 1).padStart(2, "0");
+      const day = String(date.getDate()).padStart(2, "0");
+      return `${year}-${month}-${day}`;
+    }
+
     function todayKey() {
-      return new Date().toISOString().slice(0, 10);
+      return dateKeyFrom(new Date());
     }
 
     function createPlate(index) {
@@ -1056,7 +1173,7 @@
       const today = todayKey();
       state.history = allHistory.filter((record) => {
         if (!record || !record.cleanedAt) return false;
-        return String(record.cleanedAt).slice(0, 10) === today;
+        return dateKeyFrom(record.cleanedAt) === today;
       });
       persistHistory();
     }
@@ -1066,7 +1183,7 @@
     }
 
     function userCanAccessHistory() {
-      return String(state.meseraNombre).trim().toLowerCase() === "brian";
+      return true;
     }
 
     function pushHistoryRecord(table) {
@@ -1755,6 +1872,16 @@
       return { qty, name: withoutVariant || "Item" };
     }
 
+    function renderHistoryItemLine(itemLine) {
+      const { qty, name } = parseHistoryItem(itemLine);
+      return `
+        <p class="history-item">
+          <span class="history-item-qty">${qty}x</span>
+          <span class="history-item-name">${name}</span>
+        </p>
+      `;
+    }
+
     function summarizeHistoryRecordItems(record) {
       const counter = {};
       const plates = Array.isArray(record.plates) ? record.plates : [];
@@ -1812,6 +1939,59 @@
           };
         })
       };
+    }
+
+    function createTicketDataFromHistoryRecord(record) {
+      const plates = Array.isArray(record.plates) ? record.plates : [];
+      return {
+        id: `ticket_historial_mesa_${record.tableNumber}_${Date.now()}`,
+        type: "ticket",
+        tableId: `historial_mesa_${record.tableNumber}`,
+        tableNumber: Number(record.tableNumber) || 0,
+        mesera: String(record.cleanedBy || state.meseraNombre || "Sin nombre"),
+        createdAt: String(record.cleanedAt || new Date().toISOString()),
+        plateSeparator: "=========================",
+        plates: plates.map((plate, index) => {
+          const items = Array.isArray(plate.items) ? plate.items : [];
+          return {
+            id: `hist_plate_${index + 1}`,
+            name: plate.name || `Plato ${index + 1}`,
+            items: items.map((itemLine) => {
+              const line = String(itemLine || "").trim();
+              const qtyMatch = line.match(/^(\d+)\s*x\s*/i);
+              const qty = qtyMatch ? Number(qtyMatch[1]) : 1;
+              const name = line.replace(/^(\d+)\s*x\s*/i, "").trim() || "Item";
+              return {
+                id: `hist_item_${index + 1}`,
+                name,
+                variant: "",
+                qty,
+                price: 0,
+                subtotal: 0
+              };
+            })
+          };
+        }),
+        total: Number(record.totalBeforeClear) || 0
+      };
+    }
+
+    async function printHistoryRecordTicket(recordId) {
+      const record = state.history.find((entry) => entry.id === recordId);
+      if (!record) {
+        showToast("No se encontró el registro del historial.", "error");
+        return;
+      }
+      const ticket = createTicketDataFromHistoryRecord(record);
+      state.printQueue.unshift(ticket);
+      persistPrintQueue();
+      try {
+        await enqueueRemote(ticket);
+        playNotificationSound("ticket");
+        showToast(`Ticket de Mesa ${record.tableNumber} enviado a impresión.`);
+      } catch (_) {
+        showToast("No se pudo enviar el ticket del historial.", "error");
+      }
     }
 
     async function printHistorySummary() {
@@ -2134,6 +2314,7 @@
       const detail = document.getElementById("detail-view");
       const history = document.getElementById("history-view");
       const addTableButton = document.getElementById("add-table-button");
+      const addTableHint = document.getElementById("add-table-hint");
       const detailActionsBar = document.getElementById("detail-actions-bar");
       const headerPlateWrapper = document.getElementById("header-plate-wrapper");
 
@@ -2141,12 +2322,14 @@
       detail.classList.add("hidden");
       history.classList.add("hidden");
       addTableButton.classList.add("hidden");
+      addTableHint.classList.add("hidden");
       detailActionsBar.classList.add("hidden");
       headerPlateWrapper.classList.add("hidden");
 
       if (view === "tables") {
         tables.classList.remove("hidden");
         addTableButton.classList.remove("hidden");
+        addTableHint.classList.remove("hidden");
       } else if (view === "detail") {
         detail.classList.remove("hidden");
         detailActionsBar.classList.remove("hidden");
@@ -2679,18 +2862,43 @@
         return;
       }
       list.innerHTML = state.history.map((record) => {
-        const plates = record.plates.map((plate) => {
-          const detail = plate.items.length ? plate.items.join(" • ") : "Sin productos";
-          return `<p class="text-xs text-on-surface-variant"><strong>${plate.name}:</strong> ${detail}</p>`;
+        const plates = (Array.isArray(record.plates) ? record.plates : []).map((plate) => {
+          const items = Array.isArray(plate.items) ? plate.items : [];
+          const detail = items.length
+            ? items.map((line) => renderHistoryItemLine(line)).join("")
+            : `<p class="history-empty-item">Sin productos</p>`;
+          return `
+            <div class="history-plate">
+              <p class="history-plate-title">${plate.name || "Plato"}</p>
+              ${detail}
+            </div>
+          `;
         }).join("");
         return `
-          <article class="bg-white/70 rounded-2xl p-4">
-            <p class="font-semibold">Mesa ${record.tableNumber} limpiada por ${record.cleanedBy}</p>
-            <p class="text-xs text-on-surface-variant">${new Date(record.cleanedAt).toLocaleString("es-MX")} • Total previo: ${formatMoney(record.totalBeforeClear)}</p>
-            <div class="mt-2 space-y-1">${plates}</div>
+          <article class="history-record">
+            <div class="history-record-header">
+              <div>
+                <p class="history-record-title">Mesa ${record.tableNumber}</p>
+                <p class="history-record-subtitle">${new Date(record.cleanedAt).toLocaleString("es-MX")} • ${record.cleanedBy}</p>
+              </div>
+              <div class="text-right">
+                <p class="history-record-total">${formatMoney(Number(record.totalBeforeClear) || 0)}</p>
+                <button data-history-print="${record.id}" class="mt-2 bg-emerald-600 text-white px-3 py-2 rounded-xl font-semibold hover:bg-emerald-700 flex items-center gap-1 text-sm">
+                  <span class="material-symbols-outlined" style="font-size: 18px;">print</span>
+                  Imprimir
+                </button>
+              </div>
+            </div>
+            <div>${plates}</div>
           </article>
         `;
       }).join("");
+
+      list.querySelectorAll("[data-history-print]").forEach((btn) => {
+        btn.addEventListener("click", () => {
+          printHistoryRecordTicket(btn.dataset.historyPrint);
+        });
+      });
     }
 
     function renderLoggedUser() {
