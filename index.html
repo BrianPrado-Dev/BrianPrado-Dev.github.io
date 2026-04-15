@@ -1,13 +1,17 @@
 <!DOCTYPE html>
 <html lang="es">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Brian Prado | Ingeniería Mecatrónica & Software</title>
-    <meta name="description" content="Portafolio de Brian Prado — Estudiante de Ingeniería Mecatrónica en CETI Colomos. Desarrollo de software, manufactura y proyectos de ingeniería.">
+    <meta name="description"
+        content="Portafolio de Brian Prado — Estudiante de Ingeniería Mecatrónica en CETI Colomos. Desarrollo de software, manufactura y proyectos de ingeniería.">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600&display=swap"
+        rel="stylesheet">
     <style>
         /* ============================================
            DESIGN SYSTEM — TOKENS
@@ -48,7 +52,9 @@
         /* ============================================
            RESET & BASE
            ============================================ */
-        *, *::before, *::after {
+        *,
+        *::before,
+        *::after {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
@@ -222,8 +228,8 @@
             position: absolute;
             inset: 0;
             background-image:
-                linear-gradient(rgba(255,255,255,0.018) 1px, transparent 1px),
-                linear-gradient(90deg, rgba(255,255,255,0.018) 1px, transparent 1px);
+                linear-gradient(rgba(255, 255, 255, 0.018) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(255, 255, 255, 0.018) 1px, transparent 1px);
             background-size: 72px 72px;
             mask-image: radial-gradient(ellipse 70% 55% at 50% 45%, black, transparent);
             -webkit-mask-image: radial-gradient(ellipse 70% 55% at 50% 45%, black, transparent);
@@ -271,8 +277,17 @@
         }
 
         @keyframes pulse-glow {
-            0%, 100% { opacity: 1; box-shadow: 0 0 0 0 var(--accent-glow); }
-            50% { opacity: 0.6; box-shadow: 0 0 0 6px transparent; }
+
+            0%,
+            100% {
+                opacity: 1;
+                box-shadow: 0 0 0 0 var(--accent-glow);
+            }
+
+            50% {
+                opacity: 0.6;
+                box-shadow: 0 0 0 6px transparent;
+            }
         }
 
         .hero-title {
@@ -364,7 +379,7 @@
         }
 
         .btn-ghost:hover {
-            background: rgba(255,255,255,0.04);
+            background: rgba(255, 255, 255, 0.04);
             border-color: var(--border-hover);
         }
 
@@ -384,9 +399,9 @@
             max-width: 460px;
             overflow: hidden;
             box-shadow:
-                0 0 0 1px rgba(255,255,255,0.04),
-                0 25px 60px -15px rgba(0,0,0,0.55),
-                0 0 120px -40px rgba(0,255,200,0.08);
+                0 0 0 1px rgba(255, 255, 255, 0.04),
+                0 25px 60px -15px rgba(0, 0, 0, 0.55),
+                0 0 120px -40px rgba(0, 255, 200, 0.08);
             will-change: transform;
         }
 
@@ -399,10 +414,23 @@
             border-bottom: 1px solid var(--border);
         }
 
-        .t-dot { width: 12px; height: 12px; border-radius: 50%; }
-        .t-dot.r { background: #ff5f57; }
-        .t-dot.y { background: #febc2e; }
-        .t-dot.g { background: #28c840; }
+        .t-dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+        }
+
+        .t-dot.r {
+            background: #ff5f57;
+        }
+
+        .t-dot.y {
+            background: #febc2e;
+        }
+
+        .t-dot.g {
+            background: #28c840;
+        }
 
         .t-title {
             margin-left: auto;
@@ -430,12 +458,29 @@
             text-align: right;
         }
 
-        .t-kw { color: #ff79c6; }
-        .t-fn { color: #50fa7b; }
-        .t-str { color: #f1fa8c; }
-        .t-var { color: #8be9fd; }
-        .t-op { color: #ff79c6; }
-        .t-cm { color: #6272a4; }
+        .t-kw {
+            color: #ff79c6;
+        }
+
+        .t-fn {
+            color: #50fa7b;
+        }
+
+        .t-str {
+            color: #f1fa8c;
+        }
+
+        .t-var {
+            color: #8be9fd;
+        }
+
+        .t-op {
+            color: #ff79c6;
+        }
+
+        .t-cm {
+            color: #6272a4;
+        }
 
         .hero-float {
             position: absolute;
@@ -448,12 +493,19 @@
             display: flex;
             align-items: center;
             gap: 0.5rem;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.35);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.35);
             will-change: transform;
         }
 
-        .hero-float.top { top: -15px; left: -25px; }
-        .hero-float.bottom { bottom: -15px; right: -25px; }
+        .hero-float.top {
+            top: -15px;
+            left: -25px;
+        }
+
+        .hero-float.bottom {
+            bottom: -15px;
+            right: -25px;
+        }
 
         /* ============================================
            SECTION UTILITIES
@@ -516,13 +568,11 @@
             transform: translateX(-50%);
             width: 2px;
             height: 100%;
-            background: linear-gradient(
-                to bottom,
-                transparent,
-                var(--accent) 20%,
-                var(--accent) 80%,
-                transparent
-            );
+            background: linear-gradient(to bottom,
+                    transparent,
+                    var(--accent) 20%,
+                    var(--accent) 80%,
+                    transparent);
             opacity: 0.3;
         }
 
@@ -562,8 +612,17 @@
         }
 
         @keyframes pulse-ring {
-            0%, 100% { transform: scale(1); opacity: 1; }
-            50% { transform: scale(1.4); opacity: 0; }
+
+            0%,
+            100% {
+                transform: scale(1);
+                opacity: 1;
+            }
+
+            50% {
+                transform: scale(1.4);
+                opacity: 0;
+            }
         }
 
         .timeline-date {
@@ -704,7 +763,7 @@
             content: '';
             position: absolute;
             inset: 0;
-            background: linear-gradient(180deg, transparent 60%, rgba(13,13,13,0.4));
+            background: linear-gradient(180deg, transparent 60%, rgba(13, 13, 13, 0.4));
             pointer-events: none;
         }
 
@@ -808,8 +867,8 @@
             position: absolute;
             inset: 0;
             background:
-                radial-gradient(circle at 30% 40%, rgba(0,255,200,0.05), transparent 60%),
-                radial-gradient(circle at 70% 70%, rgba(184,255,87,0.04), transparent 60%);
+                radial-gradient(circle at 30% 40%, rgba(0, 255, 200, 0.05), transparent 60%),
+                radial-gradient(circle at 70% 70%, rgba(184, 255, 87, 0.04), transparent 60%);
         }
 
         .project-icon-svg {
@@ -861,7 +920,7 @@
             background-clip: text;
         }
 
-        .contact-left > p {
+        .contact-left>p {
             color: var(--text-secondary);
             font-size: 1.05rem;
             line-height: 1.7;
@@ -952,7 +1011,7 @@
             content: '';
             position: absolute;
             inset: 0;
-            background: linear-gradient(135deg, rgba(0,255,200,0.04), rgba(184,255,87,0.03));
+            background: linear-gradient(135deg, rgba(0, 255, 200, 0.04), rgba(184, 255, 87, 0.03));
         }
 
         .cta-card-body {
@@ -960,7 +1019,11 @@
             z-index: 1;
         }
 
-        .cta-emoji { font-size: 3.5rem; margin-bottom: 1.5rem; display: block; }
+        .cta-emoji {
+            font-size: 3.5rem;
+            margin-bottom: 1.5rem;
+            display: block;
+        }
 
         .cta-card h3 {
             font-size: 1.35rem;
@@ -1024,11 +1087,25 @@
                 text-align: center;
             }
 
-            .hero-text { align-items: center; }
-            .hero-subtitle { max-width: 100%; }
-            .hero-tags { justify-content: center; }
-            .hero-buttons { justify-content: center; }
-            .hero-float { display: none; }
+            .hero-text {
+                align-items: center;
+            }
+
+            .hero-subtitle {
+                max-width: 100%;
+            }
+
+            .hero-tags {
+                justify-content: center;
+            }
+
+            .hero-buttons {
+                justify-content: center;
+            }
+
+            .hero-float {
+                display: none;
+            }
 
             .terminal-window {
                 max-width: 100%;
@@ -1074,7 +1151,9 @@
                 gap: 3rem;
             }
 
-            .contact-right { order: -1; }
+            .contact-right {
+                order: -1;
+            }
 
             .footer-inner {
                 flex-direction: column;
@@ -1083,9 +1162,14 @@
         }
 
         @media (max-width: 600px) {
-            #navbar { padding: 0.85rem 1rem; }
+            #navbar {
+                padding: 0.85rem 1rem;
+            }
 
-            .nav-links { display: none; }
+            .nav-links {
+                display: none;
+            }
+
             .nav-links.open {
                 display: flex;
                 flex-direction: column;
@@ -1093,17 +1177,23 @@
                 top: 100%;
                 left: 0;
                 right: 0;
-                background: rgba(13,13,13,0.95);
+                background: rgba(13, 13, 13, 0.95);
                 backdrop-filter: blur(20px);
                 padding: 1rem;
                 border-bottom: 1px solid var(--border);
             }
 
-            .nav-toggle { display: block; }
+            .nav-toggle {
+                display: block;
+            }
 
-            #hero { padding: 5rem 1rem 3rem; }
+            #hero {
+                padding: 5rem 1rem 3rem;
+            }
 
-            .hero-title { font-size: 2.2rem; }
+            .hero-title {
+                font-size: 2.2rem;
+            }
 
             .hero-buttons {
                 flex-direction: column;
@@ -1115,7 +1205,9 @@
                 justify-content: center;
             }
 
-            .project-card-inner { padding: 1rem; }
+            .project-card-inner {
+                padding: 1rem;
+            }
         }
 
         /* ============================================
@@ -1126,6 +1218,7 @@
         }
     </style>
 </head>
+
 <body>
     <div class="noise-overlay"></div>
     <div class="ambient-glow"></div>
@@ -1157,17 +1250,16 @@
             <div class="hero-text gs-hidden">
                 <div class="hero-badge">
                     <span class="pulse-dot"></span>
-                    Técnico de Manufactura @ Tormach
+                    Online
                 </div>
                 <h1 class="hero-title">
                     Ingeniería que<br>
                     <span class="accent-text">se convierte en realidad.</span>
                 </h1>
                 <p class="hero-subtitle">
-                    Soy <strong>Brian Prado</strong>, estudiante de 5to semestre de
+                    Soy <strong>Brian Prado</strong>, estudiante de 6to semestre de
                     <strong>Ingeniería Mecatrónica</strong> en CETI Colomos.
-                    Construyo software, diseño sistemas y creo experiencias digitales
-                    con precisión de ingeniería.
+                    Me gusta combinar la ingenieria con retos de mi dia a dia.
                 </p>
                 <div class="hero-tags">
                     <span class="hero-tag">⚡ C++</span>
@@ -1194,14 +1286,25 @@
                         <span class="t-title">brian_prado.py</span>
                     </div>
                     <div class="terminal-body">
-                        <div class="t-line"><span class="t-num">1</span><span><span class="t-kw">class</span> <span class="t-fn">Engineer</span>:</span></div>
-                        <div class="t-line"><span class="t-num">2</span><span>&nbsp;&nbsp;<span class="t-kw">def</span> <span class="t-fn">__init__</span>(<span class="t-var">self</span>):</span></div>
-                        <div class="t-line"><span class="t-num">3</span><span>&nbsp;&nbsp;&nbsp;&nbsp;<span class="t-var">self</span>.name <span class="t-op">=</span> <span class="t-str">"Brian Prado"</span></span></div>
-                        <div class="t-line"><span class="t-num">4</span><span>&nbsp;&nbsp;&nbsp;&nbsp;<span class="t-var">self</span>.field <span class="t-op">=</span> <span class="t-str">"Mechatronics"</span></span></div>
-                        <div class="t-line"><span class="t-num">5</span><span>&nbsp;&nbsp;&nbsp;&nbsp;<span class="t-var">self</span>.semester <span class="t-op">=</span> <span class="t-str">5</span></span></div>
+                        <div class="t-line"><span class="t-num">1</span><span><span class="t-kw">class</span> <span
+                                    class="t-fn">Engineer</span>:</span></div>
+                        <div class="t-line"><span class="t-num">2</span><span>&nbsp;&nbsp;<span class="t-kw">def</span>
+                                <span class="t-fn">__init__</span>(<span class="t-var">self</span>):</span></div>
+                        <div class="t-line"><span class="t-num">3</span><span>&nbsp;&nbsp;&nbsp;&nbsp;<span
+                                    class="t-var">self</span>.name <span class="t-op">=</span> <span
+                                    class="t-str">"Brian Prado"</span></span></div>
+                        <div class="t-line"><span class="t-num">4</span><span>&nbsp;&nbsp;&nbsp;&nbsp;<span
+                                    class="t-var">self</span>.field <span class="t-op">=</span> <span
+                                    class="t-str">"Mechatronics"</span></span></div>
+                        <div class="t-line"><span class="t-num">5</span><span>&nbsp;&nbsp;&nbsp;&nbsp;<span
+                                    class="t-var">self</span>.semester <span class="t-op">=</span> <span
+                                    class="t-str">5</span></span></div>
                         <div class="t-line"><span class="t-num">6</span><span></span></div>
-                        <div class="t-line"><span class="t-num">7</span><span>&nbsp;&nbsp;<span class="t-kw">def</span> <span class="t-fn">build</span>(<span class="t-var">self</span>, idea):</span></div>
-                        <div class="t-line"><span class="t-num">8</span><span>&nbsp;&nbsp;&nbsp;&nbsp;<span class="t-kw">return</span> idea.to_reality() <span class="t-cm"># 🚀</span></span></div>
+                        <div class="t-line"><span class="t-num">7</span><span>&nbsp;&nbsp;<span class="t-kw">def</span>
+                                <span class="t-fn">build</span>(<span class="t-var">self</span>, idea):</span></div>
+                        <div class="t-line"><span class="t-num">8</span><span>&nbsp;&nbsp;&nbsp;&nbsp;<span
+                                    class="t-kw">return</span> idea.to_reality() <span class="t-cm"># 🚀</span></span>
+                        </div>
                     </div>
                 </div>
                 <div class="hero-float bottom">🚀 +4 proyectos</div>
@@ -1216,7 +1319,7 @@
                 <span class="section-label">// Experiencia</span>
                 <h2 class="section-title">Trayectoria profesional</h2>
                 <p class="section-desc" style="margin-left:auto;margin-right:auto;">
-                    Mi camino en la industria, combinando conocimiento académico con experiencia práctica en manufactura de precisión.
+                    Mi camino en la industria, combinando conocimiento académico con experiencia práctica.
                 </p>
             </div>
 
@@ -1233,9 +1336,12 @@
                         </div>
                         <div class="timeline-desc">
                             <ul>
-                                <li>Calibración y verificación de tornos y fresadoras CNC tras el ensamble, asegurando parámetros de precisión para despacho.</li>
-                                <li>Preparación, empaquetado y coordinación de envíos de maquinaria hacia el área de embarques.</li>
-                                <li>Ejecución de pruebas funcionales post-ensamble para garantizar el correcto desempeño de cada unidad.</li>
+                                <li>Calibración y verificación de tornos y fresadoras CNC tras el ensamble, asegurando
+                                    parámetros de precisión para despacho.</li>
+                                <li>Preparación, empaquetado y coordinación de envíos de maquinaria hacia el área de
+                                    embarques.</li>
+                                <li>Ejecución de pruebas funcionales post-ensamble para garantizar el correcto desempeño
+                                    de cada unidad.</li>
                             </ul>
                         </div>
                         <div class="timeline-tags">
@@ -1282,7 +1388,8 @@
                         <span>Responsive</span>
                     </div>
                     <div class="project-actions">
-                        <a href="https://brianprado.me/Tortas/index.html" target="_blank" rel="noopener noreferrer" class="project-btn primary">
+                        <a href="https://brianprado.me/Tortas/index.html" target="_blank" rel="noopener noreferrer"
+                            class="project-btn primary">
                             Ver sitio →
                         </a>
                     </div>
@@ -1310,7 +1417,8 @@
                         <span>Tickets</span>
                     </div>
                     <div class="project-actions">
-                        <a href="https://github.com/BrianPrado-Dev/TortasAhogadas" target="_blank" rel="noopener noreferrer" class="project-btn primary">
+                        <a href="https://github.com/BrianPrado-Dev/TortasAhogadas" target="_blank"
+                            rel="noopener noreferrer" class="project-btn primary">
                             Ver código →
                         </a>
                     </div>
@@ -1338,7 +1446,8 @@
                         <span>Game Dev</span>
                     </div>
                     <div class="project-actions">
-                        <a href="https://github.com/BrianPrado-Dev/Tetrix" target="_blank" rel="noopener noreferrer" class="project-btn primary">
+                        <a href="https://github.com/BrianPrado-Dev/Tetrix" target="_blank" rel="noopener noreferrer"
+                            class="project-btn primary">
                             Ver código →
                         </a>
                     </div>
@@ -1369,7 +1478,8 @@
                         </div>
                         <span class="contact-arrow">→</span>
                     </a>
-                    <a href="https://github.com/BrianPrado-Dev" target="_blank" rel="noopener noreferrer" class="contact-link">
+                    <a href="https://github.com/BrianPrado-Dev" target="_blank" rel="noopener noreferrer"
+                        class="contact-link">
                         <div class="contact-icon">💻</div>
                         <div class="contact-text">
                             <span class="contact-label">GitHub</span>
@@ -1767,4 +1877,5 @@
         });
     </script>
 </body>
+
 </html>
