@@ -723,13 +723,23 @@
             margin-right: auto;
         }
 
+        .projects-stack-container {
+            position: relative;
+            width: 100%;
+            height: 100vh;
+            overflow: hidden;
+        }
+
         .project-panel {
             width: 100%;
             height: 100vh;
             display: grid;
             place-items: center;
-            position: relative;
+            position: absolute;
+            top: 0;
+            left: 0;
             overflow: hidden;
+            will-change: transform;
         }
 
         .project-card-inner {
@@ -739,7 +749,13 @@
             align-items: center;
             max-width: 1100px;
             width: 100%;
-            padding: 2rem;
+            padding: 3.5rem;
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-xl);
+            box-shadow: 0 25px 60px rgba(0, 0, 0, 0.4);
+            position: relative;
+            z-index: 1;
         }
 
         .project-img-wrap {
@@ -1117,7 +1133,13 @@
                 padding: 1.5rem;
             }
 
+            .projects-stack-container {
+                height: auto;
+                overflow: visible;
+            }
+
             .project-panel {
+                position: relative;
                 height: auto;
                 min-height: 100vh;
                 padding: 3rem 0;
@@ -1298,7 +1320,7 @@
                                     class="t-str">"Mechatronics"</span></span></div>
                         <div class="t-line"><span class="t-num">5</span><span>&nbsp;&nbsp;&nbsp;&nbsp;<span
                                     class="t-var">self</span>.semester <span class="t-op">=</span> <span
-                                    class="t-str">5</span></span></div>
+                                    class="t-str">6</span></span></div>
                         <div class="t-line"><span class="t-num">6</span><span></span></div>
                         <div class="t-line"><span class="t-num">7</span><span>&nbsp;&nbsp;<span class="t-kw">def</span>
                                 <span class="t-fn">build</span>(<span class="t-var">self</span>, idea):</span></div>
@@ -1369,6 +1391,7 @@
         </div>
 
         <!-- Project 1: Tortas Susy Web -->
+        <div class="projects-stack-container">
         <div class="project-panel" id="project-1">
             <div class="project-card-inner">
                 <div class="project-img-wrap gs-hidden">
@@ -1453,6 +1476,7 @@
                     </div>
                 </div>
             </div>
+        </div>
         </div>
 
     </section>
@@ -1692,99 +1716,86 @@
                 // ------------------------------------------
                 const panels = gsap.utils.toArray(".project-panel");
 
-                panels.forEach((panel, i) => {
+                // Ensure visibility for inner elements
+                panels.forEach((panel) => {
                     const imgWrap = panel.querySelector(".project-img-wrap, .project-icon-large");
                     const meta = panel.querySelector(".project-meta");
-
-                    // Remove gs-hidden
                     if (imgWrap) imgWrap.classList.remove("gs-hidden");
                     if (meta) meta.classList.remove("gs-hidden");
+                });
 
-                    if (isDesktop && !reduceMotion) {
-                        // Pin each panel for stacking effect
-                        ScrollTrigger.create({
-                            trigger: panel,
-                            start: "top top",
-                            end: "bottom top",
-                            pin: true,
-                            pinSpacing: true
+                if (isDesktop && !reduceMotion) {
+                    // Set all panels except the first to start directly below viewport
+                    gsap.set(panels.slice(1), { yPercent: 100 });
+
+                    // Animate the first card elements individually since it's immediately visible
+                    const firstImgWrap = panels[0].querySelector(".project-img-wrap");
+                    if (firstImgWrap) {
+                        gsap.from(firstImgWrap, { autoAlpha: 0, y: 40, duration: 1, ease: "power2.out", 
+                            scrollTrigger: { trigger: panels[0], start: "top 70%" }
                         });
-
-                        // Image entrance
-                        const imgEl = imgWrap ? imgWrap.querySelector("img") : null;
-                        if (imgEl) {
-                            gsap.from(imgEl, {
-                                scale: 1.15,
-                                duration: 1.2,
-                                ease: "power2.out",
-                                scrollTrigger: {
-                                    trigger: panel,
-                                    start: "top 60%",
-                                    toggleActions: "play none none none"
-                                }
-                            });
-                        }
-
-                        gsap.from(imgWrap, {
-                            autoAlpha: 0,
-                            y: 60,
-                            duration: 1,
-                            ease: "power2.out",
-                            scrollTrigger: {
-                                trigger: panel,
-                                start: "top 70%",
-                                toggleActions: "play none none none"
-                            }
-                        });
-
-                        // Meta entrance
-                        const metaTl = gsap.timeline({
-                            defaults: { duration: 0.7, ease: "power2.out" },
-                            scrollTrigger: {
-                                trigger: panel,
-                                start: "top 60%",
-                                toggleActions: "play none none none"
-                            }
-                        });
-
-                        metaTl
-                            .from(meta.querySelector(".project-number"), { autoAlpha: 0, y: 15 })
-                            .from(meta.querySelector(".project-title"), { autoAlpha: 0, y: 25 }, "<0.1")
-                            .from(meta.querySelector(".project-desc"), { autoAlpha: 0, y: 20 }, "<0.1")
-                            .from(meta.querySelector(".project-stack"), { autoAlpha: 0, y: 15 }, "<0.1")
-                            .from(meta.querySelector(".project-actions"), { autoAlpha: 0, y: 15 }, "<0.1");
-
-                    } else {
-                        // Mobile: simple scroll-triggered fade-in
-                        if (imgWrap) {
-                            gsap.from(imgWrap, {
-                                autoAlpha: 0,
-                                y: 40,
-                                duration: dur !== undefined ? dur : 0.8,
-                                ease: "power2.out",
-                                scrollTrigger: {
-                                    trigger: panel,
-                                    start: "top 80%",
-                                    toggleActions: "play none none none"
-                                }
-                            });
-                        }
-
-                        if (meta) {
-                            gsap.from(meta, {
-                                autoAlpha: 0,
-                                y: 30,
-                                duration: dur !== undefined ? dur : 0.8,
-                                ease: "power2.out",
-                                scrollTrigger: {
-                                    trigger: panel,
-                                    start: "top 75%",
-                                    toggleActions: "play none none none"
-                                }
+                        const firstImgEl = firstImgWrap.querySelector("img");
+                        if (firstImgEl) {
+                            gsap.from(firstImgEl, { scale: 1.15, duration: 1.2, ease: "power2.out", 
+                                scrollTrigger: { trigger: panels[0], start: "top 70%" }
                             });
                         }
                     }
-                });
+                    const firstMetaTl = gsap.timeline({ scrollTrigger: { trigger: panels[0], start: "top 70%" }});
+                    firstMetaTl
+                        .from(panels[0].querySelector(".project-number"), { autoAlpha: 0, y: 15, duration: 0.7 })
+                        .from(panels[0].querySelector(".project-title"), { autoAlpha: 0, y: 25, duration: 0.7 }, "<0.1")
+                        .from(panels[0].querySelector(".project-desc"), { autoAlpha: 0, y: 20, duration: 0.7 }, "<0.1")
+                        .from(panels[0].querySelector(".project-stack"), { autoAlpha: 0, y: 15, duration: 0.7 }, "<0.1")
+                        .from(panels[0].querySelector(".project-actions"), { autoAlpha: 0, y: 15, duration: 0.7 }, "<0.1");
+
+                    // Definir Timeline del "Stack" para contenedor .projects-stack-container
+                    const stackTl = gsap.timeline({
+                        scrollTrigger: {
+                            trigger: ".projects-stack-container",
+                            start: "top top",
+                            end: "+=120%", // Reducido drásticamente de (length * 100vh) a 120vh total
+                            pin: true,
+                            scrub: 1,
+                        }
+                    });
+
+                    panels.forEach((panel, i) => {
+                        if (i === 0) return;
+
+                        // Efecto opcional de escala "profundidad" a la carta inferior
+                        stackTl.to(panels[i - 1], {
+                            scale: 0.95,
+                            opacity: 0.5,
+                            ease: "none"
+                        }, (i - 1)); // Forzamos a que inicie en el segundo 0, 1, etc.
+
+                        // Card entrando deslizándose 
+                        stackTl.to(panel, {
+                            yPercent: 0,
+                            ease: "none"
+                        }, (i - 1)); // Lo sincronizamos con la misma posición
+                    });
+                } else {
+                    // Mobile: comportamiento anterior normal al bajar scroll
+                    panels.forEach((panel) => {
+                        const imgWrap = panel.querySelector(".project-img-wrap, .project-icon-large");
+                        const meta = panel.querySelector(".project-meta");
+
+                        if (imgWrap) {
+                            gsap.from(imgWrap, {
+                                autoAlpha: 0, y: 40, duration: dur !== undefined ? dur : 0.8, ease: "power2.out",
+                                scrollTrigger: { trigger: panel, start: "top 80%", toggleActions: "play none none none" }
+                            });
+                        }
+                        if (meta) {
+                            gsap.from(meta, {
+                                autoAlpha: 0, y: 30, duration: dur !== undefined ? dur : 0.8, ease: "power2.out",
+                                scrollTrigger: { trigger: panel, start: "top 75%", toggleActions: "play none none none" }
+                            });
+                        }
+                    });
+                }
 
                 // ------------------------------------------
                 // CONTACT SECTION
