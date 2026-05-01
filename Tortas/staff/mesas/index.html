@@ -1000,7 +1000,7 @@
 
     const MENU = {
       comida: [
-        { id: "torta_ahogada", name: "Torta Ahogada", price: 55, note: "Carnitas, Buche, Lengua, Mixta" },
+        { id: "torta_ahogada", name: "Torta Ahogada", price: 60, note: "Carnitas, Buche, Lengua, Mixta" },
         { id: "torta_mini", name: "Torta Mini", price: 28, note: "Carnitas, Buche, Lengua, Mixta" },
         { id: "taco_dorado_sencillo", name: "Taco Dorado Sencillo", price: 10, note: "Papa, Frijol, Requesón y Picadillo" },
         { id: "taco_dorado_carne", name: "Taco Dorado con Carne", price: 25, note: "Carnitas, Buche, Lengua, Mixta" },
@@ -1008,11 +1008,11 @@
         { id: "kilo_carne", name: "Kilo de Carne", price: 300, note: "Carnitas, Buche, Lengua, Mixta" }
       ],
       paquetes: [
-        { id: "paquete_1", name: "Paquete #1", price: 85, note: "1 Torta + 1 Taco Dorado Sencillo + 1 Refresco (o Agua Fresca)" },
-        { id: "paquete_2", name: "Paquete #2", price: 90, note: "1 Torta + 2 Tacos Dorados Sencillos + 1 Refresco (o Agua Fresca)" },
-        { id: "paquete_3", name: "Paquete #3", price: 205, note: "3 Tortas + 5 Tacos Dorados Sencillos" },
-        { id: "paquete_4", name: "Paquete #4", price: 320, note: "5 Tortas + 6 Tacos Dorados Sencillos" },
-        { id: "paquete_5", name: "Paquete #5", price: 630, note: "10 Tortas + 10 Tacos Dorados Sencillos" }
+        { id: "paquete_1", name: "Paquete #1", price: 90, note: "1 Torta + 1 Taco Dorado Sencillo + 1 Refresco (o Agua Fresca)" },
+        { id: "paquete_2", name: "Paquete #2", price: 95, note: "1 Torta + 2 Tacos Dorados Sencillos + 1 Refresco (o Agua Fresca)" },
+        { id: "paquete_3", name: "Paquete #3", price: 220, note: "3 Tortas + 5 Tacos Dorados Sencillos" },
+        { id: "paquete_4", name: "Paquete #4", price: 345, note: "5 Tortas + 6 Tacos Dorados Sencillos" },
+        { id: "paquete_5", name: "Paquete #5", price: 680, note: "10 Tortas + 10 Tacos Dorados Sencillos" }
       ],
       bebidas: [
         { id: "refresco_taparosca", name: "Refresco Taparosca", price: 30 },
@@ -1327,17 +1327,7 @@
         const customPrice = parseCustomItemPriceFromVariant(line.variant);
         if (customPrice !== null) return customPrice;
       }
-      const basePrice = ITEM_INDEX[line.itemId].price;
-      if (line.itemId === "paquete_1" || line.itemId === "paquete_2") {
-        const variantText = String(line.variant || "").toLowerCase();
-        const hasBeer =
-          variantText.includes("bebida:cerveza clara") ||
-          variantText.includes("bebida: cerveza clara") ||
-          variantText.includes("bebida:cerveza obscura") ||
-          variantText.includes("bebida: cerveza obscura");
-        if (hasBeer) return basePrice + 5;
-      }
-      return basePrice;
+      return ITEM_INDEX[line.itemId].price;
     }
 
     function getLineSubtotal(line) {
@@ -1537,12 +1527,11 @@
         titleEl.textContent = title;
         optionsEl.innerHTML = options.map((option) => {
           const opt = String(option).toLowerCase();
-          const isBeerWithExtra = opt.includes("cerveza clara") || opt.includes("cerveza obscura");
-          if (isBeerWithExtra) {
+          const isBeerOption = opt.includes("cerveza clara") || opt.includes("cerveza obscura");
+          if (isBeerOption) {
             return `
               <button data-variant-choice="${option}" class="px-4 py-4 rounded-xl font-bold text-left min-h-[64px] ${getOptionButtonClass(title, option)}">
                 <span class="block text-base">👑 ${option}</span>
-                <span class="block text-xs font-medium opacity-90 mt-1">+5</span>
               </button>
             `;
           }
