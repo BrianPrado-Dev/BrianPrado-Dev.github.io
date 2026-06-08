@@ -1021,6 +1021,7 @@
         { id: "agua_500ml", name: "Agua Fresca Chica", price: 15 },
         { id: "cerveza_corona_500ml", name: "Cerveza Corona 500ml", price: 25 },
         { id: "caguama_mega", name: "Caguama Mega", price: 70 },
+        { id: "pgo_tarjeta", name: "Pgo con Tarjeta 4%", price: 0, note: "4% del pedido (solo si ya hay items)" },
         { id: "bebida_otro", name: "Otro", price: 0, note: "Captura nombre y precio" }
       ]
     };
@@ -1323,7 +1324,7 @@
         const parsedTotal = parseKiloCarneTotalFromVariant(line.variant);
         if (parsedTotal !== null) return parsedTotal;
       }
-      if (line.itemId === "bebida_otro") {
+      if (line.itemId === "bebida_otro" || line.itemId === "pgo_tarjeta") {
         const customPrice = parseCustomItemPriceFromVariant(line.variant);
         if (customPrice !== null) return customPrice;
       }
@@ -2170,6 +2171,33 @@
       if (!table) return;
       const plate = getPlateById(table, plateId);
       if (!plate) return;
+
+      // Special handling for pago con tarjeta: only add if table already has items
+      if (itemId === "pgo_tarjeta") {
+        if (!tableHasItems(table)) {
+          showToast("Debe haber items en el pedido para agregar Pgo con Tarjeta", "error");
+          return;
+        }
+        const computed = Math.round(tableTotal(table) * 0.04 * 100) / 100;
+        const variant = `Precio:$${computed.toFixed(2)}`;
+        const qty = 1;
+        const lineKey = makeLineKey(itemId, variant);
+        const current = plate.order[lineKey];
+        if (typeof current === "number") {
+          plate.order[lineKey] = { itemId, qty: current + qty, variant };
+        } else if (current && typeof current === "object") {
+          current.qty = (Number(current.qty) || 0) + qty;
+          current.itemId = itemId;
+          current.variant = variant;
+        } else {
+          plate.order[lineKey] = { itemId, qty, variant };
+        }
+        persistState();
+        renderDetail();
+        renderTables();
+        return;
+      }
+
       const selection = await askItemSelection(itemId);
       if (!selection) return;
       const { variant, qty } = selection;
@@ -2604,7 +2632,14 @@
               <div class="quick-item-header">
                 <span class="quick-item-name">${displayName}</span>
               </div>
-              <div class="quick-item-price">${item.id === "bebida_otro" ? "" : formatMoney(item.price)}</div>
+              <div class="quick-item-price">${(function(){
+                if (item.id === "bebida_otro") return "";
+                if (item.id === "pgo_tarjeta") {
+                  const computed = Math.round(tableTotal(table) * 0.04 * 100) / 100;
+                  return formatMoney(computed);
+                }
+                return formatMoney(item.price);
+              })()}</div>
               ${item.note ? `<div class="quick-item-note">${item.note}</div>` : ''}
             </div>
           `;
