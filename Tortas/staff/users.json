@@ -2,19 +2,19 @@
   "users": [
     {
       "username": "Brian",
-      "password": "Kfc-2020"
+      "passwordSha256": "26ab53b6b62cd066303724eb2dd199466a34102e589ac383f07115ccae85602d"
     },
     {
       "username": "Adriana",
-      "password": "Adriana2"
+      "passwordSha256": "e06b2e57fa2c11cec2dcf2e2fde84d93a09a700c445b2889e784ab0647e6b06e"
     },
     {
       "username": "Lupe",
-      "password": "Lupe2"
+      "passwordSha256": "674eaabfde2e89e41db8ef5caee02ae34748b24507f2534204e7e7ebc6179eac"
     },
     {
       "username": "Ceci",
-      "password": "Ceci2"
+      "passwordSha256": "4c8fb0a9296bf02f659965ff0652258ebbcda4cc5826e13cea1b28e0a92aa337"
     }
   ]
 }

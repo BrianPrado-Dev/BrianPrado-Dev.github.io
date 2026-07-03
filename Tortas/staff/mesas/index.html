@@ -3,6 +3,11 @@
 <head>
   <meta charset="utf-8" />
   <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+  <script>
+    if (sessionStorage.getItem("autenticado") !== "true") {
+      window.location.replace("../index.html");
+    }
+  </script>
   <title>Doña Susy - Gestión de Mesas</title>
   <link href="https://fonts.googleapis.com/css2?family=Epilogue:wght@400;700;800;900&family=Be+Vietnam+Pro:wght@400;500;600;700&display=swap" rel="stylesheet" />
   <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet" />
@@ -814,6 +819,10 @@
       <div class="flex items-center gap-2">
         <p id="current-user-label" class="text-xs uppercase tracking-widest text-on-surface-variant">Usuario: -</p>
         <select id="profile-switch-select" class="hidden rounded-lg border-outline-variant bg-white/90 text-xs px-2 py-1 min-w-[110px]"></select>
+        <button id="logout-button" class="flex items-center gap-1 bg-red-100 text-red-700 hover:bg-red-200 rounded-xl px-3 py-2 text-xs font-semibold" title="Cerrar sesión">
+          <span class="material-symbols-outlined" style="font-size: 16px;">logout</span>
+          <span>Salir</span>
+        </button>
       </div>
       <div id="header-plate-wrapper" class="hidden items-center gap-2 bg-surface-container-highest/90 rounded-xl px-3 py-2 shadow-[0_8px_16px_rgba(27,29,14,0.12)]">
         <label for="plate-select" class="text-xs font-semibold whitespace-nowrap">Plato actual</label>
@@ -1008,8 +1017,8 @@
         { id: "kilo_carne", name: "Kilo de Carne", price: 300, note: "Carnitas, Buche, Lengua, Mixta" }
       ],
       paquetes: [
-        { id: "paquete_1", name: "Paquete #1", price: 90, note: "1 Torta + 1 Taco Dorado Sencillo + 1 Refresco (o Agua Fresca)" },
-        { id: "paquete_2", name: "Paquete #2", price: 95, note: "1 Torta + 2 Tacos Dorados Sencillos + 1 Refresco (o Agua Fresca)" },
+        { id: "paquete_1", name: "Paquete #1", price: 90, note: "1 Torta + 1 Taco Dorado Sencillo + 1 Refresco (o Agua Fresca; con Cerveza +$5)" },
+        { id: "paquete_2", name: "Paquete #2", price: 95, note: "1 Torta + 2 Tacos Dorados Sencillos + 1 Refresco (o Agua Fresca; con Cerveza +$5)" },
         { id: "paquete_3", name: "Paquete #3", price: 220, note: "3 Tortas + 5 Tacos Dorados Sencillos" },
         { id: "paquete_4", name: "Paquete #4", price: 345, note: "5 Tortas + 6 Tacos Dorados Sencillos" },
         { id: "paquete_5", name: "Paquete #5", price: 680, note: "10 Tortas + 10 Tacos Dorados Sencillos" }
@@ -1019,7 +1028,7 @@
         { id: "refresco_retornable", name: "Refresco Retornable", price: 28 },
         { id: "agua_fresca_1lt", name: "Agua Fresca Grande", price: 25 },
         { id: "agua_500ml", name: "Agua Fresca Chica", price: 15 },
-        { id: "cerveza_corona_500ml", name: "Cerveza Corona 500ml", price: 25 },
+        { id: "cerveza_corona_500ml", name: "Cerveza Corona 500ml", price: 30 },
         { id: "caguama_mega", name: "Caguama Mega", price: 70 },
         { id: "pgo_tarjeta", name: "Pgo con Tarjeta 4%", price: 0, note: "4% del pedido (solo si ya hay items)" },
         { id: "bebida_otro", name: "Otro", price: 0, note: "Captura nombre y precio" }
@@ -1197,7 +1206,14 @@
         plates: table.plates.map((plate) => ({
           name: plate.name,
           items: getPlateLineItems(plate)
-            .map((line) => `${line.qty}x ${getLineDisplayName(line)}${formatVariant(line.variant)}`)
+            .map((line) => `${line.qty}x ${getLineDisplayName(line)}${formatVariant(line.variant)}`),
+          lineItems: getPlateLineItems(plate).map((line) => ({
+            name: getLineDisplayName(line),
+            variant: line.variant || "",
+            qty: line.qty,
+            price: getLineUnitPrice(line),
+            subtotal: getLineSubtotal(line)
+          }))
         }))
       };
       state.history.unshift(record);
@@ -1261,6 +1277,15 @@
       }).filter((line) => line.qty > 0 && ITEM_INDEX[line.itemId]);
     }
 
+    function escapeHtml(value) {
+      return String(value ?? "")
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#39;");
+    }
+
     function formatVariant(variant) {
       return variant ? ` (${variant})` : "";
     }
@@ -1280,12 +1305,12 @@
           const value = part.substring(colonIndex + 1).trim();
           return `
             <div class="inline-flex items-center gap-1 bg-white/60 rounded-lg px-2 py-1 mr-1 mb-1">
-              <span class="text-on-surface-variant text-xs font-medium">${label}:</span>
-              <span class="font-bold text-primary text-sm">${value}</span>
+              <span class="text-on-surface-variant text-xs font-medium">${escapeHtml(label)}:</span>
+              <span class="font-bold text-primary text-sm">${escapeHtml(value)}</span>
             </div>
           `;
         }
-        return `<span class="inline-block bg-white/60 rounded-lg px-2 py-1 mr-1 mb-1 font-bold text-primary text-sm">${part}</span>`;
+        return `<span class="inline-block bg-white/60 rounded-lg px-2 py-1 mr-1 mb-1 font-bold text-primary text-sm">${escapeHtml(part)}</span>`;
       }).join('');
     }
 
@@ -1318,6 +1343,13 @@
       return ITEM_INDEX[line.itemId].name;
     }
 
+    const PAQUETE_CERVEZA_EXTRA = 5;
+
+    function getPaqueteCervezaSurcharge(itemId, variant) {
+      if (itemId !== "paquete_1" && itemId !== "paquete_2") return 0;
+      return /Bebida:\s*Cerveza/i.test(String(variant || "")) ? PAQUETE_CERVEZA_EXTRA : 0;
+    }
+
     function getLineUnitPrice(line) {
       if (!line || !ITEM_INDEX[line.itemId]) return 0;
       if (line.itemId === "kilo_carne") {
@@ -1328,7 +1360,7 @@
         const customPrice = parseCustomItemPriceFromVariant(line.variant);
         if (customPrice !== null) return customPrice;
       }
-      return ITEM_INDEX[line.itemId].price;
+      return ITEM_INDEX[line.itemId].price + getPaqueteCervezaSurcharge(line.itemId, line.variant);
     }
 
     function getLineSubtotal(line) {
@@ -1867,7 +1899,7 @@
       return `
         <p class="history-item">
           <span class="history-item-qty">${qty}x</span>
-          <span class="history-item-name">${name}</span>
+          <span class="history-item-name">${escapeHtml(name)}</span>
         </p>
       `;
     }
@@ -1931,6 +1963,37 @@
       };
     }
 
+    const ITEM_NAME_INDEX = Object.values(MENU).flat().reduce((acc, item) => {
+      acc[item.name] = item;
+      return acc;
+    }, {});
+
+    function resolveHistoryLineUnitPrice(name, variantText) {
+      const variant = String(variantText || "");
+      const kiloTotal = parseKiloCarneTotalFromVariant(variant);
+      const customPrice = parseCustomItemPriceFromVariant(variant);
+      const menuItem = ITEM_NAME_INDEX[String(name || "").trim()];
+      if (menuItem) {
+        if (menuItem.id === "kilo_carne" && kiloTotal !== null) return kiloTotal;
+        if ((menuItem.id === "bebida_otro" || menuItem.id === "pgo_tarjeta") && customPrice !== null) return customPrice;
+        return menuItem.price + getPaqueteCervezaSurcharge(menuItem.id, variant);
+      }
+      if (customPrice !== null) return customPrice;
+      if (kiloTotal !== null) return kiloTotal;
+      return 0;
+    }
+
+    function parseLegacyHistoryItemLine(itemLine) {
+      const line = String(itemLine || "").trim();
+      const qtyMatch = line.match(/^(\d+)\s*x\s*/i);
+      const qty = qtyMatch ? Number(qtyMatch[1]) : 1;
+      const rest = line.replace(/^(\d+)\s*x\s*/i, "").trim();
+      const variantMatch = rest.match(/\(([^)]*)\)\s*$/);
+      const variant = variantMatch ? variantMatch[1].trim() : "";
+      const name = (variantMatch ? rest.slice(0, variantMatch.index) : rest).trim() || "Item";
+      return { qty, name, variant };
+    }
+
     function createTicketDataFromHistoryRecord(record) {
       const plates = Array.isArray(record.plates) ? record.plates : [];
       return {
@@ -1942,22 +2005,41 @@
         createdAt: String(record.cleanedAt || new Date().toISOString()),
         plateSeparator: "=========================",
         plates: plates.map((plate, index) => {
+          const structuredLines = Array.isArray(plate.lineItems) ? plate.lineItems : null;
+          if (structuredLines) {
+            return {
+              id: `hist_plate_${index + 1}`,
+              name: plate.name || `Plato ${index + 1}`,
+              items: structuredLines.map((line, itemIndex) => {
+                const qty = Number(line.qty) || 1;
+                const price = Number(line.price) || 0;
+                const subtotal = Number.isFinite(Number(line.subtotal)) ? Number(line.subtotal) : price * qty;
+                return {
+                  id: `hist_item_${index + 1}_${itemIndex + 1}`,
+                  name: String(line.name || "Item"),
+                  variant: String(line.variant || ""),
+                  qty,
+                  price,
+                  subtotal
+                };
+              })
+            };
+          }
+          // Registros antiguos: solo guardaron texto, se recupera el precio desde el menú
           const items = Array.isArray(plate.items) ? plate.items : [];
           return {
             id: `hist_plate_${index + 1}`,
             name: plate.name || `Plato ${index + 1}`,
-            items: items.map((itemLine) => {
-              const line = String(itemLine || "").trim();
-              const qtyMatch = line.match(/^(\d+)\s*x\s*/i);
-              const qty = qtyMatch ? Number(qtyMatch[1]) : 1;
-              const name = line.replace(/^(\d+)\s*x\s*/i, "").trim() || "Item";
+            items: items.map((itemLine, itemIndex) => {
+              const { qty, name, variant } = parseLegacyHistoryItemLine(itemLine);
+              const price = resolveHistoryLineUnitPrice(name, variant);
               return {
-                id: `hist_item_${index + 1}`,
+                id: `hist_item_${index + 1}_${itemIndex + 1}`,
                 name,
-                variant: "",
+                variant,
                 qty,
-                price: 0,
-                subtotal: 0
+                price,
+                subtotal: price * qty
               };
             })
           };
@@ -2473,7 +2555,7 @@
              </button>`
           : "";
         const compactItemsHtml = compactItems.length
-          ? compactItems.slice(0, 3).map((line) => `<p>${line}</p>`).join("") + (compactItems.length > 3 ? `<p>+${compactItems.length - 3} más...</p>` : "")
+          ? compactItems.slice(0, 3).map((line) => `<p>${escapeHtml(line)}</p>`).join("") + (compactItems.length > 3 ? `<p>+${compactItems.length - 3} más...</p>` : "")
           : `<p style="color: #5b403d; opacity: 0.6;">Sin productos</p>`;
 
         return `
@@ -2481,7 +2563,7 @@
             <div class="table-header">
               <div>
                 <div class="table-number">${table.number}</div>
-                <div class="table-name">${table.customName || 'Mesa ' + table.number}</div>
+                <div class="table-name">${escapeHtml(table.customName) || 'Mesa ' + table.number}</div>
               </div>
               <div style="display: flex; align-items: center; gap: 6px;">
                 <button data-rename="${table.id}" class="table-edit-btn" title="Cambiar nombre">
@@ -2724,7 +2806,7 @@
                 <div class="flex-1 min-w-0">
                   <div class="flex items-center gap-2 flex-wrap">
                     <span class="bg-primary text-white text-sm font-bold px-2.5 py-1 rounded-lg shrink-0">${line.qty}x</span>
-                    <span class="font-bold text-base">${itemName}</span>
+                    <span class="font-bold text-base">${escapeHtml(itemName)}</span>
                   </div>
                   ${variantHtml}
                 </div>
@@ -2893,7 +2975,7 @@
             : `<p class="history-empty-item">Sin productos</p>`;
           return `
             <div class="history-plate">
-              <p class="history-plate-title">${plate.name || "Plato"}</p>
+              <p class="history-plate-title">${escapeHtml(plate.name || "Plato")}</p>
               ${detail}
             </div>
           `;
@@ -2903,7 +2985,7 @@
             <div class="history-record-header">
               <div>
                 <p class="history-record-title">Mesa ${record.tableNumber}</p>
-                <p class="history-record-subtitle">${new Date(record.cleanedAt).toLocaleString("es-MX")} • ${record.cleanedBy}</p>
+                <p class="history-record-subtitle">${new Date(record.cleanedAt).toLocaleString("es-MX")} • ${escapeHtml(record.cleanedBy)}</p>
               </div>
               <div class="text-right">
                 <p class="history-record-total">${formatMoney(Number(record.totalBeforeClear) || 0)}</p>
@@ -2941,7 +3023,7 @@
         return;
       }
       select.innerHTML = options
-        .map((name) => `<option value="${name}" ${name === state.meseraNombre ? "selected" : ""}>${name}</option>`)
+        .map((name) => `<option value="${escapeHtml(name)}" ${name === state.meseraNombre ? "selected" : ""}>${escapeHtml(name)}</option>`)
         .join("");
       select.classList.remove("hidden");
     }
@@ -2965,6 +3047,10 @@
     }
 
     function setupEvents() {
+      document.getElementById("logout-button").addEventListener("click", () => {
+        sessionStorage.removeItem("autenticado");
+        window.location.replace("../index.html");
+      });
       document.getElementById("add-table-button").addEventListener("click", addExtraTable);
       document.getElementById("back-button").addEventListener("click", closeTableDetail);
       document.getElementById("add-plate-button").addEventListener("click", addPlateToSelectedTable);

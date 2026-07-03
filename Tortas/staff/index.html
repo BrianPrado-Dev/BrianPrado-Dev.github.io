@@ -166,6 +166,15 @@
 
     if (!form || !userInput || !passInput || !errorBox) return;
 
+    // Las contraseñas se guardan como SHA-256("dona_susy|usuario_minusculas|contraseña")
+    async function sha256Hex(text) {
+      var data = new TextEncoder().encode(text);
+      var digest = await crypto.subtle.digest("SHA-256", data);
+      return Array.from(new Uint8Array(digest)).map(function (b) {
+        return b.toString(16).padStart(2, "0");
+      }).join("");
+    }
+
     form.addEventListener("submit", async function (event) {
       event.preventDefault();
       errorBox.classList.add("hidden");
@@ -180,6 +189,12 @@
         return;
       }
 
+      if (!window.crypto || !window.crypto.subtle) {
+        errorBox.textContent = "Abre la página con HTTPS para poder iniciar sesión.";
+        errorBox.classList.remove("hidden");
+        return;
+      }
+
       try {
         var response = await fetch("users.json", { cache: "no-store" });
         if (!response.ok) {
@@ -188,12 +203,19 @@
 
         var data = await response.json();
         var users = Array.isArray(data.users) ? data.users : [];
-        var isValid = users.some(function (u) {
-          return u.username === username && u.password === password;
+        var user = users.find(function (u) {
+          return u.username === username;
         });
+
+        var isValid = false;
+        if (user && user.passwordSha256) {
+          var hash = await sha256Hex("dona_susy|" + username.toLowerCase() + "|" + password);
+          isValid = hash === String(user.passwordSha256).toLowerCase();
+        }
 
         if (isValid) {
           localStorage.setItem("dona_susy_mesera_nombre", username);
+          sessionStorage.setItem("autenticado", "true");
           window.location.href = "mesas/index.html";
           return;
         }

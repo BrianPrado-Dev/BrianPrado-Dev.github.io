@@ -3,6 +3,11 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <script>
+    if (sessionStorage.getItem("autenticado") !== "true") {
+      window.location.replace("../index.html");
+    }
+  </script>
   <title>Doña Susy - Impresiones</title>
   <link href="https://fonts.googleapis.com/css2?family=Epilogue:wght@700;800;900&family=Be+Vietnam+Pro:wght@400;500;700&display=swap" rel="stylesheet" />
   <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet" />
@@ -138,6 +143,15 @@
       URL.revokeObjectURL(url);
     }
 
+    function escapeHtml(value) {
+      return String(value ?? "")
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#39;");
+    }
+
     async function render() {
       const remote = await fetchRemoteQueue();
       const queue = remote ?? loadQueue();
@@ -149,10 +163,10 @@
       list.innerHTML = queue.map((t) => `
         <article class="bg-white/75 rounded-2xl p-4 flex items-center justify-between gap-3">
           <div>
-            <p class="font-semibold">${t.type === "comanda" ? "Comanda cocina" : "Ticket cliente"} - Mesa ${t.tableNumber}</p>
-            <p class="text-xs opacity-70">${new Date(t.createdAt).toLocaleString("es-MX")} • Mesera: ${t.mesera}</p>
+            <p class="font-semibold">${t.type === "comanda" ? "Comanda cocina" : "Ticket cliente"} - Mesa ${escapeHtml(t.tableNumber)}</p>
+            <p class="text-xs opacity-70">${new Date(t.createdAt).toLocaleString("es-MX")} • Mesera: ${escapeHtml(t.mesera)}</p>
           </div>
-          <span class="text-xs font-bold px-2 py-1 rounded-lg ${t.type === "comanda" ? "bg-amber-100 text-amber-800" : "bg-blue-100 text-blue-800"}">${t.type || "ticket"}</span>
+          <span class="text-xs font-bold px-2 py-1 rounded-lg ${t.type === "comanda" ? "bg-amber-100 text-amber-800" : "bg-blue-100 text-blue-800"}">${escapeHtml(t.type || "ticket")}</span>
         </article>
       `).join("");
     }
