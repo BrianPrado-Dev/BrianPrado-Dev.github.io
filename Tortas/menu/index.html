@@ -3,6 +3,7 @@
 <head>
     <meta charset="utf-8"/>
     <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+    <meta name="theme-color" content="#faf8f3"/>
     <title>Menú - Tortas Doña Susy</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -367,6 +368,8 @@
         /* === SECTION STYLES === */
         .menu-section {
             margin-bottom: 3rem;
+            /* Deja visible el titulo al navegar con las anclas (header fijo + nav pegajosa) */
+            scroll-margin-top: 160px;
         }
 
         .section-header {
@@ -811,6 +814,191 @@
         .package-card:nth-child(3) { transition-delay: 0.15s; }
         .package-card:nth-child(4) { transition-delay: 0.2s; }
         .package-card:nth-child(5) { transition-delay: 0.25s; }
+
+        /* === OPTIMIZACIONES PARA CELULAR === */
+        @media (max-width: 600px) {
+            /* En pantalla tactil sobran las flechas: queda swipe + puntos */
+            .carousel-arrows {
+                display: none;
+            }
+
+            .carousel-slide {
+                aspect-ratio: 4/3;
+            }
+
+            .carousel-overlay {
+                padding: 1.25rem;
+            }
+
+            .carousel-content h2 {
+                font-size: 1.5rem;
+            }
+
+            .carousel-content p {
+                font-size: 0.85rem;
+                margin-bottom: 0.75rem;
+            }
+
+            .carousel-price {
+                font-size: 1.15rem;
+                padding: 0.5rem 1rem;
+            }
+
+            .carousel-badge {
+                top: 1rem;
+                right: 1rem;
+                font-size: 0.65rem;
+            }
+        }
+
+        @media (max-width: 480px) {
+            header {
+                padding: 0.6rem 1rem;
+            }
+
+            .logo-img {
+                width: 40px;
+                height: 40px;
+            }
+
+            .logo-title {
+                font-size: 1rem;
+            }
+
+            .logo-subtitle {
+                font-size: 0.6rem;
+            }
+
+            .header-cta {
+                padding: 0.5rem 0.9rem;
+                font-size: 0.75rem;
+            }
+
+            main {
+                padding: 5.5rem 1rem 7.5rem;
+            }
+
+            .category-nav {
+                top: 58px;
+                margin: 0 -1rem;
+                padding: 0.75rem 1rem;
+            }
+
+            .category-chip {
+                padding: 0.5rem 1rem;
+                font-size: 0.8rem;
+            }
+
+            .menu-section {
+                scroll-margin-top: 135px;
+            }
+
+            .hero-section {
+                margin-bottom: 2.25rem;
+            }
+
+            .section-icon {
+                width: 42px;
+                height: 42px;
+            }
+
+            .section-title {
+                font-size: 1.35rem;
+            }
+
+            .menu-item {
+                padding: 1rem 1.15rem;
+                border-radius: 16px;
+            }
+
+            .menu-item-name {
+                font-size: 1rem;
+            }
+
+            .menu-item-price {
+                font-size: 1.15rem;
+            }
+
+            .package-card {
+                padding: 1.25rem;
+                min-height: 150px;
+            }
+
+            .package-price {
+                font-size: 1.35rem;
+                margin-top: 0.75rem;
+            }
+
+            /* CTA flotante compacto: solo icono para no tapar los platillos */
+            .floating-cta {
+                bottom: 5.75rem;
+                right: 1rem;
+                width: 56px;
+                height: 56px;
+                padding: 0;
+                justify-content: center;
+                border-radius: 50%;
+            }
+
+            .floating-cta .floating-cta-text {
+                display: none;
+            }
+
+            .floating-cta .material-symbols-outlined {
+                font-size: 1.5rem;
+            }
+        }
+
+        /* Tactil: sin efectos hover, feedback con :active */
+        @media (hover: none) and (pointer: coarse) {
+            .menu-item:hover,
+            .package-card:hover,
+            .drink-item:hover {
+                transform: none;
+                box-shadow: var(--shadow-soft);
+            }
+
+            .header-cta:hover,
+            .floating-cta:hover {
+                transform: none;
+            }
+
+            .menu-item:active,
+            .package-card:active,
+            .drink-item:active {
+                transform: scale(0.98);
+            }
+
+            .header-cta:active,
+            .floating-cta:active {
+                transform: scale(0.95);
+            }
+        }
+
+        /* Safe area para celulares con notch */
+        @supports (padding-bottom: env(safe-area-inset-bottom)) {
+            .bottom-nav {
+                padding-bottom: calc(1.25rem + env(safe-area-inset-bottom));
+            }
+
+            main {
+                padding-bottom: calc(8rem + env(safe-area-inset-bottom));
+            }
+
+            .floating-cta {
+                bottom: calc(6.5rem + env(safe-area-inset-bottom));
+            }
+
+            @media (max-width: 480px) {
+                main {
+                    padding-bottom: calc(7.5rem + env(safe-area-inset-bottom));
+                }
+
+                .floating-cta {
+                    bottom: calc(5.75rem + env(safe-area-inset-bottom));
+                }
+            }
+        }
     </style>
 </head>
 <body>
@@ -879,7 +1067,7 @@
                         </div>
                     </div>
                     <div class="carousel-slide" data-slide="2">
-                        <img src="https://editorialtelevisa.brightspotcdn.com/dims4/default/5edb229/2147483647/strip/true/crop/1195x672+3+0/resize/1440x810!/quality/90/?url=https%3A%2F%2Fk2-prod-editorial-televisa.s3.us-east-1.amazonaws.com%2Fbrightspot%2Fwp-content%2Fuploads%2F2022%2F10%2Ftorta-ahogada.jpg" alt="Paquete 2">
+                        <img src="https://editorialtelevisa.brightspotcdn.com/dims4/default/5edb229/2147483647/strip/true/crop/1195x672+3+0/resize/1440x810!/quality/90/?url=https%3A%2F%2Fk2-prod-editorial-televisa.s3.us-east-1.amazonaws.com%2Fbrightspot%2Fwp-content%2Fuploads%2F2022%2F10%2Ftorta-ahogada.jpg" alt="Paquete 2" loading="lazy" decoding="async">
                         <div class="carousel-overlay">
                             <div class="carousel-badge">
                                 <span class="material-symbols-outlined" style="font-size: 0.9rem;">thumb_up</span>
@@ -893,7 +1081,7 @@
                         </div>
                     </div>
                     <div class="carousel-slide" data-slide="3">
-                        <img src="../../resta.jpeg" alt="Paquete 3">
+                        <img src="../../resta.jpeg" alt="Paquete 3" loading="lazy" decoding="async">
                         <div class="carousel-overlay">
                             <div class="carousel-badge">
                                 <span class="material-symbols-outlined" style="font-size: 0.9rem;">groups</span>
@@ -907,7 +1095,7 @@
                         </div>
                     </div>
                     <div class="carousel-slide" data-slide="4">
-                        <img src="https://media.admagazine.com/photos/6500efc37021aeab60241530/master/w_1600%2Cc_limit/tortas-ahogadas.jpg" alt="Paquete 4">
+                        <img src="https://media.admagazine.com/photos/6500efc37021aeab60241530/master/w_1600%2Cc_limit/tortas-ahogadas.jpg" alt="Paquete 4" loading="lazy" decoding="async">
                         <div class="carousel-overlay">
                             <div class="carousel-badge">
                                 <span class="material-symbols-outlined" style="font-size: 0.9rem;">celebration</span>
@@ -921,7 +1109,7 @@
                         </div>
                     </div>
                     <div class="carousel-slide" data-slide="5">
-                        <img src="https://offloadmedia.feverup.com/guadalajarasecreta.com/wp-content/uploads/2021/11/15175423/Photo-Collage-22-1024x683.jpg" alt="Paquete 5">
+                        <img src="https://offloadmedia.feverup.com/guadalajarasecreta.com/wp-content/uploads/2021/11/15175423/Photo-Collage-22-1024x683.jpg" alt="Paquete 5" loading="lazy" decoding="async">
                         <div class="carousel-overlay">
                             <div class="carousel-badge">
                                 <span class="material-symbols-outlined" style="font-size: 0.9rem;">family_restroom</span>
@@ -1160,9 +1348,9 @@
     </main>
 
     <!-- Floating CTA -->
-    <a href="https://wa.me/message/VBNRTP6HAEZVO1" target="_blank" class="floating-cta">
+    <a href="https://wa.me/message/VBNRTP6HAEZVO1" target="_blank" class="floating-cta" aria-label="Ordena ahora por WhatsApp">
         <span class="material-symbols-outlined">chat</span>
-        Ordena Ahora
+        <span class="floating-cta-text">Ordena Ahora</span>
     </a>
 
     <!-- Bottom Navigation -->
