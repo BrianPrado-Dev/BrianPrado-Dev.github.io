@@ -1,0 +1,2490 @@
+<!DOCTYPE html>
+<html class="light" lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+  <script>
+    if (sessionStorage.getItem("autenticado") !== "true") {
+      window.location.replace("../index.html");
+    }
+  </script>
+  <title>Doña Susy - Punto de Venta</title>
+  <link href="https://fonts.googleapis.com/css2?family=Epilogue:wght@400;700;800;900&family=Be+Vietnam+Pro:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet" />
+  <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/sql.js/1.10.2/sql-wasm.js"></script>
+  <script id="tailwind-config">
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          colors: {
+            primary: "#a20513",
+            "primary-container": "#c62828",
+            surface: "#fbfbe2",
+            "surface-container-low": "#f5f5dc",
+            "surface-container-highest": "#e4e4cc",
+            "on-surface": "#1b1d0e",
+            "on-surface-variant": "#5b403d",
+            "outline-variant": "#e4beba"
+          },
+          fontFamily: {
+            headline: ["Epilogue"],
+            body: ["Be Vietnam Pro"]
+          }
+        }
+      }
+    };
+  </script>
+  <style>
+    .material-symbols-outlined {
+      font-variation-settings: "FILL" 0, "wght" 400, "GRAD" 0, "opsz" 24;
+    }
+
+    .paper-texture {
+      background-color: #f4e5cf;
+      background-image:
+        radial-gradient(circle at 10% 12%, rgba(255, 255, 255, 0.45), rgba(255, 255, 255, 0) 38%),
+        linear-gradient(145deg, #f6ead8 0%, #efddc4 45%, #e7d2b4 100%);
+    }
+
+    /* === ETIQUETAS DE CAMPO (rectángulo rojo con letra blanca) === */
+    .campo-etiqueta {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      background: #a20513;
+      color: #ffffff;
+      font-weight: 800;
+      font-size: 12px;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      padding: 5px 12px;
+      border-radius: 10px;
+      box-shadow: 0 3px 8px rgba(162, 5, 19, 0.3);
+    }
+
+    /* === CAMPO TELÉFONO DESTACADO === */
+    #input-telefono {
+      border: 3px solid #a20513;
+      background: #fff5f4;
+      font-size: 1.3rem;
+      font-weight: 800;
+      letter-spacing: 0.08em;
+      color: #a20513;
+      box-shadow: 0 6px 14px rgba(162, 5, 19, 0.18);
+    }
+
+    #input-telefono::placeholder {
+      font-size: 0.85rem;
+      font-weight: 600;
+      letter-spacing: normal;
+      color: #c49490;
+    }
+
+    #input-telefono:disabled {
+      opacity: 0.4;
+      box-shadow: none;
+    }
+
+    /* === PESTAÑAS DE MENÚ (igual que gestor de mesas) === */
+    .quick-menu-tabs {
+      display: flex;
+      gap: 8px;
+      background: rgba(255, 255, 255, 0.6);
+      padding: 6px;
+      border-radius: 16px;
+      overflow-x: auto;
+      -webkit-overflow-scrolling: touch;
+    }
+
+    .quick-menu-tab {
+      flex: 1;
+      min-width: 100px;
+      padding: 14px 20px;
+      border-radius: 12px;
+      border: none;
+      background: transparent;
+      font-size: 15px;
+      font-weight: 700;
+      color: #5b403d;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      white-space: nowrap;
+    }
+
+    .quick-menu-tab .material-symbols-outlined {
+      font-size: 22px;
+    }
+
+    .quick-menu-tab.active {
+      background: #a20513;
+      color: white;
+      box-shadow: 0 4px 12px rgba(162, 5, 19, 0.3);
+    }
+
+    .quick-menu-tab:active:not(.active) {
+      background: rgba(91, 64, 61, 0.15);
+    }
+
+    /* === TARJETAS DE PRODUCTO (estilo del PDV de escritorio) === */
+    .pdv-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 10px;
+    }
+
+    @media (min-width: 640px) {
+      .pdv-grid {
+        grid-template-columns: repeat(3, 1fr);
+      }
+    }
+
+    @media (min-width: 1100px) {
+      .pdv-grid {
+        grid-template-columns: repeat(4, 1fr);
+      }
+    }
+
+    .pdv-card {
+      border: none;
+      border-radius: 14px;
+      padding: 12px;
+      min-height: 96px;
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
+      justify-content: flex-start;
+      gap: 3px;
+      cursor: pointer;
+      text-align: left;
+      color: #ffffff;
+      transition: transform 0.12s ease, filter 0.15s ease;
+      box-shadow: 0 6px 14px rgba(27, 29, 14, 0.18);
+    }
+
+    .pdv-card:hover {
+      filter: brightness(0.9);
+    }
+
+    .pdv-card:active {
+      transform: scale(0.96);
+    }
+
+    .pdv-card-nombre {
+      font-size: 13px;
+      font-weight: 700;
+      line-height: 1.2;
+    }
+
+    .pdv-card-precio {
+      font-size: 16px;
+      font-weight: 800;
+      color: #ffd54f;
+    }
+
+    .pdv-card-desc {
+      font-size: 10px;
+      color: #eeeeee;
+      opacity: 0.9;
+      line-height: 1.25;
+    }
+
+    /* Tarjetas con foto (mismas imágenes que el gestor de mesas) */
+    .pdv-card.has-image {
+      position: relative;
+      overflow: hidden;
+      background-size: cover;
+      background-position: center;
+    }
+
+    .pdv-card.has-image::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(to bottom, rgba(0, 0, 0, 0.35) 0%, rgba(0, 0, 0, 0.72) 100%);
+    }
+
+    .pdv-card.has-image > * {
+      position: relative;
+      z-index: 1;
+    }
+
+    .pdv-card.has-image .pdv-card-nombre,
+    .pdv-card.has-image .pdv-card-desc {
+      text-shadow: 0 1px 3px rgba(0, 0, 0, 0.6);
+    }
+
+    .pdv-card.has-image .pdv-card-precio {
+      text-shadow: 0 1px 3px rgba(0, 0, 0, 0.7);
+    }
+
+    /* === RESUMEN DEL PEDIDO (grupos / platos) === */
+    .grupo-card {
+      background: #fffdf7;
+      border: 2px solid #e0c684;
+      border-radius: 14px;
+      overflow: hidden;
+    }
+
+    .grupo-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      padding: 10px 12px;
+      cursor: pointer;
+      background: #f5f0e0;
+      transition: background 0.15s ease;
+    }
+
+    .grupo-header.activo {
+      background: #ffd54f;
+    }
+
+    .grupo-item {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 8px;
+      padding: 8px 12px;
+      border-top: 1px dashed rgba(122, 31, 31, 0.2);
+    }
+
+    /* === BOTONES DE OPCIÓN EN MODALES === */
+    .opcion-btn {
+      border: none;
+      border-radius: 12px;
+      padding: 16px 10px;
+      font-weight: 800;
+      font-size: 15px;
+      cursor: pointer;
+      transition: transform 0.1s ease, box-shadow 0.15s ease, outline 0.1s ease;
+      min-height: 60px;
+      box-shadow: 0 4px 10px rgba(27, 29, 14, 0.15);
+    }
+
+    .opcion-btn:active {
+      transform: scale(0.96);
+    }
+
+    .opcion-btn.seleccionada {
+      outline: 4px solid #1b1d0e;
+      outline-offset: -4px;
+      box-shadow: inset 0 0 0 100px rgba(0, 0, 0, 0.18);
+    }
+
+    /* === IMPRESIÓN LOCAL DEL TICKET ===
+       El ticket se imprime directamente desde este navegador (PC conectada
+       a la impresora térmica). El formato del texto es idéntico al del
+       PDV de escritorio (32 columnas, fuente monoespaciada). */
+    #print-area {
+      display: none;
+    }
+
+    @media print {
+      body > *:not(#print-area) {
+        display: none !important;
+      }
+
+      body {
+        background: #ffffff !important;
+        min-height: 0 !important;
+        margin: 0 !important;
+        padding: 0 !important;
+      }
+
+      #print-area {
+        display: block !important;
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: var(--ticket-ancho, 70mm);
+        padding: 1mm 1mm 4mm 1mm;
+      }
+
+      #print-area pre {
+        font-family: "Courier New", "Consolas", monospace;
+        font-size: var(--ticket-font, 3.5mm);
+        line-height: 1.3;
+        font-weight: 600;
+        color: #000000;
+        white-space: pre;
+        margin: 0;
+      }
+    }
+  </style>
+  <style id="page-style">
+    @page { size: 80mm auto; margin: 0mm; }
+  </style>
+</head>
+<body class="paper-texture min-h-screen font-body text-on-surface">
+  <header class="bg-[#fbfbe2] flex justify-between items-center gap-3 px-4 md:px-6 py-4 w-full sticky top-0 z-40 shadow-[0_12px_24px_rgba(27,29,14,0.08)]">
+    <div class="flex items-center gap-3">
+      <span class="material-symbols-outlined text-primary" style="font-size: 28px;">point_of_sale</span>
+      <div>
+        <h1 class="font-headline font-bold text-xl md:text-2xl tracking-tight text-primary leading-none">Punto de Venta</h1>
+        <p class="text-[11px] uppercase tracking-widest text-on-surface-variant">Tortas Doña Susy</p>
+      </div>
+    </div>
+    <div class="flex items-center gap-2">
+      <p id="current-user-label" class="hidden sm:block text-xs uppercase tracking-widest text-on-surface-variant">Usuario: -</p>
+      <a href="../mesas/index.html" class="flex items-center gap-1 bg-surface-container-highest hover:bg-primary hover:text-white transition-colors rounded-xl px-3 py-2 text-xs font-semibold">
+        <span class="material-symbols-outlined" style="font-size: 16px;">table_restaurant</span>
+        <span>Mesas</span>
+      </a>
+      <button id="config-button" class="flex items-center gap-1 bg-surface-container-highest hover:bg-primary hover:text-white transition-colors rounded-xl px-3 py-2 text-xs font-semibold" title="Configuración">
+        <span class="material-symbols-outlined" style="font-size: 16px;">settings</span>
+      </button>
+      <button id="logout-button" class="flex items-center gap-1 bg-red-100 text-red-700 hover:bg-red-200 rounded-xl px-3 py-2 text-xs font-semibold" title="Cerrar sesión">
+        <span class="material-symbols-outlined" style="font-size: 16px;">logout</span>
+        <span>Salir</span>
+      </button>
+    </div>
+  </header>
+
+  <main class="px-4 md:px-6 pt-6 pb-32 max-w-[1400px] mx-auto">
+    <div class="grid grid-cols-1 lg:grid-cols-5 gap-6 items-start">
+
+      <!-- ===================== PANEL IZQUIERDO ===================== -->
+      <section class="lg:col-span-3 space-y-5">
+
+        <!-- Datos del cliente -->
+        <div class="bg-surface-container-low rounded-3xl p-5">
+          <div class="flex items-center justify-between gap-2 mb-4 flex-wrap">
+            <h2 class="font-headline font-bold text-2xl">Datos del Cliente</h2>
+            <div class="flex items-center gap-2">
+              <span id="clientes-status" class="text-[11px] font-semibold text-on-surface-variant bg-white/70 rounded-full px-3 py-1">Cargando clientes...</span>
+              <button id="db-conectar" class="hidden text-[11px] font-bold bg-primary text-white rounded-full px-3 py-1.5 hover:opacity-90 shadow-[0_3px_8px_rgba(162,5,19,0.3)]">Conectar clientes.db</button>
+            </div>
+          </div>
+
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+            <!-- Teléfono con autocompletado -->
+            <div class="md:col-span-2">
+              <div class="flex items-center gap-3 mb-1.5 flex-wrap">
+                <label for="input-telefono" class="campo-etiqueta">
+                  <span class="material-symbols-outlined" style="font-size: 15px;">call</span>
+                  Teléfono
+                </label>
+                <div class="flex items-center gap-2 text-xs font-semibold">
+                  <label class="flex items-center gap-1 cursor-pointer">
+                    <input type="radio" name="telefono-toggle" value="1" checked class="text-primary focus:ring-primary" /> Sí
+                  </label>
+                  <label class="flex items-center gap-1 cursor-pointer">
+                    <input type="radio" name="telefono-toggle" value="0" class="text-primary focus:ring-primary" /> No
+                  </label>
+                </div>
+                <span id="cliente-encontrado" class="hidden text-xs font-bold text-emerald-700 bg-emerald-100 rounded-full px-2 py-0.5">✓ Cliente encontrado</span>
+              </div>
+              <div class="relative">
+                <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-primary pointer-events-none" style="font-size: 24px;">call</span>
+                <input id="input-telefono" type="tel" inputmode="tel" autocomplete="off" placeholder="Escribe el teléfono... (autocompleta domicilio y cruces)"
+                  class="w-full pl-12 pr-4 py-3 rounded-xl focus:ring-2 focus:ring-primary" />
+                <div id="telefono-sugerencias" class="hidden absolute left-0 right-0 top-full mt-1 z-30 bg-white rounded-xl border border-outline-variant shadow-[0_16px_32px_rgba(27,29,14,0.2)] overflow-hidden max-h-64 overflow-y-auto"></div>
+              </div>
+            </div>
+
+            <div>
+              <div class="mb-1.5">
+                <label for="input-domicilio" class="campo-etiqueta">
+                  <span class="material-symbols-outlined" style="font-size: 15px;">home</span>
+                  Domicilio
+                </label>
+              </div>
+              <input id="input-domicilio" type="text" autocomplete="off" placeholder="Calle y número"
+                class="w-full px-4 py-3 rounded-xl border border-outline-variant bg-white/90 text-base focus:ring-2 focus:ring-primary" />
+            </div>
+
+            <div>
+              <div class="mb-1.5">
+                <label for="input-cruces" class="campo-etiqueta">
+                  <span class="material-symbols-outlined" style="font-size: 15px;">signpost</span>
+                  Cruces
+                </label>
+              </div>
+              <input id="input-cruces" type="text" autocomplete="off" placeholder="Entre calles"
+                class="w-full px-4 py-3 rounded-xl border border-outline-variant bg-white/90 text-base focus:ring-2 focus:ring-primary" />
+            </div>
+
+            <div class="md:col-span-2">
+              <div class="flex items-center gap-3 mb-1.5">
+                <label for="select-hora" class="campo-etiqueta">
+                  <span class="material-symbols-outlined" style="font-size: 15px;">schedule</span>
+                  Hora en específico
+                </label>
+                <div class="flex items-center gap-2 text-xs font-semibold">
+                  <label class="flex items-center gap-1 cursor-pointer">
+                    <input type="radio" name="hora-toggle" value="1" class="text-primary focus:ring-primary" /> Sí
+                  </label>
+                  <label class="flex items-center gap-1 cursor-pointer">
+                    <input type="radio" name="hora-toggle" value="0" checked class="text-primary focus:ring-primary" /> No
+                  </label>
+                </div>
+              </div>
+              <div class="flex items-center gap-2">
+                <select id="select-hora" disabled aria-label="Hora"
+                  class="flex-1 max-w-[110px] px-3 py-3 rounded-xl border border-outline-variant bg-white/90 text-lg font-bold text-center focus:ring-2 focus:ring-primary disabled:opacity-40"></select>
+                <span class="font-black text-2xl text-on-surface-variant">:</span>
+                <select id="select-minutos" disabled aria-label="Minutos"
+                  class="flex-1 max-w-[110px] px-3 py-3 rounded-xl border border-outline-variant bg-white/90 text-lg font-bold text-center focus:ring-2 focus:ring-primary disabled:opacity-40"></select>
+                <select id="select-ampm" disabled aria-label="AM o PM"
+                  class="flex-1 max-w-[110px] px-3 py-3 rounded-xl border border-outline-variant bg-white/90 text-lg font-bold text-center focus:ring-2 focus:ring-primary disabled:opacity-40"></select>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Menú -->
+        <div class="bg-surface-container-low rounded-3xl p-5">
+          <h2 class="font-headline font-bold text-2xl mb-4">Menú</h2>
+          <div id="menu-tabs" class="quick-menu-tabs mb-4"></div>
+          <div id="menu-grid" class="pdv-grid"></div>
+        </div>
+      </section>
+
+      <!-- ===================== PANEL DERECHO: RESUMEN ===================== -->
+      <section class="lg:col-span-2 bg-surface-container-low rounded-3xl p-5 lg:sticky lg:top-24 self-start max-h-[calc(100vh-120px)] flex flex-col">
+        <h2 class="font-headline font-bold text-2xl">Resumen del Pedido</h2>
+        <p class="text-xs text-on-surface-variant mb-3">Verifica cantidades, notas y total antes de imprimir.</p>
+        <div id="pedido-lista" class="space-y-3 overflow-y-auto pr-1 flex-1"></div>
+        <div class="border-t border-outline-variant mt-4 pt-4 flex justify-between items-center">
+          <span class="font-headline font-bold text-xl">TOTAL</span>
+          <span id="pedido-total" class="font-headline font-black text-3xl text-primary">$0.00</span>
+        </div>
+      </section>
+    </div>
+  </main>
+
+  <!-- ===================== BARRA DE ACCIONES ===================== -->
+  <div class="fixed bottom-4 left-4 right-4 z-40">
+    <div class="max-w-[1400px] mx-auto flex flex-wrap items-center justify-between gap-2 bg-[#fbfbe2]/95 backdrop-blur rounded-2xl px-3 py-3 shadow-[0_16px_32px_rgba(27,29,14,0.25)]">
+      <div class="flex flex-wrap items-center gap-2">
+        <button id="btn-agregar-cliente" class="bg-emerald-600 text-white px-4 py-3 rounded-xl font-bold hover:bg-emerald-700 flex items-center gap-2">
+          <span class="material-symbols-outlined">group_add</span>
+          <span class="hidden sm:inline">Agregar Cliente</span>
+        </button>
+        <button id="btn-lista" class="bg-sky-600 text-white px-4 py-3 rounded-xl font-bold hover:bg-sky-700 flex items-center gap-2">
+          <span class="material-symbols-outlined">receipt_long</span>
+          <span class="hidden sm:inline">Lista de Pedidos</span>
+        </button>
+        <button id="btn-limpiar" class="bg-red-100 text-red-700 px-4 py-3 rounded-xl font-bold hover:bg-red-200 flex items-center gap-2">
+          <span class="material-symbols-outlined">cleaning_services</span>
+          <span class="hidden sm:inline">Limpiar</span>
+        </button>
+      </div>
+      <button id="btn-imprimir" class="bg-primary text-white px-6 py-3 rounded-xl font-black text-lg hover:opacity-90 flex items-center gap-2 shadow-[0_10px_20px_rgba(162,5,19,0.35)]">
+        <span class="material-symbols-outlined">print</span>
+        IMPRIMIR TICKET
+      </button>
+    </div>
+  </div>
+
+  <!-- ===================== MODAL GENÉRICO (variantes / cantidades) ===================== -->
+  <div id="pdv-modal" class="hidden fixed inset-0 z-50 bg-black/40 p-4 flex items-center justify-center overflow-y-auto">
+    <div id="pdv-modal-card" class="bg-surface-container-low rounded-3xl p-5 w-full max-w-2xl shadow-[0_20px_40px_rgba(27,29,14,0.25)] my-8"></div>
+  </div>
+
+  <!-- ===================== MODAL: LISTA DE PEDIDOS ===================== -->
+  <div id="lista-modal" class="hidden fixed inset-0 z-50 bg-black/50 p-3 md:p-6 flex items-start justify-center overflow-y-auto">
+    <div class="bg-surface rounded-3xl w-full max-w-6xl shadow-[0_20px_40px_rgba(27,29,14,0.3)] my-4">
+      <div class="bg-primary text-white rounded-t-3xl px-5 py-4 flex items-center justify-between gap-3">
+        <h3 class="font-headline font-black text-2xl">Lista de Pedidos del Día</h3>
+        <div class="flex items-center gap-2">
+          <span id="lista-resumen" class="text-xs font-semibold bg-white/20 rounded-full px-3 py-1"></span>
+          <button id="lista-cerrar" class="bg-white/20 hover:bg-white/30 rounded-xl px-3 py-2 font-bold">✕</button>
+        </div>
+      </div>
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4 p-4">
+        <div>
+          <p class="font-headline font-bold text-lg mb-2 bg-[#6d4c41] text-white rounded-xl px-3 py-2">Pedidos Sin Hora</p>
+          <div id="lista-sin-hora" class="space-y-3"></div>
+        </div>
+        <div>
+          <p class="font-headline font-bold text-lg mb-2 bg-sky-700 text-white rounded-xl px-3 py-2">Pedidos Con Hora</p>
+          <div id="lista-con-hora" class="space-y-3"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===================== MODAL: RESUMEN DEL DÍA ===================== -->
+  <div id="resumen-modal" class="hidden fixed inset-0 z-50 bg-black/50 p-3 md:p-6 flex items-start justify-center overflow-y-auto">
+    <div class="bg-surface rounded-3xl w-full max-w-3xl shadow-[0_20px_40px_rgba(27,29,14,0.3)] my-4">
+      <div class="bg-emerald-700 text-white rounded-t-3xl px-5 py-4 flex items-center justify-between gap-3">
+        <h3 class="font-headline font-black text-2xl">📊 Resumen del Día</h3>
+        <button id="resumen-cerrar" class="bg-white/20 hover:bg-white/30 rounded-xl px-3 py-2 font-bold">✕</button>
+      </div>
+      <div class="p-5 space-y-4">
+        <div id="resumen-contenido"></div>
+        <button id="resumen-imprimir" class="w-full bg-emerald-600 text-white px-4 py-3 rounded-xl font-bold hover:bg-emerald-700 flex items-center justify-center gap-2">
+          <span class="material-symbols-outlined">print</span>
+          Imprimir Resumen
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===================== MODAL: CONFIGURACIÓN ===================== -->
+  <div id="config-modal" class="hidden fixed inset-0 z-50 bg-black/50 p-3 md:p-6 flex items-start justify-center overflow-y-auto">
+    <div class="bg-surface rounded-3xl w-full max-w-xl shadow-[0_20px_40px_rgba(27,29,14,0.3)] my-4">
+      <div class="bg-[#5b403d] text-white rounded-t-3xl px-5 py-4 flex items-center justify-between gap-3">
+        <h3 class="font-headline font-black text-2xl">⚙️ Configuración</h3>
+        <button id="config-cerrar" class="bg-white/20 hover:bg-white/30 rounded-xl px-3 py-2 font-bold">✕</button>
+      </div>
+      <div class="p-5 space-y-3">
+        <button id="config-precios" class="w-full bg-orange-500 text-white px-4 py-3 rounded-xl font-bold hover:bg-orange-600 text-left flex items-center gap-2">
+          <span class="material-symbols-outlined">sell</span> Modificar Precios
+        </button>
+        <button id="config-clave" class="w-full bg-orange-500 text-white px-4 py-3 rounded-xl font-bold hover:bg-orange-600 text-left flex items-center gap-2">
+          <span class="material-symbols-outlined">key</span> Cambiar Contraseña
+        </button>
+        <button id="config-resumen" class="w-full bg-sky-600 text-white px-4 py-3 rounded-xl font-bold hover:bg-sky-700 text-left flex items-center gap-2">
+          <span class="material-symbols-outlined">bar_chart</span> Resumen del Día
+        </button>
+        <div class="bg-white/70 rounded-xl px-4 py-3 flex items-center justify-between gap-3">
+          <span class="font-bold text-sm">Ancho del papel térmico</span>
+          <select id="config-papel" class="rounded-lg border-outline-variant bg-white text-sm px-2 py-1">
+            <option value="80">80 mm</option>
+            <option value="58">58 mm</option>
+          </select>
+        </div>
+        <div id="config-precios-panel" class="hidden bg-white/70 rounded-xl p-4 max-h-80 overflow-y-auto space-y-2"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===================== DIÁLOGOS PROPIOS (sin alertas del navegador) ===================== -->
+  <div id="dialog-modal" class="hidden fixed inset-0 z-[60] bg-black/50 p-4 flex items-center justify-center">
+    <div id="dialog-card" class="bg-surface-container-low rounded-3xl p-6 w-full max-w-md shadow-[0_20px_40px_rgba(27,29,14,0.35)]"></div>
+  </div>
+
+  <div id="toast-container" class="fixed inset-0 z-[70] flex items-center justify-center pointer-events-none p-6"></div>
+
+  <!-- Área oculta que solo se muestra al imprimir -->
+  <div id="print-area"><pre id="ticket-print-pre"></pre></div>
+
+  <script>
+    // =====================================================================
+    // CONSTANTES Y ALMACENAMIENTO
+    // =====================================================================
+    const WAITER_NAME_KEY = "dona_susy_mesera_nombre";
+    const PRECIOS_KEY = "pdv_precios_v1";
+    const CLAVE_KEY = "pdv_clave_v1";
+    const PAPEL_KEY = "pdv_papel_v1";
+    const BORRADOR_KEY = "pdv_borrador_v1";
+    const CLIENTES_OVERLAY_KEY = "pdv_clientes_overlay_v1";
+    const HISTORIAL_PREFIX = "pdv_historial_";
+    const CLIENTES_DB_URL = "../../../clientes.db"; // clientes.db en la raíz del proyecto
+    const SQLJS_CDN = "https://cdnjs.cloudflare.com/ajax/libs/sql.js/1.10.2/";
+    const PRECIO_ENVIO = 15;
+    const PRECIO_POR_GRAMO = 0.3;
+    const CORONA_EXTRA = 5;
+
+    // Precios por defecto (idénticos al PDV de escritorio)
+    const PRECIOS_DEFAULT = {
+      "Torta": 55,
+      "Torta Mini": 28,
+      "Taco Dorado": 10,
+      "Taco con Carne": 25,
+      "Taco Blandito": 25,
+      "Refresco": 25,
+      "Agua Chica": 15,
+      "Agua Grande": 25,
+      "Caguama": 70,
+      "Cerveza": 25,
+      "Paquete 1": 80,
+      "Paquete 2": 85,
+      "Paquete 3": 205,
+      "Paquete 4": 320,
+      "Paquete 5": 630
+    };
+
+    let precios = { ...PRECIOS_DEFAULT };
+    try {
+      const guardados = JSON.parse(localStorage.getItem(PRECIOS_KEY) || "{}");
+      precios = { ...PRECIOS_DEFAULT, ...guardados };
+    } catch (_) {}
+
+    function guardarPrecios() {
+      localStorage.setItem(PRECIOS_KEY, JSON.stringify(precios));
+    }
+
+    // =====================================================================
+    // CATÁLOGO DE PRODUCTOS (mismas categorías y flujos que el escritorio)
+    // =====================================================================
+    const CATEGORIAS = [
+      { key: "comida", titulo: "Comida", icon: "lunch_dining" },
+      { key: "paquetes", titulo: "Paquetes", icon: "inventory_2" },
+      { key: "bebidas", titulo: "Bebidas", icon: "local_drink" }
+    ];
+
+    const PRODUCTOS = {
+      comida: [
+        { key: "Torta", nombre: "Torta Ahogada", tipo: "carne", emoji: "🥩", color: "#8B2500", desc: "Carne, Buche, Lengua, Mixta" },
+        { key: "Torta Mini", nombre: "Torta Mini", tipo: "carne", emoji: "🥪", color: "#A0522D", desc: "Carne, Buche, Lengua, Mixta" },
+        { key: "Taco Dorado", nombre: "Taco Sencillo", tipo: "taco", emoji: "🌮", color: "#BF6B00", desc: "Papa, Frijol, Requesón, Picadillo" },
+        { key: "Taco con Carne", nombre: "Taco Dorado c/Carne", tipo: "carne_taco", emoji: "🌮", color: "#8B0000", desc: "Carne + sabor de taco" },
+        { key: "Taco Blandito", nombre: "Taco Blandito", tipo: "carne", emoji: "🌮", color: "#A52A2A", desc: "Carne, Buche, Lengua, Mixta" },
+        { key: "Carne(Gramos)", nombre: "Carne por Gramos", tipo: "gramos", emoji: "🥩", color: "#6D4C41", desc: "Por gramos o por monto", precioTexto: "$$$" },
+        { key: "__nuevo__", nombre: "Nuevo Ítem", tipo: "nuevo", emoji: "➕", color: "#ff8f00", desc: "Producto personalizado", precioTexto: "Custom" },
+        { key: "__descuento__", nombre: "Descuento", tipo: "descuento", emoji: "💲", color: "#ff6f00", desc: "Aplica un descuento", precioTexto: "- $" }
+      ],
+      paquetes: [
+        { key: "Paquete 1", nombre: "Paquete 1", tipo: "paquete_bebida", emoji: "📦", color: "#2e7d32", desc: "Torta + Tacos + Bebida" },
+        { key: "Paquete 2", nombre: "Paquete 2", tipo: "paquete_bebida", emoji: "📦", color: "#388e3c", desc: "Torta + Tacos + Bebida" },
+        { key: "Paquete 3", nombre: "Paquete 3", tipo: "simple", emoji: "📦", color: "#43a047", desc: "Paquete familiar mediano" },
+        { key: "Paquete 4", nombre: "Paquete 4", tipo: "simple", emoji: "📦", color: "#4caf50", desc: "Paquete familiar grande" },
+        { key: "Paquete 5", nombre: "Paquete 5", tipo: "simple", emoji: "📦", color: "#2e7d32", desc: "Paquete familiar extra grande" }
+      ],
+      bebidas: [
+        { key: "Refresco", nombre: "Refresco", tipo: "refresco", emoji: "🥤", color: "#0288d1", desc: "Coca, Fanta, Manza, Sprite, Coca Light" },
+        { key: "Agua Chica", nombre: "Agua Chica", tipo: "agua", emoji: "💧", color: "#0277bd", desc: "Jamaica, Horchata" },
+        { key: "Agua Grande", nombre: "Agua Grande", tipo: "agua", emoji: "💧", color: "#01579b", desc: "Jamaica, Horchata" },
+        { key: "Caguama", nombre: "Caguama", tipo: "simple", emoji: "🍺", color: "#BF8C00", desc: "Cerveza tamaño familiar" },
+        { key: "Cerveza", nombre: "Cerveza", tipo: "simple", emoji: "🍺", color: "#D4A017", desc: "Cerveza individual" }
+      ]
+    };
+
+    // Fotos de los productos (las mismas que usa el gestor de mesas)
+    const IMAGENES_PRODUCTOS = {
+      "Torta": "https://i.pinimg.com/736x/84/0d/3e/840d3ee9ef51cd7a21cf77fdd1f834de.jpg",
+      "Torta Mini": "https://lossaboresdemexico.com/wp-content/uploads/2021/05/image-1.jpeg",
+      "Taco Dorado": "https://i.pinimg.com/474x/66/e8/62/66e862a60d77a5936a5a45b47345c474.jpg",
+      "Taco con Carne": "https://live.staticflickr.com/5493/11908135565_1c710b0ab2_b.jpg",
+      "Taco Blandito": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQqfkb1nq8K3jtL1VjPLTMLRX_LuNdnZgd0og&s",
+      "Carne(Gramos)": "https://www.cocinadelirante.com/sites/default/files/images/2023/08/carnitas-sin-freir-para-tortas-ahogadas.jpg",
+      "Refresco": "https://photos.tryotter.com/cdn-cgi/image/fit=crop,width=492,height=267,quality=60,format=auto/menu-photos/f547ac6c-fc51-4e7f-a279-0ffe24487e8f.jpeg",
+      "Agua Chica": "https://mercadofacil.mx/wp-content/uploads/2023/03/IMG-20230322-WA0014.jpg",
+      "Agua Grande": "https://static.wixstatic.com/media/4d09e7_f81bdd07b4b1430d89021fcadb342dea~mv2.jpg/v1/fill/w_476,h_528,al_c,q_80,usm_0.66_1.00_0.01,enc_avif,quality_auto/4d09e7_f81bdd07b4b1430d89021fcadb342dea~mv2.jpg",
+      "Caguama": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQcEgMQaxC1NJNJ5Bx-uJDeX5XpXmygkx8rnw&s",
+      "Cerveza": "https://m.media-amazon.com/images/I/51lcAj5hBlL.jpg"
+    };
+
+    const CARNES = ["Carne", "Buche", "Lengua", "Mixta"];
+    const ORDEN_CARNES = { "Carne": 1, "Buche": 2, "Lengua": 3, "Mixta": 4 };
+    const COLORES_CARNE = { "Carne": "#d32f2f", "Buche": "#c62828", "Lengua": "#b71c1c", "Mixta": "#e53935" };
+
+    const TACOS = ["Papa", "Frijol", "Requeson", "Picadillo"];
+    const ORDEN_TACOS = { "Papa": 1, "Frijol": 2, "Requeson": 3, "Picadillo": 4 };
+    const COLORES_TACO = {
+      "Papa": { bg: "#FFF59D", fg: "#1b1d0e" },
+      "Frijol": { bg: "#8D6E63", fg: "#ffffff" },
+      "Requeson": { bg: "#EEEEEE", fg: "#1b1d0e" },
+      "Picadillo": { bg: "#BF360C", fg: "#ffffff" }
+    };
+
+    const REFRESCOS = ["COCA", "FANTA", "MANZA", "SPRITE", "COCA LIGHT"];
+    const COLORES_REFRESCO = {
+      "COCA": "#d32f2f",
+      "FANTA": "#ff6f00",
+      "MANZA": "#8d6e63",
+      "SPRITE": "#4caf50",
+      "COCA LIGHT": "#424242"
+    };
+
+    const AGUAS = ["Jamaica", "Horchata"];
+    const COLORES_AGUA = {
+      "Jamaica": { bg: "#9c0000", fg: "#ffffff" },
+      "Horchata": { bg: "#f5f5f5", fg: "#1b1d0e" }
+    };
+
+    // =====================================================================
+    // ESTADO DEL PEDIDO ACTUAL
+    // =====================================================================
+    const state = {
+      pedidoActual: [],           // [{nombre, anotacion, precio, grupo, cantidad}]
+      grupos: ["General"],
+      grupoActual: "General",
+      platoCounter: 0,
+      categoriaActiva: "comida",
+      meseraNombre: localStorage.getItem(WAITER_NAME_KEY) || "Sin nombre"
+    };
+
+    function guardarBorrador() {
+      localStorage.setItem(BORRADOR_KEY, JSON.stringify({
+        pedidoActual: state.pedidoActual,
+        grupos: state.grupos,
+        grupoActual: state.grupoActual,
+        platoCounter: state.platoCounter,
+        telefonoActivo: telefonoActivo(),
+        telefono: document.getElementById("input-telefono").value,
+        domicilio: document.getElementById("input-domicilio").value,
+        cruces: document.getElementById("input-cruces").value,
+        horaActiva: horaActiva(),
+        hora: horaSeleccionada()
+      }));
+    }
+
+    function restaurarBorrador() {
+      try {
+        const raw = localStorage.getItem(BORRADOR_KEY);
+        if (!raw) return;
+        const b = JSON.parse(raw);
+        state.pedidoActual = Array.isArray(b.pedidoActual) ? b.pedidoActual : [];
+        state.grupos = Array.isArray(b.grupos) && b.grupos.length ? b.grupos : ["General"];
+        state.grupoActual = b.grupoActual || "General";
+        state.platoCounter = Number(b.platoCounter) || 0;
+        document.getElementById("input-telefono").value = b.telefono || "";
+        document.getElementById("input-domicilio").value = b.domicilio || "";
+        document.getElementById("input-cruces").value = b.cruces || "";
+        setHoraDesdeTexto(b.hora);
+        setToggle("telefono-toggle", b.telefonoActivo !== false);
+        setToggle("hora-toggle", Boolean(b.horaActiva));
+        aplicarToggles();
+      } catch (_) {}
+    }
+
+    // =====================================================================
+    // UTILIDADES DE FORMATO DE TICKET (portadas 1:1 del PDV de escritorio)
+    // =====================================================================
+    function centrar(texto, ancho = 32) {
+      texto = String(texto);
+      if (texto.length >= ancho) return texto;
+      const marg = ancho - texto.length;
+      const izq = Math.floor(marg / 2);
+      return " ".repeat(izq) + texto + " ".repeat(marg - izq);
+    }
+
+    function envolverConPrefijo(texto, prefijo, anchoMax = 32) {
+      const palabras = String(texto || "").split(/\s+/).filter(Boolean);
+      if (!palabras.length) return null;
+      const lineas = [];
+      const indent = " ".repeat(prefijo.length);
+      let lineaActual = [];
+      let longitudActual = 0;
+      for (const palabra of palabras) {
+        const ancho = lineas.length === 0 ? anchoMax - prefijo.length : anchoMax;
+        const espacio = lineaActual.length ? 1 : 0;
+        if (longitudActual + palabra.length + espacio <= ancho) {
+          lineaActual.push(palabra);
+          longitudActual += palabra.length + espacio;
+        } else {
+          if (lineaActual.length) {
+            lineas.push((lineas.length === 0 ? prefijo : indent) + lineaActual.join(" "));
+          }
+          lineaActual = [palabra];
+          longitudActual = palabra.length;
+        }
+      }
+      if (lineaActual.length) {
+        lineas.push((lineas.length === 0 ? prefijo : indent) + lineaActual.join(" "));
+      }
+      return lineas.join("\n");
+    }
+
+    function dividirTexto(texto, anchoMax = 32, prefijo = "Nota: ") {
+      if (!texto) return "";
+      return envolverConPrefijo(texto, prefijo, anchoMax) || "";
+    }
+
+    function dividirCampo(texto, prefijo, anchoMax = 32) {
+      if (!texto) return prefijo;
+      return envolverConPrefijo(texto, prefijo, anchoMax) || prefijo;
+    }
+
+    function agruparItems(items) {
+      const agrupados = {};
+      for (const item of items) {
+        const grupo = item.grupo || "General";
+        if (!agrupados[grupo]) agrupados[grupo] = [];
+        agrupados[grupo].push(item);
+      }
+      return agrupados;
+    }
+
+    // General va al final; el resto en orden alfabético (igual que el escritorio)
+    function ordenarGrupos(keys) {
+      return [...keys].sort((a, b) => {
+        const ga = a === "General" ? 1 : 0;
+        const gb = b === "General" ? 1 : 0;
+        if (ga !== gb) return ga - gb;
+        return a < b ? -1 : a > b ? 1 : 0;
+      });
+    }
+
+    // Resumen de refrescos y aguas frescas (misma lógica que el escritorio)
+    function resumenBebidas(items) {
+      const refrescos = {};
+      const aguas = {};
+      // "COCA LIGHT" se revisa antes que "COCA" para clasificarla bien
+      const tiposRefresco = ["COCA LIGHT", "COCA", "FANTA", "MANZA", "SPRITE"];
+      for (const item of items) {
+        const nombre = item.nombre;
+        const cantidad = Number(item.cantidad) || 0;
+        const anotacion = String(item.anotacion || "");
+        if (nombre === "Refresco") {
+          const tipo = anotacion ? anotacion.split(",")[0].trim() : "Sin especificar";
+          refrescos[tipo] = (refrescos[tipo] || 0) + cantidad;
+        } else if (nombre === "Paquete 1" || nombre === "Paquete 2") {
+          if (anotacion.toLowerCase().includes("agua fresca") || anotacion.includes("Agua:")) {
+            if (anotacion.toLowerCase().includes("jamaica")) {
+              aguas["Jamaica Grande"] = (aguas["Jamaica Grande"] || 0) + cantidad;
+            } else if (anotacion.toLowerCase().includes("horchata")) {
+              aguas["Horchata Grande"] = (aguas["Horchata Grande"] || 0) + cantidad;
+            } else {
+              aguas["Agua Fresca Grande"] = (aguas["Agua Fresca Grande"] || 0) + cantidad;
+            }
+          } else {
+            let encontrado = false;
+            for (const tipo of tiposRefresco) {
+              if (anotacion.includes(tipo)) {
+                refrescos[tipo] = (refrescos[tipo] || 0) + cantidad;
+                encontrado = true;
+                break;
+              }
+            }
+            if (!encontrado && anotacion && !anotacion.toLowerCase().includes("agua fresca") && !anotacion.startsWith("Cerveza:")) {
+              const tipo = anotacion.split(",")[0].trim().replace("Refresco: ", "");
+              refrescos[tipo] = (refrescos[tipo] || 0) + cantidad;
+            }
+          }
+        } else if (nombre === "Agua Chica" || nombre === "Agua Grande") {
+          const tam = nombre === "Agua Chica" ? "Chica" : "Grande";
+          if (anotacion.toLowerCase().includes("jamaica")) {
+            aguas[`Jamaica ${tam}`] = (aguas[`Jamaica ${tam}`] || 0) + cantidad;
+          } else if (anotacion.toLowerCase().includes("horchata")) {
+            aguas[`Horchata ${tam}`] = (aguas[`Horchata ${tam}`] || 0) + cantidad;
+          } else {
+            const sabor = anotacion ? anotacion.split(",")[0].trim() : "Sin especificar";
+            aguas[`${sabor} ${tam}`] = (aguas[`${sabor} ${tam}`] || 0) + cantidad;
+          }
+        }
+      }
+      return { refrescos, aguas };
+    }
+
+    // Construye el texto del ticket con EXACTAMENTE el mismo formato
+    // que imprimir_ticket_personalizado() del PDV de escritorio.
+    function construirTicket(pedido) {
+      let t = "";
+      t += centrar("TORTAS AHOGADAS") + "\n";
+      t += centrar("DOÑA SUSY") + "\n";
+      t += centrar("Geranio #869A") + "\n";
+      t += centrar("Col.Tulipanes CP:45647") + "\n";
+      t += centrar("33-3684-4525") + "\n";
+      t += "=".repeat(32) + "\n";
+      t += dividirCampo(pedido.domicilio, "Domicilio: ") + "\n";
+      if (pedido.telefono) t += dividirCampo(pedido.telefono, "Telefono: ") + "\n";
+      t += dividirCampo(pedido.cruces, "Cruces: ") + "\n";
+      t += `Fecha: ${pedido.fechaHora}\n`;
+      if (pedido.horaEspecifica) t += `Hora especifica: ${pedido.horaEspecifica}\n`;
+      t += "=".repeat(32) + "\n";
+      t += "Prod          | Cant | Precio\n";
+      t += "-".repeat(32) + "\n";
+      const agrupados = agruparItems(pedido.items);
+      for (const grupo of ordenarGrupos(Object.keys(agrupados))) {
+        t += `Cliente: ${grupo.toUpperCase()}\n`;
+        for (const item of agrupados[grupo]) {
+          const prod = String(item.nombre).slice(0, 14).padEnd(14);
+          const cant = centrar(String(item.cantidad), 6);
+          const precio = ("$" + Number(item.precio).toFixed(2)).padStart(10);
+          t += `${prod}|${cant}|${precio}\n`;
+          if (item.anotacion) t += dividirTexto(item.anotacion) + "\n";
+        }
+        t += "=================================\n";
+      }
+      t += "=".repeat(32) + "\n";
+      t += centrar(`TOTAL: $${Number(pedido.total).toFixed(2)}`) + "\n";
+      t += "=".repeat(32) + "\n";
+      const { refrescos, aguas } = resumenBebidas(pedido.items);
+      if (Object.keys(refrescos).length || Object.keys(aguas).length) {
+        if (Object.keys(refrescos).length) {
+          t += centrar("RESUMEN DE REFRESCOS:") + "\n";
+          for (const [tipo, cant] of Object.entries(refrescos)) t += centrar(`${tipo}: ${cant}`) + "\n";
+        }
+        if (Object.keys(aguas).length) {
+          t += centrar("RESUMEN DE AGUAS FRESCAS:") + "\n";
+          for (const [sabor, cant] of Object.entries(aguas)) t += centrar(`${sabor}: ${cant}`) + "\n";
+        }
+        t += "=".repeat(32) + "\n";
+      }
+      t += centrar(`N. PEDIDO: ${pedido.numeroPedido}`) + "\n";
+      t += "=".repeat(32) + "\n";
+      t += centrar("Gracias por su pedido") + "\n";
+      t += "=".repeat(32) + "\n";
+      return t;
+    }
+
+    // =====================================================================
+    // IMPRESIÓN LOCAL (window.print + @media print)
+    // =====================================================================
+    function aplicarPapel() {
+      const papel = localStorage.getItem(PAPEL_KEY) || "80";
+      const pageStyle = document.getElementById("page-style");
+      if (papel === "58") {
+        pageStyle.textContent = "@page { size: 58mm auto; margin: 0mm; }";
+        document.documentElement.style.setProperty("--ticket-ancho", "48mm");
+        document.documentElement.style.setProperty("--ticket-font", "2.45mm");
+      } else {
+        pageStyle.textContent = "@page { size: 80mm auto; margin: 0mm; }";
+        document.documentElement.style.setProperty("--ticket-ancho", "70mm");
+        document.documentElement.style.setProperty("--ticket-font", "3.5mm");
+      }
+      const select = document.getElementById("config-papel");
+      if (select) select.value = papel;
+    }
+
+    function imprimirTexto(texto) {
+      document.getElementById("ticket-print-pre").textContent = texto;
+      window.print();
+    }
+
+    // =====================================================================
+    // BASE DE DATOS DE CLIENTES (clientes.db vía sql.js + overlay local)
+    // =====================================================================
+    let sqlModule = null;
+    let clientesDB = null;
+    let clientesDBTotal = 0;
+    let dbFileHandle = null;      // handle del archivo clientes.db (File System Access API)
+    let dbEscrituraActiva = false; // true = los clientes nuevos se escriben directo al archivo
+
+    async function getSqlModule() {
+      if (!sqlModule) sqlModule = await initSqlJs({ locateFile: (f) => SQLJS_CDN + f });
+      return sqlModule;
+    }
+
+    // --- IndexedDB: persiste el handle del archivo entre sesiones ---
+    function idbOpen() {
+      return new Promise((resolve, reject) => {
+        const req = indexedDB.open("pdv_kv", 1);
+        req.onupgradeneeded = () => req.result.createObjectStore("kv");
+        req.onsuccess = () => resolve(req.result);
+        req.onerror = () => reject(req.error);
+      });
+    }
+
+    async function idbGet(key) {
+      const db = await idbOpen();
+      return new Promise((resolve, reject) => {
+        const rq = db.transaction("kv", "readonly").objectStore("kv").get(key);
+        rq.onsuccess = () => resolve(rq.result || null);
+        rq.onerror = () => reject(rq.error);
+      });
+    }
+
+    async function idbSet(key, valor) {
+      const db = await idbOpen();
+      return new Promise((resolve, reject) => {
+        const tx = db.transaction("kv", "readwrite");
+        tx.objectStore("kv").put(valor, key);
+        tx.oncomplete = () => resolve();
+        tx.onerror = () => reject(tx.error);
+      });
+    }
+
+    function soportaFileSystem() {
+      return typeof window.showOpenFilePicker === "function";
+    }
+
+    function cargarOverlayClientes() {
+      try {
+        return JSON.parse(localStorage.getItem(CLIENTES_OVERLAY_KEY) || "{}");
+      } catch (_) {
+        return {};
+      }
+    }
+
+    // Guarda/actualiza al cliente: siempre en el respaldo local y, si el
+    // archivo clientes.db está conectado, también directo en el archivo.
+    function guardarActualizarCliente(telefono, domicilio, cruces) {
+      const tel = String(telefono).trim();
+      const dom = String(domicilio).trim();
+      const cru = String(cruces).trim();
+      const overlay = cargarOverlayClientes();
+      overlay[tel] = { domicilio: dom, cruces: cru };
+      localStorage.setItem(CLIENTES_OVERLAY_KEY, JSON.stringify(overlay));
+      escribirClienteEnDB(tel, dom, cru).then((ok) => {
+        if (ok) {
+          // Ya quedó en el archivo: se quita del respaldo local
+          const ov = cargarOverlayClientes();
+          delete ov[tel];
+          localStorage.setItem(CLIENTES_OVERLAY_KEY, JSON.stringify(ov));
+        }
+      }).catch(() => {});
+    }
+
+    // Escribe el cliente en el archivo clientes.db real (lee el archivo
+    // fresco, aplica INSERT OR REPLACE y lo vuelve a escribir).
+    async function escribirClienteEnDB(telefono, domicilio, cruces) {
+      if (!dbFileHandle || !dbEscrituraActiva) return false;
+      try {
+        const SQLmod = await getSqlModule();
+        const archivo = await dbFileHandle.getFile();
+        const db = new SQLmod.Database(new Uint8Array(await archivo.arrayBuffer()));
+        db.run("CREATE TABLE IF NOT EXISTS clientes (telefono TEXT PRIMARY KEY, domicilio TEXT, cruces TEXT)");
+        db.run("INSERT OR REPLACE INTO clientes (telefono, domicilio, cruces) VALUES (?, ?, ?)", [telefono, domicilio, cruces]);
+        const bytes = db.export();
+        db.close();
+        const writable = await dbFileHandle.createWritable();
+        await writable.write(bytes);
+        await writable.close();
+        await cargarDBDesdeBytes(bytes); // refresca la copia en memoria
+        actualizarEstadoDB();
+        return true;
+      } catch (e) {
+        dbEscrituraActiva = false;
+        actualizarEstadoDB();
+        return false;
+      }
+    }
+
+    async function cargarDBDesdeBytes(bytes) {
+      const SQLmod = await getSqlModule();
+      if (clientesDB) {
+        try { clientesDB.close(); } catch (_) {}
+      }
+      clientesDB = new SQLmod.Database(bytes);
+      try {
+        const stmt = clientesDB.prepare("SELECT COUNT(*) AS c FROM clientes");
+        clientesDBTotal = stmt.step() ? Number(stmt.getAsObject().c) || 0 : 0;
+        stmt.free();
+      } catch (_) {
+        clientesDBTotal = 0;
+      }
+    }
+
+    function actualizarEstadoDB() {
+      const status = document.getElementById("clientes-status");
+      const btn = document.getElementById("db-conectar");
+      const baseChip = "text-[11px] font-semibold rounded-full px-3 py-1 ";
+      if (!clientesDB) {
+        status.className = baseChip + "bg-red-100 text-red-700";
+        status.textContent = "⚠ Sin base de clientes";
+      } else if (dbEscrituraActiva) {
+        status.className = baseChip + "bg-emerald-100 text-emerald-800";
+        status.textContent = `📇 ${clientesDBTotal} clientes · guardado en archivo activo`;
+      } else {
+        status.className = baseChip + "bg-amber-100 text-amber-800";
+        status.textContent = `📇 ${clientesDBTotal} clientes · solo lectura`;
+      }
+      if (soportaFileSystem() && !dbEscrituraActiva) {
+        btn.classList.remove("hidden");
+        btn.textContent = dbFileHandle ? "Reactivar guardado en clientes.db" : "Conectar clientes.db";
+      } else {
+        btn.classList.add("hidden");
+      }
+    }
+
+    // Conecta (o reactiva) el archivo clientes.db para lectura y escritura
+    async function conectarArchivoDB() {
+      try {
+        if (dbFileHandle) {
+          const permiso = await dbFileHandle.requestPermission({ mode: "readwrite" });
+          if (permiso === "granted") {
+            const archivo = await dbFileHandle.getFile();
+            await cargarDBDesdeBytes(new Uint8Array(await archivo.arrayBuffer()));
+            dbEscrituraActiva = true;
+            actualizarEstadoDB();
+            showToast("clientes.db conectado: los clientes nuevos se guardarán en el archivo.");
+            return;
+          }
+        }
+        const [handle] = await window.showOpenFilePicker({
+          types: [{ description: "Base de datos de clientes (SQLite)", accept: { "application/octet-stream": [".db"] } }]
+        });
+        if (!handle) return;
+        const permiso = await handle.requestPermission({ mode: "readwrite" });
+        if (permiso !== "granted") {
+          showToast("Permiso de escritura denegado.", "error");
+          return;
+        }
+        dbFileHandle = handle;
+        try { await idbSet("dbHandle", handle); } catch (_) {}
+        const archivo = await handle.getFile();
+        await cargarDBDesdeBytes(new Uint8Array(await archivo.arrayBuffer()));
+        dbEscrituraActiva = true;
+        actualizarEstadoDB();
+        showToast("clientes.db conectado: los clientes nuevos se guardarán en el archivo.");
+      } catch (_) {
+        // El usuario canceló el selector de archivos
+      }
+    }
+
+    function buscarClienteExacto(telefono) {
+      const tel = String(telefono).trim();
+      if (!tel) return null;
+      const overlay = cargarOverlayClientes();
+      if (overlay[tel]) return { telefono: tel, ...overlay[tel] };
+      if (!clientesDB) return null;
+      try {
+        const stmt = clientesDB.prepare("SELECT telefono, domicilio, cruces FROM clientes WHERE telefono = ? LIMIT 1");
+        stmt.bind([tel]);
+        let resultado = null;
+        if (stmt.step()) resultado = stmt.getAsObject();
+        stmt.free();
+        return resultado;
+      } catch (_) {
+        return null;
+      }
+    }
+
+    function buscarSugerencias(prefijo, limite = 6) {
+      const pref = String(prefijo).trim();
+      if (pref.length < 3) return [];
+      const resultados = [];
+      const vistos = new Set();
+      const overlay = cargarOverlayClientes();
+      for (const [tel, datos] of Object.entries(overlay)) {
+        if (tel.startsWith(pref) && !vistos.has(tel)) {
+          resultados.push({ telefono: tel, ...datos });
+          vistos.add(tel);
+        }
+        if (resultados.length >= limite) return resultados;
+      }
+      if (clientesDB) {
+        try {
+          const stmt = clientesDB.prepare("SELECT telefono, domicilio, cruces FROM clientes WHERE telefono LIKE ? ORDER BY telefono LIMIT ?");
+          stmt.bind([pref + "%", limite]);
+          while (stmt.step() && resultados.length < limite) {
+            const fila = stmt.getAsObject();
+            if (!vistos.has(fila.telefono)) {
+              resultados.push(fila);
+              vistos.add(fila.telefono);
+            }
+          }
+          stmt.free();
+        } catch (_) {}
+      }
+      return resultados;
+    }
+
+    async function initClientesDB() {
+      const status = document.getElementById("clientes-status");
+      try {
+        const SQL = await initSqlJs({ locateFile: (f) => SQLJS_CDN + f });
+        const resp = await fetch(CLIENTES_DB_URL, { cache: "no-store" });
+        if (!resp.ok) throw new Error("HTTP " + resp.status);
+        const buf = await resp.arrayBuffer();
+        clientesDB = new SQL.Database(new Uint8Array(buf));
+        const stmt = clientesDB.prepare("SELECT COUNT(*) AS c FROM clientes");
+        if (stmt.step()) clientesDBTotal = Number(stmt.getAsObject().c) || 0;
+        stmt.free();
+        status.textContent = `📇 ${clientesDBTotal} clientes cargados`;
+        status.classList.add("text-emerald-700");
+      } catch (e) {
+        status.textContent = "⚠ Sin base de clientes (solo locales)";
+        status.classList.add("text-red-700");
+      }
+    }
+
+    // =====================================================================
+    // AUTOCOMPLETADO DEL TELÉFONO
+    // =====================================================================
+    function rellenarCliente(cliente) {
+      document.getElementById("input-domicilio").value = cliente.domicilio || "";
+      document.getElementById("input-cruces").value = cliente.cruces || "";
+      document.getElementById("cliente-encontrado").classList.remove("hidden");
+      guardarBorrador();
+    }
+
+    function ocultarSugerencias() {
+      document.getElementById("telefono-sugerencias").classList.add("hidden");
+    }
+
+    function onTelefonoInput() {
+      const valor = document.getElementById("input-telefono").value.trim();
+      const badge = document.getElementById("cliente-encontrado");
+      badge.classList.add("hidden");
+      const cont = document.getElementById("telefono-sugerencias");
+
+      if (!valor) {
+        ocultarSugerencias();
+        guardarBorrador();
+        return;
+      }
+
+      // Coincidencia exacta: autocompletar de inmediato (como el escritorio)
+      const exacto = buscarClienteExacto(valor);
+      if (exacto) {
+        rellenarCliente(exacto);
+        ocultarSugerencias();
+        return;
+      }
+
+      // Sugerencias por prefijo
+      const sugerencias = buscarSugerencias(valor);
+      if (!sugerencias.length) {
+        ocultarSugerencias();
+        guardarBorrador();
+        return;
+      }
+      cont.innerHTML = sugerencias.map((s) => `
+        <button type="button" data-tel="${escapeHtml(s.telefono)}" class="w-full text-left px-4 py-3 hover:bg-surface-container-highest border-b border-outline-variant/40 last:border-b-0">
+          <span class="font-bold text-primary">${escapeHtml(s.telefono)}</span>
+          <span class="block text-xs text-on-surface-variant truncate">${escapeHtml(s.domicilio || "")}${s.cruces ? " · " + escapeHtml(s.cruces) : ""}</span>
+        </button>
+      `).join("");
+      cont.classList.remove("hidden");
+      cont.querySelectorAll("[data-tel]").forEach((btn) => {
+        btn.addEventListener("click", () => {
+          document.getElementById("input-telefono").value = btn.dataset.tel;
+          const cliente = buscarClienteExacto(btn.dataset.tel);
+          if (cliente) rellenarCliente(cliente);
+          ocultarSugerencias();
+        });
+      });
+      guardarBorrador();
+    }
+
+    // =====================================================================
+    // HELPERS DE UI
+    // =====================================================================
+    function escapeHtml(value) {
+      return String(value ?? "")
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#39;");
+    }
+
+    function showToast(message, type = "info") {
+      const container = document.getElementById("toast-container");
+      const toneClass = type === "error"
+        ? "bg-red-100/95 text-red-900 border-red-400"
+        : "bg-emerald-100/95 text-emerald-900 border-emerald-400";
+      const toast = document.createElement("div");
+      toast.className = `pointer-events-none w-full max-w-xl px-8 py-6 rounded-2xl border-2 shadow-[0_20px_40px_rgba(27,29,14,0.28)] text-center text-2xl font-black tracking-wide ${toneClass}`;
+      toast.textContent = message;
+      container.innerHTML = "";
+      container.appendChild(toast);
+      setTimeout(() => toast.remove(), 2200);
+    }
+
+    // =====================================================================
+    // DIÁLOGOS PROPIOS (sin alertas del navegador, no interrumpen el flujo)
+    // =====================================================================
+    function abrirDialogo(html) {
+      const modal = document.getElementById("dialog-modal");
+      const card = document.getElementById("dialog-card");
+      card.innerHTML = html;
+      modal.classList.remove("hidden");
+      return card;
+    }
+
+    function cerrarDialogo() {
+      document.getElementById("dialog-modal").classList.add("hidden");
+      document.getElementById("dialog-card").innerHTML = "";
+    }
+
+    function modalConfirmar(titulo, mensaje, opciones = {}) {
+      const { textoOk = "Aceptar", textoCancelar = "Cancelar", tono = "rojo" } = opciones;
+      const colorOk = tono === "verde" ? "bg-emerald-600 hover:bg-emerald-700" : "bg-primary hover:opacity-90";
+      return new Promise((resolve) => {
+        const card = abrirDialogo(`
+          <h3 class="font-headline font-bold text-2xl mb-2">${escapeHtml(titulo)}</h3>
+          <p class="text-sm text-on-surface-variant mb-5 whitespace-pre-line">${escapeHtml(mensaje)}</p>
+          <div class="grid grid-cols-2 gap-2">
+            <button data-dlg-cancelar class="w-full bg-surface-container-highest text-on-surface px-4 py-3 rounded-xl font-bold hover:bg-white">${escapeHtml(textoCancelar)}</button>
+            <button data-dlg-ok class="w-full ${colorOk} text-white px-4 py-3 rounded-xl font-bold">${escapeHtml(textoOk)}</button>
+          </div>
+        `);
+        const terminar = (valor) => { cerrarDialogo(); resolve(valor); };
+        card.querySelector("[data-dlg-ok]").addEventListener("click", () => terminar(true));
+        card.querySelector("[data-dlg-cancelar]").addEventListener("click", () => terminar(false));
+        card.querySelector("[data-dlg-ok]").focus();
+      });
+    }
+
+    function modalPrompt(titulo, mensaje, opciones = {}) {
+      const { valorInicial = "", placeholder = "", tipo = "text", textoOk = "Aceptar" } = opciones;
+      return new Promise((resolve) => {
+        const card = abrirDialogo(`
+          <h3 class="font-headline font-bold text-2xl mb-2">${escapeHtml(titulo)}</h3>
+          ${mensaje ? `<p class="text-sm text-on-surface-variant mb-3 whitespace-pre-line">${escapeHtml(mensaje)}</p>` : ""}
+          <input data-dlg-input type="${tipo === "password" ? "password" : "text"}" autocomplete="off"
+            class="w-full px-4 py-3 rounded-xl border border-outline-variant bg-white/90 text-lg font-semibold mb-4 focus:ring-2 focus:ring-primary" />
+          <div class="grid grid-cols-2 gap-2">
+            <button data-dlg-cancelar class="w-full bg-surface-container-highest text-on-surface px-4 py-3 rounded-xl font-bold hover:bg-white">Cancelar</button>
+            <button data-dlg-ok class="w-full bg-emerald-600 text-white px-4 py-3 rounded-xl font-bold hover:bg-emerald-700">${escapeHtml(textoOk)}</button>
+          </div>
+        `);
+        const input = card.querySelector("[data-dlg-input]");
+        input.placeholder = placeholder;
+        input.value = valorInicial;
+        const terminar = (valor) => { cerrarDialogo(); resolve(valor); };
+        card.querySelector("[data-dlg-ok]").addEventListener("click", () => terminar(input.value));
+        card.querySelector("[data-dlg-cancelar]").addEventListener("click", () => terminar(null));
+        input.addEventListener("keydown", (event) => {
+          if (event.key === "Enter") { event.preventDefault(); terminar(input.value); }
+          if (event.key === "Escape") { event.preventDefault(); terminar(null); }
+        });
+        setTimeout(() => { input.focus(); input.select(); }, 0);
+      });
+    }
+
+    function telefonoActivo() {
+      return document.querySelector('input[name="telefono-toggle"]:checked')?.value === "1";
+    }
+
+    function horaActiva() {
+      return document.querySelector('input[name="hora-toggle"]:checked')?.value === "1";
+    }
+
+    function setToggle(nombre, activo) {
+      const radios = document.querySelectorAll(`input[name="${nombre}"]`);
+      radios.forEach((r) => { r.checked = r.value === (activo ? "1" : "0"); });
+    }
+
+    function aplicarToggles() {
+      const inputTel = document.getElementById("input-telefono");
+      inputTel.disabled = !telefonoActivo();
+      if (!telefonoActivo()) {
+        inputTel.value = "";
+        document.getElementById("cliente-encontrado").classList.add("hidden");
+        ocultarSugerencias();
+      }
+      const horaOn = horaActiva();
+      ["select-hora", "select-minutos", "select-ampm"].forEach((id) => {
+        document.getElementById(id).disabled = !horaOn;
+      });
+    }
+
+    // --- Selectores de hora específica (hora / minutos de 5 en 5 / AM-PM) ---
+    function initHoraSelects() {
+      const selHora = document.getElementById("select-hora");
+      selHora.innerHTML = Array.from({ length: 12 }, (_, i) => `<option value="${i + 1}">${i + 1}</option>`).join("");
+      const selMin = document.getElementById("select-minutos");
+      selMin.innerHTML = Array.from({ length: 12 }, (_, i) => {
+        const v = String(i * 5).padStart(2, "0");
+        return `<option value="${v}">${v}</option>`;
+      }).join("");
+      const selAmPm = document.getElementById("select-ampm");
+      selAmPm.innerHTML = `<option value="AM">AM</option><option value="PM">PM</option>`;
+      resetHoraSelects();
+    }
+
+    function resetHoraSelects() {
+      document.getElementById("select-hora").value = "2";
+      document.getElementById("select-minutos").value = "00";
+      document.getElementById("select-ampm").value = "PM";
+    }
+
+    function horaSeleccionada() {
+      const h = document.getElementById("select-hora").value;
+      const m = document.getElementById("select-minutos").value;
+      const ap = document.getElementById("select-ampm").value;
+      return `${h}:${m} ${ap}`;
+    }
+
+    function setHoraDesdeTexto(texto) {
+      const match = String(texto || "").trim().toUpperCase().match(/^(\d{1,2}):(\d{2})\s*(AM|PM)$/);
+      if (!match) {
+        resetHoraSelects();
+        return;
+      }
+      const hora = String(parseInt(match[1], 10));
+      const minutos = match[2];
+      document.getElementById("select-hora").value = hora;
+      // Si los minutos no son múltiplo de 5, se redondean al más cercano
+      const minNum = parseInt(minutos, 10);
+      const minRedondeado = String(Math.min(55, Math.round(minNum / 5) * 5)).padStart(2, "0");
+      document.getElementById("select-minutos").value = minRedondeado;
+      document.getElementById("select-ampm").value = match[3];
+    }
+
+    function fechaHoraActual() {
+      const d = new Date();
+      const p = (n) => String(n).padStart(2, "0");
+      return `${d.getFullYear()}-${p(d.getMonth() + 1)}-${p(d.getDate())} ${p(d.getHours())}:${p(d.getMinutes())}`;
+    }
+
+    function hoyKey() {
+      const d = new Date();
+      const p = (n) => String(n).padStart(2, "0");
+      return `${d.getFullYear()}-${p(d.getMonth() + 1)}-${p(d.getDate())}`;
+    }
+
+    // =====================================================================
+    // HISTORIAL DEL DÍA (equivalente a historial_YYYY-MM-DD.txt)
+    // =====================================================================
+    function cargarHistorialHoy() {
+      try {
+        const raw = localStorage.getItem(HISTORIAL_PREFIX + hoyKey());
+        const parsed = JSON.parse(raw || "[]");
+        return Array.isArray(parsed) ? parsed : [];
+      } catch (_) {
+        return [];
+      }
+    }
+
+    function guardarHistorialHoy(lista) {
+      localStorage.setItem(HISTORIAL_PREFIX + hoyKey(), JSON.stringify(lista));
+    }
+
+    function siguienteNumeroPedido() {
+      return String(cargarHistorialHoy().length + 1).padStart(2, "0");
+    }
+
+    function firmaItems(items) {
+      return items
+        .map((i) => `${i.nombre}|${i.cantidad}|${Number(i.precio).toFixed(2)}|${i.grupo || "General"}|${i.anotacion || ""}`)
+        .sort();
+    }
+
+    function esDuplicado(pedidoNuevo) {
+      const historial = cargarHistorialHoy();
+      if (!historial.length) return false;
+      const ultimo = historial[historial.length - 1];
+      if (String(pedidoNuevo.domicilio).trim() !== String(ultimo.domicilio).trim()) return false;
+      if (String(pedidoNuevo.telefono || "").trim() !== String(ultimo.telefono || "").trim()) return false;
+      if (String(pedidoNuevo.cruces).trim() !== String(ultimo.cruces).trim()) return false;
+      if (Math.abs(Number(pedidoNuevo.total) - Number(ultimo.total)) > 0.01) return false;
+      if (pedidoNuevo.items.length !== ultimo.items.length) return false;
+      return JSON.stringify(firmaItems(pedidoNuevo.items)) === JSON.stringify(firmaItems(ultimo.items));
+    }
+
+    function convertirHoraAMinutos(horaStr) {
+      try {
+        if (!horaStr) return 9999;
+        let s = String(horaStr).trim().toUpperCase();
+        s = s.replace(" AM", "AM").replace(" PM", "PM").replace("A.M.", "AM").replace("P.M.", "PM");
+        let esPM = s.includes("PM");
+        let esAM = s.includes("AM");
+        const limpio = s.replace("AM", "").replace("PM", "").trim();
+        if (!esAM && !esPM) {
+          const horaTemp = parseInt(limpio.includes(":") ? limpio.split(":")[0] : limpio, 10);
+          if (horaTemp >= 7 && horaTemp <= 11) esAM = true;
+          else esPM = true;
+        }
+        let horas, minutos;
+        if (limpio.includes(":")) {
+          const partes = limpio.split(":");
+          horas = parseInt(partes[0], 10);
+          minutos = parseInt(partes[1], 10);
+        } else {
+          horas = parseInt(limpio, 10);
+          minutos = 0;
+        }
+        if (!Number.isFinite(horas) || !Number.isFinite(minutos)) return 9999;
+        if (esAM) {
+          if (horas === 12) horas = 0;
+        } else if (esPM) {
+          if (horas !== 12) horas += 12;
+        }
+        return horas * 60 + minutos;
+      } catch (_) {
+        return 9999;
+      }
+    }
+
+    // =====================================================================
+    // LÓGICA DEL PEDIDO (grupos, envío, items)
+    // =====================================================================
+    function asegurarEnvio() {
+      if (state.grupoActual === null) {
+        state.grupoActual = "General";
+        if (!state.grupos.includes("General")) state.grupos.push("General");
+      }
+      if (!state.pedidoActual.some((item) => item.nombre === "Envío")) {
+        state.pedidoActual.push({ nombre: "Envío", anotacion: null, precio: PRECIO_ENVIO, grupo: "General", cantidad: 1 });
+      }
+    }
+
+    function agregarItem(nombre, anotacion, precio, cantidad) {
+      asegurarEnvio();
+      state.pedidoActual.push({
+        nombre,
+        anotacion: anotacion || null,
+        precio: Math.round(precio * 100) / 100,
+        grupo: state.grupoActual,
+        cantidad
+      });
+      renderPedido();
+      guardarBorrador();
+    }
+
+    function eliminarItem(indice) {
+      state.pedidoActual.splice(indice, 1);
+      renderPedido();
+      guardarBorrador();
+    }
+
+    function generarNombrePlatoUnico() {
+      while (true) {
+        state.platoCounter += 1;
+        const nombre = `Plato ${state.platoCounter}`;
+        if (!state.grupos.includes(nombre)) return nombre;
+      }
+    }
+
+    function crearGrupo() {
+      const nombre = generarNombrePlatoUnico();
+      state.grupoActual = nombre;
+      if (!state.grupos.includes(nombre)) state.grupos.push(nombre);
+      renderPedido();
+      guardarBorrador();
+      showToast(`Cliente "${nombre}" agregado. Los nuevos productos irán ahí.`);
+    }
+
+    async function renombrarGrupo(nombreViejo) {
+      const nuevo = await modalPrompt("✏️ Editar nombre", `Nombre actual: ${nombreViejo}`, { valorInicial: nombreViejo, textoOk: "Guardar" });
+      if (nuevo === null) return;
+      const nombreNuevo = nuevo.trim();
+      if (!nombreNuevo || nombreNuevo === nombreViejo) return;
+      const idx = state.grupos.indexOf(nombreViejo);
+      if (idx >= 0) state.grupos[idx] = nombreNuevo;
+      state.pedidoActual.forEach((item) => {
+        if (item.grupo === nombreViejo) item.grupo = nombreNuevo;
+      });
+      if (state.grupoActual === nombreViejo) state.grupoActual = nombreNuevo;
+      renderPedido();
+      guardarBorrador();
+    }
+
+    function duplicarGrupo(grupoOrigen) {
+      const nuevoNombre = generarNombrePlatoUnico();
+      const copiar = state.pedidoActual.filter((item) => item.grupo === grupoOrigen && item.nombre !== "Envío");
+      for (const item of copiar) {
+        state.pedidoActual.push({ ...item, grupo: nuevoNombre });
+      }
+      state.grupoActual = nuevoNombre;
+      if (!state.grupos.includes(nuevoNombre)) state.grupos.push(nuevoNombre);
+      renderPedido();
+      guardarBorrador();
+      showToast(`Plato duplicado como "${nuevoNombre}".`);
+    }
+
+    function seleccionarGrupo(grupo) {
+      state.grupoActual = grupo;
+      if (!state.grupos.includes(grupo)) state.grupos.push(grupo);
+      renderPedido();
+      guardarBorrador();
+    }
+
+    async function limpiarPedido() {
+      if (state.pedidoActual.length) {
+        const ok = await modalConfirmar("🧹 Limpiar pedido", "Se borrará todo el pedido actual y los datos del cliente.\n\n¿Deseas continuar?", { textoOk: "Sí, limpiar" });
+        if (!ok) return;
+      }
+      state.pedidoActual = [];
+      state.grupos = ["General"];
+      state.grupoActual = "General";
+      state.platoCounter = 0;
+      document.getElementById("input-telefono").value = "";
+      document.getElementById("input-domicilio").value = "";
+      document.getElementById("input-cruces").value = "";
+      resetHoraSelects();
+      setToggle("hora-toggle", false);
+      aplicarToggles();
+      document.getElementById("cliente-encontrado").classList.add("hidden");
+      ocultarSugerencias();
+      renderPedido();
+      guardarBorrador();
+    }
+
+    function totalPedido() {
+      return state.pedidoActual.reduce((suma, item) => suma + Number(item.precio), 0);
+    }
+
+    // =====================================================================
+    // RENDERIZADO: MENÚ
+    // =====================================================================
+    function renderMenu() {
+      const tabsEl = document.getElementById("menu-tabs");
+      tabsEl.innerHTML = CATEGORIAS.map((c) => `
+        <button class="quick-menu-tab ${c.key === state.categoriaActiva ? "active" : ""}" data-tab="${c.key}">
+          <span class="material-symbols-outlined">${c.icon}</span>
+          ${c.titulo}
+        </button>
+      `).join("");
+      tabsEl.querySelectorAll("[data-tab]").forEach((tab) => {
+        tab.addEventListener("click", () => {
+          state.categoriaActiva = tab.dataset.tab;
+          renderMenu();
+        });
+      });
+
+      const gridEl = document.getElementById("menu-grid");
+      const productos = PRODUCTOS[state.categoriaActiva] || [];
+      gridEl.innerHTML = productos.map((p, i) => {
+        const precioTexto = p.precioTexto || `$${precios[p.key] ?? 0}`;
+        const imagen = IMAGENES_PRODUCTOS[p.key];
+        const estilo = imagen
+          ? `background-color:${p.color};background-image:url('${imagen}');`
+          : `background:${p.color};`;
+        return `
+          <button class="pdv-card ${imagen ? "has-image" : ""}" style="${estilo}" data-prod="${i}">
+            <span class="pdv-card-nombre">${p.emoji} ${escapeHtml(p.nombre)}</span>
+            <span class="pdv-card-precio">${escapeHtml(precioTexto)}</span>
+            <span class="pdv-card-desc">${escapeHtml(p.desc)}</span>
+          </button>
+        `;
+      }).join("");
+      gridEl.querySelectorAll("[data-prod]").forEach((btn) => {
+        btn.addEventListener("click", () => {
+          const producto = productos[Number(btn.dataset.prod)];
+          flujoAgregarProducto(producto);
+        });
+      });
+    }
+
+    // =====================================================================
+    // RENDERIZADO: RESUMEN DEL PEDIDO
+    // =====================================================================
+    function renderPedido() {
+      const lista = document.getElementById("pedido-lista");
+      if (!state.pedidoActual.length) {
+        lista.innerHTML = `<p class="text-sm italic text-on-surface-variant py-8 text-center">(Sin productos aún)</p>`;
+      } else {
+        const agrupados = agruparItems(state.pedidoActual);
+        lista.innerHTML = ordenarGrupos(Object.keys(agrupados)).map((grupo) => {
+          const esActivo = grupo === state.grupoActual;
+          const filas = agrupados[grupo].map((item) => {
+            const idx = state.pedidoActual.indexOf(item);
+            return `
+              <div class="grupo-item">
+                <div class="flex-1 min-w-0">
+                  <div class="flex items-center gap-2 flex-wrap">
+                    <span class="bg-primary text-white text-xs font-bold px-2 py-0.5 rounded-lg shrink-0">${item.cantidad}x</span>
+                    <span class="font-bold text-sm">${escapeHtml(item.nombre)}</span>
+                  </div>
+                  ${item.anotacion ? `<p class="text-xs text-on-surface-variant mt-1">${escapeHtml(item.anotacion)}</p>` : ""}
+                </div>
+                <div class="flex items-center gap-2 shrink-0">
+                  <span class="font-bold text-primary">$${Number(item.precio).toFixed(2)}</span>
+                  <button data-del="${idx}" class="w-9 h-9 rounded-lg bg-red-100 text-red-700 hover:bg-red-200 font-bold" title="Eliminar">✕</button>
+                </div>
+              </div>
+            `;
+          }).join("");
+          return `
+            <div class="grupo-card">
+              <div class="grupo-header ${esActivo ? "activo" : ""}" data-select-grupo="${escapeHtml(grupo)}">
+                <span class="font-bold text-sm">${esActivo ? "▸ " : ""}${escapeHtml(grupo)}</span>
+                <span class="flex items-center gap-1">
+                  <button data-rename-grupo="${escapeHtml(grupo)}" class="text-[10px] font-bold bg-orange-400 text-white rounded-lg px-2 py-1 hover:bg-orange-500">Editar nombre</button>
+                  <button data-dup-grupo="${escapeHtml(grupo)}" class="text-[10px] font-bold bg-emerald-600 text-white rounded-lg px-2 py-1 hover:bg-emerald-700">Duplicar plato</button>
+                </span>
+              </div>
+              ${filas}
+            </div>
+          `;
+        }).join("");
+      }
+
+      lista.querySelectorAll("[data-del]").forEach((btn) => {
+        btn.addEventListener("click", (e) => {
+          e.stopPropagation();
+          eliminarItem(Number(btn.dataset.del));
+        });
+      });
+      lista.querySelectorAll("[data-select-grupo]").forEach((header) => {
+        header.addEventListener("click", (e) => {
+          if (e.target.closest("[data-rename-grupo]") || e.target.closest("[data-dup-grupo]")) return;
+          seleccionarGrupo(header.dataset.selectGrupo);
+        });
+      });
+      lista.querySelectorAll("[data-rename-grupo]").forEach((btn) => {
+        btn.addEventListener("click", (e) => {
+          e.stopPropagation();
+          renombrarGrupo(btn.dataset.renameGrupo);
+        });
+      });
+      lista.querySelectorAll("[data-dup-grupo]").forEach((btn) => {
+        btn.addEventListener("click", (e) => {
+          e.stopPropagation();
+          duplicarGrupo(btn.dataset.dupGrupo);
+        });
+      });
+
+      document.getElementById("pedido-total").textContent = `$${totalPedido().toFixed(2)}`;
+    }
+
+    // =====================================================================
+    // MODAL GENÉRICO
+    // =====================================================================
+    function abrirModal(html) {
+      const modal = document.getElementById("pdv-modal");
+      const card = document.getElementById("pdv-modal-card");
+      card.innerHTML = html;
+      modal.classList.remove("hidden");
+      return card;
+    }
+
+    function cerrarModal() {
+      const modal = document.getElementById("pdv-modal");
+      modal.classList.add("hidden");
+      document.getElementById("pdv-modal-card").innerHTML = "";
+    }
+
+    function htmlCantidad(valorInicial = 1) {
+      return `
+        <div class="bg-white/70 rounded-2xl p-3 mb-3">
+          <p class="text-sm font-semibold mb-2">Cantidad</p>
+          <div class="flex items-center gap-2">
+            <button data-qty-dec class="w-14 h-12 rounded-xl bg-red-100 text-red-700 font-black text-xl hover:bg-red-200">-</button>
+            <span data-qty-value class="flex-1 text-center text-2xl font-black">${valorInicial}</span>
+            <button data-qty-inc class="w-14 h-12 rounded-xl bg-green-100 text-green-700 font-black text-xl hover:bg-green-200">+</button>
+          </div>
+        </div>
+      `;
+    }
+
+    function conectarCantidad(card) {
+      const valueEl = card.querySelector("[data-qty-value]");
+      card.querySelector("[data-qty-dec]").addEventListener("click", () => {
+        const actual = Number(valueEl.textContent) || 1;
+        valueEl.textContent = String(Math.max(1, actual - 1));
+      });
+      card.querySelector("[data-qty-inc]").addEventListener("click", () => {
+        const actual = Number(valueEl.textContent) || 1;
+        valueEl.textContent = String(actual + 1);
+      });
+      return () => Math.max(1, Number(valueEl.textContent) || 1);
+    }
+
+    function htmlNota() {
+      return `
+        <div class="mb-3">
+          <label class="block text-sm font-semibold mb-1">Nota (opcional)</label>
+          <input data-nota type="text" class="w-full px-4 py-3 rounded-xl border border-outline-variant bg-white/90 text-base" placeholder="Ej. sin cebolla, bien dorada..." />
+        </div>
+      `;
+    }
+
+    function htmlSeccionCarnes() {
+      return `
+        <div class="mb-3">
+          <p class="text-sm font-bold mb-2">Selecciona la carne <span class="font-normal text-on-surface-variant">(máximo 2)</span></p>
+          <div class="grid grid-cols-2 gap-2" data-seccion-carnes>
+            ${CARNES.map((c) => `<button data-carne="${c}" class="opcion-btn text-white" style="background:${COLORES_CARNE[c]};">${c}</button>`).join("")}
+          </div>
+        </div>
+      `;
+    }
+
+    function conectarCarnes(card) {
+      const seleccion = [];
+      card.querySelectorAll("[data-carne]").forEach((btn) => {
+        btn.addEventListener("click", () => {
+          const carne = btn.dataset.carne;
+          const i = seleccion.indexOf(carne);
+          if (i >= 0) {
+            seleccion.splice(i, 1);
+            btn.classList.remove("seleccionada");
+          } else {
+            if (seleccion.length >= 2) {
+              showToast("Máximo 2 carnes.", "error");
+              return;
+            }
+            seleccion.push(carne);
+            btn.classList.add("seleccionada");
+          }
+        });
+      });
+      return () => {
+        if (!seleccion.length) return null;
+        return [...seleccion].sort((a, b) => ORDEN_CARNES[a] - ORDEN_CARNES[b]).join("-");
+      };
+    }
+
+    function htmlSeccionTacos() {
+      return `
+        <div class="mb-3">
+          <p class="text-sm font-bold mb-2">Selecciona el tipo de taco</p>
+          <div class="grid grid-cols-2 gap-2" data-seccion-tacos>
+            ${TACOS.map((t) => `<button data-taco="${t}" class="opcion-btn" style="background:${COLORES_TACO[t].bg};color:${COLORES_TACO[t].fg};">${t}</button>`).join("")}
+          </div>
+        </div>
+      `;
+    }
+
+    function conectarTacos(card) {
+      const seleccion = [];
+      card.querySelectorAll("[data-taco]").forEach((btn) => {
+        btn.addEventListener("click", () => {
+          const taco = btn.dataset.taco;
+          const i = seleccion.indexOf(taco);
+          if (i >= 0) {
+            seleccion.splice(i, 1);
+            btn.classList.remove("seleccionada");
+          } else {
+            seleccion.push(taco);
+            btn.classList.add("seleccionada");
+          }
+        });
+      });
+      return () => {
+        if (!seleccion.length) return null;
+        return [...seleccion].sort((a, b) => ORDEN_TACOS[a] - ORDEN_TACOS[b]).join("-");
+      };
+    }
+
+    function conectarSeleccionUnica(card, selector, dataAttr) {
+      let seleccionado = null;
+      card.querySelectorAll(selector).forEach((btn) => {
+        btn.addEventListener("click", () => {
+          card.querySelectorAll(selector).forEach((b) => b.classList.remove("seleccionada"));
+          btn.classList.add("seleccionada");
+          seleccionado = btn.dataset[dataAttr];
+        });
+      });
+      return () => seleccionado;
+    }
+
+    function pieModal(textoConfirmar = "Confirmar") {
+      return `
+        <div class="grid grid-cols-2 gap-2 mt-2">
+          <button data-modal-cancelar class="w-full bg-red-100 text-red-700 px-4 py-3 rounded-xl font-bold hover:bg-red-200">Cancelar</button>
+          <button data-modal-confirmar class="w-full bg-emerald-600 text-white px-4 py-3 rounded-xl font-bold hover:bg-emerald-700">${textoConfirmar}</button>
+        </div>
+      `;
+    }
+
+    // =====================================================================
+    // FLUJOS DE PRODUCTO
+    // =====================================================================
+    function flujoAgregarProducto(producto) {
+      switch (producto.tipo) {
+        case "carne": return modalItemVariante(producto, { carnes: true });
+        case "taco": return modalItemVariante(producto, { tacos: true });
+        case "carne_taco": return modalItemVariante(producto, { carnes: true, tacos: true });
+        case "refresco": return modalItemVariante(producto, { refresco: true });
+        case "agua": return modalItemVariante(producto, { agua: true });
+        case "simple": return modalItemVariante(producto, {});
+        case "paquete_bebida": return modalPaqueteBebida(producto);
+        case "gramos": return modalCarneGramos(producto);
+        case "nuevo": return modalNuevoItem();
+        case "descuento": return modalDescuento();
+      }
+    }
+
+    // Modal unificado: carnes / tacos / refresco / agua / simple + cantidad + nota
+    function modalItemVariante(producto, opciones) {
+      let secciones = "";
+      if (opciones.carnes) secciones += htmlSeccionCarnes();
+      if (opciones.tacos) secciones += htmlSeccionTacos();
+      if (opciones.refresco) {
+        secciones += `
+          <div class="mb-3">
+            <p class="text-sm font-bold mb-2">Selecciona refresco</p>
+            <div class="grid grid-cols-2 sm:grid-cols-3 gap-2">
+              ${REFRESCOS.map((r) => `<button data-refresco="${r}" class="opcion-btn text-white" style="background:${COLORES_REFRESCO[r]};">${r}</button>`).join("")}
+            </div>
+          </div>
+        `;
+      }
+      if (opciones.agua) {
+        secciones += `
+          <div class="mb-3">
+            <p class="text-sm font-bold mb-2">Selecciona agua fresca</p>
+            <div class="grid grid-cols-2 gap-2">
+              ${AGUAS.map((a) => `<button data-agua="${a}" class="opcion-btn" style="background:${COLORES_AGUA[a].bg};color:${COLORES_AGUA[a].fg};">${a.toUpperCase()}</button>`).join("")}
+            </div>
+          </div>
+        `;
+      }
+
+      const card = abrirModal(`
+        <h3 class="font-headline font-bold text-2xl mb-1">${producto.emoji} ${escapeHtml(producto.nombre)}</h3>
+        <p class="text-sm text-on-surface-variant mb-4">$${precios[producto.key]} c/u · Se agrega a: <strong>${escapeHtml(state.grupoActual || "General")}</strong></p>
+        ${secciones}
+        ${htmlCantidad()}
+        ${htmlNota()}
+        ${pieModal()}
+      `);
+
+      const getCarnes = opciones.carnes ? conectarCarnes(card) : null;
+      const getTacos = opciones.tacos ? conectarTacos(card) : null;
+      const getRefresco = opciones.refresco ? conectarSeleccionUnica(card, "[data-refresco]", "refresco") : null;
+      const getAgua = opciones.agua ? conectarSeleccionUnica(card, "[data-agua]", "agua") : null;
+      const getCantidad = conectarCantidad(card);
+
+      card.querySelector("[data-modal-cancelar]").addEventListener("click", cerrarModal);
+      card.querySelector("[data-modal-confirmar]").addEventListener("click", () => {
+        let variante = null;
+        if (opciones.carnes && opciones.tacos) {
+          const carne = getCarnes();
+          const taco = getTacos();
+          if (!carne || !taco) { showToast("Selecciona carne y tipo de taco.", "error"); return; }
+          variante = `${carne}, ${taco}`;
+        } else if (opciones.carnes) {
+          variante = getCarnes();
+          if (!variante) { showToast("Selecciona al menos una carne.", "error"); return; }
+        } else if (opciones.tacos) {
+          variante = getTacos();
+          if (!variante) { showToast("Selecciona al menos un tipo de taco.", "error"); return; }
+        } else if (opciones.refresco) {
+          variante = getRefresco();
+          if (!variante) { showToast("Selecciona un refresco.", "error"); return; }
+        } else if (opciones.agua) {
+          variante = getAgua();
+          if (!variante) { showToast("Selecciona un agua fresca.", "error"); return; }
+        }
+
+        const cantidad = getCantidad();
+        const nota = card.querySelector("[data-nota]").value.trim();
+        let anotacion = null;
+        if (variante && nota) anotacion = `${variante}, ${nota}`;
+        else if (variante) anotacion = variante;
+        else if (nota) anotacion = nota;
+
+        const precioFinal = precios[producto.key] * cantidad;
+        cerrarModal();
+        agregarItem(producto.key, anotacion, precioFinal, cantidad);
+      });
+    }
+
+    // Paquete 1 / Paquete 2: carne + taco + bebida (corona +$5)
+    function modalPaqueteBebida(producto) {
+      const card = abrirModal(`
+        <h3 class="font-headline font-bold text-2xl mb-1">${producto.emoji} ${escapeHtml(producto.nombre)}</h3>
+        <p class="text-sm text-on-surface-variant mb-4">$${precios[producto.key]} c/u · Se agrega a: <strong>${escapeHtml(state.grupoActual || "General")}</strong></p>
+        ${htmlSeccionCarnes()}
+        ${htmlSeccionTacos()}
+        <div class="mb-3">
+          <p class="text-sm font-bold mb-2">Selecciona la bebida <span class="font-normal text-on-surface-variant">(Corona +$${CORONA_EXTRA})</span></p>
+          <div class="grid grid-cols-2 sm:grid-cols-3 gap-2 mb-2">
+            ${REFRESCOS.map((r) => `<button data-bebida="refresco|${r}" class="opcion-btn text-white" style="background:${COLORES_REFRESCO[r]};">${r}</button>`).join("")}
+          </div>
+          <div class="grid grid-cols-2 gap-2 mb-2">
+            ${AGUAS.map((a) => `<button data-bebida="agua|${a}" class="opcion-btn" style="background:${COLORES_AGUA[a].bg};color:${COLORES_AGUA[a].fg};">${a.toUpperCase()}</button>`).join("")}
+          </div>
+          <div class="grid grid-cols-2 gap-2">
+            <button data-bebida="cerveza|Corona Clara" class="opcion-btn text-white" style="background:#f9a825;">👑 CORONA CLARA (+$${CORONA_EXTRA})</button>
+            <button data-bebida="cerveza|Corona Oscura" class="opcion-btn text-white" style="background:#5d4037;">👑 CORONA OSCURA (+$${CORONA_EXTRA})</button>
+          </div>
+        </div>
+        ${htmlCantidad()}
+        ${htmlNota()}
+        ${pieModal("Agregar paquete")}
+      `);
+
+      const getCarnes = conectarCarnes(card);
+      const getTacos = conectarTacos(card);
+      const getBebida = conectarSeleccionUnica(card, "[data-bebida]", "bebida");
+      const getCantidad = conectarCantidad(card);
+
+      card.querySelector("[data-modal-cancelar]").addEventListener("click", cerrarModal);
+      card.querySelector("[data-modal-confirmar]").addEventListener("click", () => {
+        const carne = getCarnes();
+        if (!carne) { showToast("Selecciona la carne de la torta.", "error"); return; }
+        const taco = getTacos();
+        if (!taco) { showToast("Selecciona el tipo de taco.", "error"); return; }
+        const bebidaRaw = getBebida();
+        if (!bebidaRaw) { showToast("Selecciona la bebida del paquete.", "error"); return; }
+
+        const [categoria, bebida] = bebidaRaw.split("|");
+        let anotacion;
+        let extra = 0;
+        if (categoria === "agua") {
+          anotacion = `Agua: ${bebida}, Torta(${carne}), Tacos(${taco})`;
+        } else if (categoria === "cerveza") {
+          anotacion = `Cerveza: ${bebida}, Torta(${carne}), Tacos(${taco})`;
+          extra = CORONA_EXTRA;
+        } else {
+          anotacion = `Refresco: ${bebida}, Torta(${carne}), Tacos(${taco})`;
+        }
+
+        const nota = card.querySelector("[data-nota]").value.trim();
+        if (nota) anotacion += `, ${nota}`;
+
+        const cantidad = getCantidad();
+        const precioFinal = (precios[producto.key] + extra) * cantidad;
+        cerrarModal();
+        agregarItem(producto.key, anotacion, precioFinal, cantidad);
+      });
+    }
+
+    // Carne por gramos: carne (máx 2) + gramos O monto ($0.30/g)
+    function modalCarneGramos(producto) {
+      const card = abrirModal(`
+        <h3 class="font-headline font-bold text-2xl mb-1">${producto.emoji} Carne por Gramos</h3>
+        <p class="text-sm text-on-surface-variant mb-4">$${PRECIO_POR_GRAMO.toFixed(2)} por gramo · Se agrega a: <strong>${escapeHtml(state.grupoActual || "General")}</strong></p>
+        ${htmlSeccionCarnes()}
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-3">
+          <div class="bg-white/70 rounded-2xl p-3">
+            <label class="block text-sm font-bold mb-1">Gramos</label>
+            <input data-gramos type="text" inputmode="decimal" class="w-full px-3 py-2 rounded-xl border border-outline-variant bg-white text-base mb-2" placeholder="Ej. 500" />
+            <div class="flex flex-wrap gap-1">
+              ${[["50gr", 50], ["100gr", 100], ["250gr", 250], ["500gr", 500], ["1kg", 1000]].map(([t, v]) =>
+                `<button data-preset-gramos="${v}" class="text-xs font-bold bg-[#8d6e63] text-white rounded-lg px-2 py-1.5 hover:opacity-80">${t}</button>`).join("")}
+            </div>
+          </div>
+          <div class="bg-white/70 rounded-2xl p-3">
+            <label class="block text-sm font-bold mb-1">O Monto ($)</label>
+            <input data-monto type="text" inputmode="decimal" class="w-full px-3 py-2 rounded-xl border border-outline-variant bg-white text-base mb-2" placeholder="Ej. 100" />
+            <div class="flex flex-wrap gap-1">
+              ${[["$20", 20], ["$50", 50], ["$100", 100], ["$250", 250]].map(([t, v]) =>
+                `<button data-preset-monto="${v}" class="text-xs font-bold bg-emerald-700 text-white rounded-lg px-2 py-1.5 hover:opacity-80">${t}</button>`).join("")}
+            </div>
+          </div>
+        </div>
+        ${htmlNota()}
+        ${pieModal()}
+      `);
+
+      const getCarnes = conectarCarnes(card);
+      const inputGramos = card.querySelector("[data-gramos]");
+      const inputMonto = card.querySelector("[data-monto]");
+      card.querySelectorAll("[data-preset-gramos]").forEach((btn) => {
+        btn.addEventListener("click", () => {
+          inputGramos.value = btn.dataset.presetGramos;
+          inputMonto.value = "";
+        });
+      });
+      card.querySelectorAll("[data-preset-monto]").forEach((btn) => {
+        btn.addEventListener("click", () => {
+          inputMonto.value = btn.dataset.presetMonto;
+          inputGramos.value = "";
+        });
+      });
+
+      card.querySelector("[data-modal-cancelar]").addEventListener("click", cerrarModal);
+      card.querySelector("[data-modal-confirmar]").addEventListener("click", () => {
+        const carne = getCarnes();
+        if (!carne) { showToast("Selecciona al menos una carne.", "error"); return; }
+        const gramosStr = inputGramos.value.replace(",", ".").trim();
+        const montoStr = inputMonto.value.replace(",", ".").trim();
+        if (!gramosStr && !montoStr) { showToast("Ingresa gramos o monto.", "error"); return; }
+        if (gramosStr && montoStr) { showToast("Ingresa solo un campo: gramos o monto.", "error"); return; }
+
+        let gramosFinal, precioFinal;
+        if (gramosStr) {
+          const gramos = Number(gramosStr);
+          if (!Number.isFinite(gramos) || gramos <= 0) { showToast("Gramos inválidos.", "error"); return; }
+          gramosFinal = gramos;
+          precioFinal = gramos * PRECIO_POR_GRAMO;
+        } else {
+          const monto = Number(montoStr);
+          if (!Number.isFinite(monto) || monto <= 0) { showToast("Monto inválido.", "error"); return; }
+          gramosFinal = monto / PRECIO_POR_GRAMO;
+          precioFinal = monto;
+        }
+
+        const nota = card.querySelector("[data-nota]").value.trim();
+        const anotacion = nota
+          ? `${carne}, ${gramosFinal.toFixed(2)}g, ${nota}`
+          : `${carne}, ${gramosFinal.toFixed(2)}g`;
+        cerrarModal();
+        agregarItem("Carne(Gramos)", anotacion, Math.round(precioFinal * 100) / 100, 1);
+      });
+    }
+
+    function modalNuevoItem() {
+      const card = abrirModal(`
+        <h3 class="font-headline font-bold text-2xl mb-4">➕ Nuevo Ítem</h3>
+        <div class="mb-3">
+          <label class="block text-sm font-semibold mb-1">Nombre</label>
+          <input data-nombre type="text" class="w-full px-4 py-3 rounded-xl border border-outline-variant bg-white/90 text-base" placeholder="Ej. Michelada" />
+        </div>
+        <div class="mb-3">
+          <label class="block text-sm font-semibold mb-1">Precio ($)</label>
+          <input data-precio type="text" inputmode="decimal" class="w-full px-4 py-3 rounded-xl border border-outline-variant bg-white/90 text-base" placeholder="Ej. 45" />
+        </div>
+        ${htmlNota()}
+        ${pieModal("Agregar")}
+      `);
+      card.querySelector("[data-modal-cancelar]").addEventListener("click", cerrarModal);
+      card.querySelector("[data-modal-confirmar]").addEventListener("click", () => {
+        const nombre = card.querySelector("[data-nombre]").value.trim();
+        const precio = Number(card.querySelector("[data-precio]").value.replace(",", ".").trim());
+        if (!nombre || !Number.isFinite(precio) || precio < 0) {
+          showToast("Ingresa nombre y precio válidos.", "error");
+          return;
+        }
+        const nota = card.querySelector("[data-nota]").value.trim();
+        cerrarModal();
+        agregarItem(nombre, nota || null, precio, 1);
+      });
+    }
+
+    function modalDescuento() {
+      const card = abrirModal(`
+        <h3 class="font-headline font-bold text-2xl mb-4">💲 Descuento</h3>
+        <div class="mb-3">
+          <label class="block text-sm font-semibold mb-1">Monto del descuento ($)</label>
+          <input data-monto type="text" inputmode="decimal" class="w-full px-4 py-3 rounded-xl border border-outline-variant bg-white/90 text-base" placeholder="Ej. 20" />
+        </div>
+        ${htmlNota()}
+        ${pieModal("Aplicar descuento")}
+      `);
+      card.querySelector("[data-modal-cancelar]").addEventListener("click", cerrarModal);
+      card.querySelector("[data-modal-confirmar]").addEventListener("click", () => {
+        const monto = Number(card.querySelector("[data-monto]").value.replace(",", ".").trim());
+        if (!Number.isFinite(monto) || monto <= 0) {
+          showToast("Monto de descuento inválido.", "error");
+          return;
+        }
+        const nota = card.querySelector("[data-nota]").value.trim();
+        cerrarModal();
+        agregarItem("Descuento", nota || null, -monto, 1);
+      });
+    }
+
+    // =====================================================================
+    // IMPRIMIR TICKET (guardar en historial + impresión local)
+    // =====================================================================
+    async function imprimirTicket() {
+      const domicilio = document.getElementById("input-domicilio").value.trim();
+      const telefono = telefonoActivo() ? document.getElementById("input-telefono").value.trim() : "";
+      const cruces = document.getElementById("input-cruces").value.trim();
+      const horaEspecifica = horaActiva() ? horaSeleccionada() : "";
+
+      if (!domicilio || (telefonoActivo() && !telefono) || !cruces) {
+        showToast("Faltan datos: domicilio, cruces y teléfono (si está activo).", "error");
+        return;
+      }
+      if (!state.pedidoActual.length) {
+        showToast("Agrega al menos un producto antes de imprimir.", "error");
+        return;
+      }
+
+      const pedido = {
+        fechaHora: fechaHoraActual(),
+        domicilio,
+        telefono,
+        cruces,
+        horaEspecifica: horaEspecifica || null,
+        items: JSON.parse(JSON.stringify(state.pedidoActual)),
+        total: Math.round(totalPedido() * 100) / 100,
+        mesera: state.meseraNombre
+      };
+
+      const duplicado = esDuplicado(pedido);
+      if (duplicado) {
+        const seguir = await modalConfirmar(
+          "⚠️ Ticket duplicado",
+          "Este ticket es idéntico al anterior.\n\n¿Deseas imprimir de todas formas?\n(No se guardará en el historial)",
+          { textoOk: "Imprimir igual" }
+        );
+        if (!seguir) return;
+      }
+
+      if (telefonoActivo() && telefono) {
+        guardarActualizarCliente(telefono, domicilio, cruces);
+      }
+
+      pedido.numeroPedido = siguienteNumeroPedido();
+      if (!duplicado) {
+        const historial = cargarHistorialHoy();
+        historial.push(pedido);
+        guardarHistorialHoy(historial);
+      }
+
+      imprimirTexto(construirTicket(pedido));
+      showToast(`Ticket N. ${pedido.numeroPedido} enviado a la impresora.`);
+    }
+
+    // =====================================================================
+    // LISTA DE PEDIDOS DEL DÍA
+    // =====================================================================
+    function abrirListaPedidos() {
+      const historial = cargarHistorialHoy();
+      const modal = document.getElementById("lista-modal");
+      const sinHoraEl = document.getElementById("lista-sin-hora");
+      const conHoraEl = document.getElementById("lista-con-hora");
+
+      const conIndice = historial.map((p, i) => ({ ...p, __idx: i }));
+      const sinHora = conIndice.filter((p) => !p.horaEspecifica).reverse();
+      const conHora = conIndice.filter((p) => p.horaEspecifica)
+        .sort((a, b) => convertirHoraAMinutos(a.horaEspecifica) - convertirHoraAMinutos(b.horaEspecifica));
+
+      document.getElementById("lista-resumen").textContent =
+        `Pedidos: ${historial.length} | Sin hora: ${sinHora.length} | Con hora: ${conHora.length}`;
+
+      function tarjetaPedido(p) {
+        const itemsHtml = p.items.map((item) => `
+          <p class="text-xs font-mono">- ${escapeHtml(item.nombre)} x${item.cantidad} ($${Number(item.precio).toFixed(2)})${item.anotacion ? `<span class="block pl-3 text-on-surface-variant">Nota: ${escapeHtml(item.anotacion)}</span>` : ""}</p>
+        `).join("");
+        return `
+          <article class="bg-white rounded-2xl border border-outline-variant p-3 shadow-sm">
+            <div class="flex items-center justify-between gap-2 bg-[#faf2d3] rounded-xl px-3 py-2 mb-2">
+              <span class="font-bold text-sm">Pedido #${escapeHtml(p.numeroPedido)} · $${Number(p.total).toFixed(2)}</span>
+              ${p.horaEspecifica
+                ? `<span class="text-sm font-black text-white bg-sky-700 rounded-full px-3 py-1 whitespace-nowrap">🕐 ${escapeHtml(p.horaEspecifica)}</span>`
+                : `<span class="text-xs font-bold text-on-surface-variant bg-white rounded-full px-3 py-1 border border-outline-variant whitespace-nowrap">Sin hora</span>`}
+            </div>
+            <p class="text-sm font-bold">Domicilio: ${escapeHtml(p.domicilio)}</p>
+            <p class="text-xs text-on-surface-variant mb-2">Tel: ${escapeHtml(p.telefono || "S/N")} | Cruces: ${escapeHtml(p.cruces)}</p>
+            <div class="space-y-0.5 mb-3">${itemsHtml}</div>
+            <div class="flex gap-2">
+              <button data-reimprimir="${p.__idx}" class="flex-1 bg-emerald-600 text-white rounded-xl px-3 py-2 text-xs font-bold hover:bg-emerald-700">Imprimir Ticket</button>
+              <button data-editar="${p.__idx}" class="flex-1 bg-orange-500 text-white rounded-xl px-3 py-2 text-xs font-bold hover:bg-orange-600">Editar</button>
+              <button data-borrar="${p.__idx}" class="bg-red-100 text-red-700 rounded-xl px-3 py-2 text-xs font-bold hover:bg-red-200">✕</button>
+            </div>
+          </article>
+        `;
+      }
+
+      sinHoraEl.innerHTML = sinHora.length
+        ? sinHora.map(tarjetaPedido).join("")
+        : `<p class="text-sm italic text-on-surface-variant p-3">Sin pedidos normales</p>`;
+      conHoraEl.innerHTML = conHora.length
+        ? conHora.map(tarjetaPedido).join("")
+        : `<p class="text-sm italic text-on-surface-variant p-3">Sin pedidos con hora</p>`;
+
+      modal.querySelectorAll("[data-reimprimir]").forEach((btn) => {
+        btn.addEventListener("click", () => {
+          const p = historial[Number(btn.dataset.reimprimir)];
+          if (p) imprimirTexto(construirTicket(p));
+        });
+      });
+
+      modal.querySelectorAll("[data-editar]").forEach((btn) => {
+        btn.addEventListener("click", async () => {
+          const idx = Number(btn.dataset.editar);
+          const p = historial[idx];
+          if (!p) return;
+          const seguir = await modalConfirmar(
+            "✏️ Editar pedido",
+            "Este pedido se quitará del historial y se cargará en la pantalla principal para editarlo.\n\n¿Deseas continuar?",
+            { textoOk: "Sí, editar", tono: "verde" }
+          );
+          if (!seguir) return;
+          historial.splice(idx, 1);
+          guardarHistorialHoy(historial);
+          cargarPedidoEnPrincipal(p);
+          modal.classList.add("hidden");
+          showToast("Pedido cargado para edición. Imprime para guardarlo de nuevo.");
+        });
+      });
+
+      modal.querySelectorAll("[data-borrar]").forEach((btn) => {
+        btn.addEventListener("click", async () => {
+          const idx = Number(btn.dataset.borrar);
+          const ok = await modalConfirmar("🗑️ Eliminar pedido", "¿Eliminar este pedido del historial del día?", { textoOk: "Sí, eliminar" });
+          if (!ok) return;
+          historial.splice(idx, 1);
+          guardarHistorialHoy(historial);
+          abrirListaPedidos();
+        });
+      });
+
+      modal.classList.remove("hidden");
+    }
+
+    function cargarPedidoEnPrincipal(p) {
+      document.getElementById("input-domicilio").value = p.domicilio || "";
+      document.getElementById("input-cruces").value = p.cruces || "";
+      setToggle("telefono-toggle", Boolean(p.telefono));
+      document.getElementById("input-telefono").value = p.telefono || "";
+      setToggle("hora-toggle", Boolean(p.horaEspecifica));
+      aplicarToggles();
+      setHoraDesdeTexto(p.horaEspecifica);
+
+      state.pedidoActual = JSON.parse(JSON.stringify(p.items || []));
+      const gruposDetectados = [];
+      for (const item of state.pedidoActual) {
+        const g = item.grupo || "General";
+        if (!gruposDetectados.includes(g)) gruposDetectados.push(g);
+      }
+      if (!gruposDetectados.includes("General")) gruposDetectados.unshift("General");
+      state.grupos = gruposDetectados;
+      state.grupoActual = gruposDetectados[0] || "General";
+      renderPedido();
+      guardarBorrador();
+    }
+
+    // =====================================================================
+    // RESUMEN DEL DÍA
+    // =====================================================================
+    async function pedirClave() {
+      const claveGuardada = localStorage.getItem(CLAVE_KEY) || "123";
+      const clave = await modalPrompt("🔒 Contraseña", "Ingresa la contraseña para continuar:", { tipo: "password", textoOk: "Entrar" });
+      if (clave === null) return false;
+      if (clave !== claveGuardada) {
+        showToast("Contraseña incorrecta.", "error");
+        return false;
+      }
+      return true;
+    }
+
+    async function abrirResumenDia() {
+      if (!(await pedirClave())) return;
+      const historial = cargarHistorialHoy();
+      const contenido = document.getElementById("resumen-contenido");
+      if (!historial.length) {
+        contenido.innerHTML = `<p class="text-sm italic text-on-surface-variant">No hay pedidos registrados hoy.</p>`;
+      } else {
+        const totalGeneral = historial.reduce((s, p) => s + Number(p.total), 0);
+        const todosItems = historial.flatMap((p) => p.items);
+        const { refrescos, aguas } = resumenBebidas(todosItems);
+        contenido.innerHTML = `
+          <div class="bg-emerald-50 border border-emerald-300 rounded-2xl p-4 text-center mb-3">
+            <p class="text-xs font-bold text-emerald-800 uppercase tracking-widest">💰 Total General</p>
+            <p class="font-headline font-black text-3xl text-emerald-900">$${Math.trunc(totalGeneral)}</p>
+            <p class="text-xs text-emerald-700">${historial.length} pedidos</p>
+          </div>
+          <div class="bg-white rounded-2xl border border-outline-variant divide-y divide-outline-variant/40 mb-3 max-h-56 overflow-y-auto">
+            ${historial.map((p) => `
+              <div class="flex items-center justify-between gap-2 px-3 py-2 text-sm">
+                <span class="truncate">🏠 ${escapeHtml(p.domicilio)}</span>
+                <span class="font-bold text-primary whitespace-nowrap">$${Math.trunc(Number(p.total))}</span>
+              </div>
+            `).join("")}
+          </div>
+          ${Object.keys(refrescos).length ? `
+            <div class="bg-orange-50 border border-orange-300 rounded-2xl p-3 mb-2">
+              <p class="text-xs font-bold text-orange-800 uppercase mb-1">🥤 Refrescos vendidos</p>
+              ${Object.entries(refrescos).sort().map(([t, c]) => `<p class="text-sm flex justify-between"><span>• ${escapeHtml(t)}</span><b>${c}</b></p>`).join("")}
+            </div>` : ""}
+          ${Object.keys(aguas).length ? `
+            <div class="bg-sky-50 border border-sky-300 rounded-2xl p-3">
+              <p class="text-xs font-bold text-sky-800 uppercase mb-1">🧊 Aguas frescas vendidas</p>
+              ${Object.entries(aguas).sort().map(([t, c]) => `<p class="text-sm flex justify-between"><span>• ${escapeHtml(t)}</span><b>${c}</b></p>`).join("")}
+            </div>` : ""}
+        `;
+      }
+      document.getElementById("resumen-modal").classList.remove("hidden");
+    }
+
+    function imprimirResumenDia() {
+      const historial = cargarHistorialHoy();
+      if (!historial.length) {
+        showToast("No hay pedidos para imprimir.", "error");
+        return;
+      }
+      const totalGeneral = historial.reduce((s, p) => s + Number(p.total), 0);
+      const todosItems = historial.flatMap((p) => p.items);
+      const { refrescos, aguas } = resumenBebidas(todosItems);
+      let r = "=============================\n";
+      r += "Resumen del Día\n";
+      r += "=============================\n";
+      for (const p of historial) {
+        r += `| ${String(p.domicilio).slice(0, 20).padEnd(20)} | $${Math.trunc(Number(p.total))}\n`;
+      }
+      r += "=============================\n";
+      if (Object.keys(refrescos).length) {
+        r += "REFRESCOS VENDIDOS:\n";
+        for (const [tipo, cant] of Object.entries(refrescos).sort()) r += `  ${tipo}: ${cant}\n`;
+        r += "=============================\n";
+      }
+      if (Object.keys(aguas).length) {
+        r += "AGUAS FRESCAS VENDIDAS:\n";
+        for (const [tipo, cant] of Object.entries(aguas).sort()) r += `  ${tipo}: ${cant}\n`;
+        r += "=============================\n";
+      }
+      r += `TOTAL GENERAL: $${Math.trunc(totalGeneral)}\n`;
+      r += "=============================\n";
+      imprimirTexto(r);
+    }
+
+    // =====================================================================
+    // CONFIGURACIÓN (precios, clave, papel)
+    // =====================================================================
+    function renderPanelPrecios() {
+      const panel = document.getElementById("config-precios-panel");
+      panel.innerHTML = Object.keys(PRECIOS_DEFAULT).map((key) => `
+        <div class="flex items-center justify-between gap-2">
+          <span class="text-sm font-semibold">${escapeHtml(key)}</span>
+          <input data-precio-key="${escapeHtml(key)}" type="text" inputmode="decimal" value="${precios[key]}"
+            class="w-24 px-2 py-1.5 rounded-lg border border-outline-variant bg-white text-sm text-right" />
+        </div>
+      `).join("") + `
+        <button id="guardar-precios-btn" class="w-full bg-emerald-600 text-white rounded-xl px-3 py-2 font-bold hover:bg-emerald-700 mt-2">Guardar precios</button>
+      `;
+      panel.querySelector("#guardar-precios-btn").addEventListener("click", () => {
+        panel.querySelectorAll("[data-precio-key]").forEach((input) => {
+          const valor = Number(String(input.value).replace(",", ".").trim());
+          if (Number.isFinite(valor) && valor >= 0) {
+            precios[input.dataset.precioKey] = valor;
+          }
+        });
+        guardarPrecios();
+        renderMenu();
+        showToast("Precios actualizados.");
+        panel.classList.add("hidden");
+      });
+    }
+
+    // =====================================================================
+    // EVENTOS
+    // =====================================================================
+    function setupEvents() {
+      document.getElementById("logout-button").addEventListener("click", () => {
+        sessionStorage.removeItem("autenticado");
+        window.location.replace("../index.html");
+      });
+
+      document.getElementById("input-telefono").addEventListener("input", onTelefonoInput);
+      document.addEventListener("click", (e) => {
+        if (!e.target.closest("#telefono-sugerencias") && e.target.id !== "input-telefono") {
+          ocultarSugerencias();
+        }
+      });
+
+      document.querySelectorAll('input[name="telefono-toggle"], input[name="hora-toggle"]').forEach((radio) => {
+        radio.addEventListener("change", () => {
+          aplicarToggles();
+          guardarBorrador();
+        });
+      });
+
+      ["input-domicilio", "input-cruces"].forEach((id) => {
+        document.getElementById(id).addEventListener("input", guardarBorrador);
+      });
+      ["select-hora", "select-minutos", "select-ampm"].forEach((id) => {
+        document.getElementById(id).addEventListener("change", guardarBorrador);
+      });
+
+      document.getElementById("btn-agregar-cliente").addEventListener("click", crearGrupo);
+      document.getElementById("btn-limpiar").addEventListener("click", limpiarPedido);
+      document.getElementById("btn-imprimir").addEventListener("click", imprimirTicket);
+      document.getElementById("btn-lista").addEventListener("click", abrirListaPedidos);
+      document.getElementById("lista-cerrar").addEventListener("click", () => {
+        document.getElementById("lista-modal").classList.add("hidden");
+      });
+
+      document.getElementById("config-button").addEventListener("click", () => {
+        document.getElementById("config-precios-panel").classList.add("hidden");
+        document.getElementById("config-modal").classList.remove("hidden");
+      });
+      document.getElementById("config-cerrar").addEventListener("click", () => {
+        document.getElementById("config-modal").classList.add("hidden");
+      });
+      document.getElementById("config-precios").addEventListener("click", async () => {
+        if (!(await pedirClave())) return;
+        renderPanelPrecios();
+        document.getElementById("config-precios-panel").classList.remove("hidden");
+      });
+      document.getElementById("config-clave").addEventListener("click", async () => {
+        if (!(await pedirClave())) return;
+        const nueva = await modalPrompt("🔑 Nueva contraseña", "Ingresa la nueva contraseña:", { tipo: "password", textoOk: "Guardar" });
+        if (nueva) {
+          localStorage.setItem(CLAVE_KEY, nueva);
+          showToast("Contraseña actualizada.");
+        }
+      });
+      document.getElementById("config-resumen").addEventListener("click", () => {
+        document.getElementById("config-modal").classList.add("hidden");
+        abrirResumenDia();
+      });
+      document.getElementById("config-papel").addEventListener("change", (e) => {
+        localStorage.setItem(PAPEL_KEY, e.target.value);
+        aplicarPapel();
+        showToast(`Papel configurado a ${e.target.value} mm.`);
+      });
+
+      document.getElementById("resumen-cerrar").addEventListener("click", () => {
+        document.getElementById("resumen-modal").classList.add("hidden");
+      });
+      document.getElementById("resumen-imprimir").addEventListener("click", imprimirResumenDia);
+
+      // Cerrar modal genérico al tocar el fondo
+      document.getElementById("pdv-modal").addEventListener("click", (e) => {
+        if (e.target.id === "pdv-modal") cerrarModal();
+      });
+    }
+
+    // =====================================================================
+    // INICIO
+    // =====================================================================
+    document.getElementById("current-user-label").textContent = `Usuario: ${state.meseraNombre}`;
+    aplicarPapel();
+    initHoraSelects();
+    setupEvents();
+    restaurarBorrador();
+    renderMenu();
+    renderPedido();
+    initClientesDB();
+    document.getElementById("input-telefono").focus();
+  </script>
+</body>
+</html>
