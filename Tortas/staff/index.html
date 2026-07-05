@@ -215,7 +215,9 @@
 
         if (isValid) {
           localStorage.setItem("dona_susy_mesera_nombre", username);
-          sessionStorage.setItem("autenticado", "true");
+          // Se guarda en localStorage para que la sesión NO caduque nunca:
+          // solo se cierra cuando el usuario pulsa "Salir".
+          localStorage.setItem("autenticado", "true");
           window.location.href = "mesas/index.html";
           return;
         }

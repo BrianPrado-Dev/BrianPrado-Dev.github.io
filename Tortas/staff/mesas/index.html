@@ -4,7 +4,7 @@
   <meta charset="utf-8" />
   <meta content="width=device-width, initial-scale=1.0" name="viewport" />
   <script>
-    if (sessionStorage.getItem("autenticado") !== "true") {
+    if (localStorage.getItem("autenticado") !== "true" && sessionStorage.getItem("autenticado") !== "true") {
       window.location.replace("../index.html");
     }
   </script>
@@ -3052,6 +3052,7 @@
 
     function setupEvents() {
       document.getElementById("logout-button").addEventListener("click", () => {
+        localStorage.removeItem("autenticado");
         sessionStorage.removeItem("autenticado");
         window.location.replace("../index.html");
       });

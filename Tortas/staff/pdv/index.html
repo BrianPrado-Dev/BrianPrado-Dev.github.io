@@ -4,7 +4,7 @@
   <meta charset="utf-8" />
   <meta content="width=device-width, initial-scale=1.0" name="viewport" />
   <script>
-    if (sessionStorage.getItem("autenticado") !== "true") {
+    if (localStorage.getItem("autenticado") !== "true" && sessionStorage.getItem("autenticado") !== "true") {
       window.location.replace("../index.html");
     }
   </script>
@@ -255,6 +255,39 @@
       border-top: 1px dashed rgba(122, 31, 31, 0.2);
     }
 
+    /* === ARRASTRAR ITEMS ENTRE PLATOS === */
+    .drag-handle {
+      cursor: grab;
+      touch-action: none;
+      user-select: none;
+      -webkit-user-select: none;
+    }
+
+    .drag-handle:active {
+      cursor: grabbing;
+    }
+
+    .grupo-item.dragging {
+      opacity: 0.35;
+    }
+
+    .drag-ghost {
+      position: fixed;
+      z-index: 100;
+      pointer-events: none;
+      background: #fffdf7;
+      border: 2px solid #e0c684;
+      border-radius: 12px;
+      box-shadow: 0 16px 32px rgba(27, 29, 14, 0.35);
+      opacity: 0.95;
+    }
+
+    .grupo-card.drop-target {
+      outline: 3px dashed #a20513;
+      outline-offset: 2px;
+      background: #fff8e1;
+    }
+
     /* === BOTONES DE OPCIÓN EN MODALES === */
     .opcion-btn {
       border: none;
@@ -280,8 +313,8 @@
 
     /* === IMPRESIÓN LOCAL DEL TICKET ===
        El ticket se imprime directamente desde este navegador (PC conectada
-       a la impresora térmica). El formato del texto es idéntico al del
-       PDV de escritorio (32 columnas, fuente monoespaciada). */
+       a la impresora térmica). Se usa Arial en peso normal, igual que los
+       tickets del gestor de mesas (impresiones_poller.py). */
     #print-area {
       display: none;
     }
@@ -308,10 +341,10 @@
       }
 
       #print-area pre {
-        font-family: "Courier New", "Consolas", monospace;
+        font-family: Arial, Helvetica, sans-serif;
         font-size: var(--ticket-font, 3.5mm);
         line-height: 1.3;
-        font-weight: 600;
+        font-weight: 400;
         color: #000000;
         white-space: pre;
         margin: 0;
@@ -450,7 +483,7 @@
       <!-- ===================== PANEL DERECHO: RESUMEN ===================== -->
       <section class="lg:col-span-2 bg-surface-container-low rounded-3xl p-5 lg:sticky lg:top-24 self-start max-h-[calc(100vh-120px)] flex flex-col">
         <h2 class="font-headline font-bold text-2xl">Resumen del Pedido</h2>
-        <p class="text-xs text-on-surface-variant mb-3">Verifica cantidades, notas y total antes de imprimir.</p>
+        <p class="text-xs text-on-surface-variant mb-3">Verifica cantidades, notas y total antes de imprimir. Arrastra un producto desde <span class="material-symbols-outlined align-middle" style="font-size: 14px;">drag_indicator</span> para moverlo a otro plato.</p>
         <div id="pedido-lista" class="space-y-3 overflow-y-auto pr-1 flex-1"></div>
         <div class="border-t border-outline-variant mt-4 pt-4 flex justify-between items-center">
           <span class="font-headline font-bold text-xl">TOTAL</span>
@@ -1637,8 +1670,12 @@
           const esActivo = grupo === state.grupoActual;
           const filas = agrupados[grupo].map((item) => {
             const idx = state.pedidoActual.indexOf(item);
+            const asa = item.nombre === "Envío" ? "" : `
+                <button data-drag-handle="${idx}" class="drag-handle w-9 h-9 rounded-lg bg-surface-container-highest text-on-surface-variant shrink-0 flex items-center justify-center" title="Arrastrar a otro plato">
+                  <span class="material-symbols-outlined" style="font-size: 20px;">drag_indicator</span>
+                </button>`;
             return `
-              <div class="grupo-item">
+              <div class="grupo-item">${asa}
                 <div class="flex-1 min-w-0">
                   <div class="flex items-center gap-2 flex-wrap">
                     <span class="bg-primary text-white text-xs font-bold px-2 py-0.5 rounded-lg shrink-0">${item.cantidad}x</span>
@@ -1654,7 +1691,7 @@
             `;
           }).join("");
           return `
-            <div class="grupo-card">
+            <div class="grupo-card" data-drop-grupo="${escapeHtml(grupo)}">
               <div class="grupo-header ${esActivo ? "activo" : ""}" data-select-grupo="${escapeHtml(grupo)}">
                 <span class="font-bold text-sm">${esActivo ? "▸ " : ""}${escapeHtml(grupo)}</span>
                 <span class="flex items-center gap-1">
@@ -1692,9 +1729,84 @@
           duplicarGrupo(btn.dataset.dupGrupo);
         });
       });
+      lista.querySelectorAll("[data-drag-handle]").forEach((handle) => {
+        handle.addEventListener("pointerdown", (e) => iniciarArrastreItem(e, handle));
+      });
 
       document.getElementById("pedido-total").textContent = `$${totalPedido().toFixed(2)}`;
     }
+
+    // =====================================================================
+    // ARRASTRAR ITEMS ENTRE PLATOS (mouse y pantalla táctil)
+    // =====================================================================
+    let arrastre = null; // { idx, ghost, fila }
+
+    function moverItemAGrupo(idx, grupoDestino) {
+      const item = state.pedidoActual[idx];
+      if (!item || item.grupo === grupoDestino) return;
+      item.grupo = grupoDestino;
+      if (!state.grupos.includes(grupoDestino)) state.grupos.push(grupoDestino);
+      renderPedido();
+      guardarBorrador();
+      showToast(`"${item.nombre}" movido a ${grupoDestino}.`);
+    }
+
+    function posicionarGhost(x, y) {
+      arrastre.ghost.style.left = `${x - 24}px`;
+      arrastre.ghost.style.top = `${y - arrastre.ghost.offsetHeight / 2}px`;
+    }
+
+    function cardBajoElPuntero(x, y) {
+      const el = document.elementFromPoint(x, y);
+      return el ? el.closest("[data-drop-grupo]") : null;
+    }
+
+    function resaltarDestino(x, y) {
+      const destino = cardBajoElPuntero(x, y);
+      document.querySelectorAll("[data-drop-grupo]").forEach((card) => {
+        card.classList.toggle("drop-target", card === destino);
+      });
+    }
+
+    function iniciarArrastreItem(evento, handle) {
+      if (arrastre) return;
+      evento.preventDefault();
+      const fila = handle.closest(".grupo-item");
+      const ghost = fila.cloneNode(true);
+      ghost.classList.add("drag-ghost");
+      ghost.style.width = `${fila.getBoundingClientRect().width}px`;
+      document.body.appendChild(ghost);
+      fila.classList.add("dragging");
+      arrastre = { idx: Number(handle.dataset.dragHandle), ghost, fila };
+      try { handle.setPointerCapture(evento.pointerId); } catch (_) {}
+      posicionarGhost(evento.clientX, evento.clientY);
+    }
+
+    function terminarArrastre() {
+      if (!arrastre) return;
+      arrastre.ghost.remove();
+      arrastre.fila.classList.remove("dragging");
+      document.querySelectorAll("[data-drop-grupo].drop-target").forEach((card) => {
+        card.classList.remove("drop-target");
+      });
+      arrastre = null;
+    }
+
+    document.addEventListener("pointermove", (e) => {
+      if (!arrastre) return;
+      posicionarGhost(e.clientX, e.clientY);
+      resaltarDestino(e.clientX, e.clientY);
+    });
+
+    document.addEventListener("pointerup", (e) => {
+      if (!arrastre) return;
+      const destino = cardBajoElPuntero(e.clientX, e.clientY);
+      const idx = arrastre.idx;
+      terminarArrastre();
+      if (destino) moverItemAGrupo(idx, destino.dataset.dropGrupo);
+    });
+
+    document.addEventListener("pointercancel", terminarArrastre);
 
     // =====================================================================
     // MODAL GENÉRICO
@@ -2399,6 +2511,7 @@
     // =====================================================================
     function setupEvents() {
       document.getElementById("logout-button").addEventListener("click", () => {
+        localStorage.removeItem("autenticado");
         sessionStorage.removeItem("autenticado");
         window.location.replace("../index.html");
       });
