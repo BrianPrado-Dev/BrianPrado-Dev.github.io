@@ -311,48 +311,6 @@
       box-shadow: inset 0 0 0 100px rgba(0, 0, 0, 0.18);
     }
 
-    /* === IMPRESIÓN LOCAL DEL TICKET ===
-       El ticket se imprime directamente desde este navegador (PC conectada
-       a la impresora térmica). Se usa Arial en peso normal, igual que los
-       tickets del gestor de mesas (impresiones_poller.py). */
-    #print-area {
-      display: none;
-    }
-
-    @media print {
-      body > *:not(#print-area) {
-        display: none !important;
-      }
-
-      body {
-        background: #ffffff !important;
-        min-height: 0 !important;
-        margin: 0 !important;
-        padding: 0 !important;
-      }
-
-      #print-area {
-        display: block !important;
-        position: absolute;
-        top: 0;
-        left: 0;
-        width: var(--ticket-ancho, 70mm);
-        padding: 1mm 1mm 4mm 1mm;
-      }
-
-      #print-area pre {
-        font-family: Arial, Helvetica, sans-serif;
-        font-size: var(--ticket-font, 3.5mm);
-        line-height: 1.3;
-        font-weight: 400;
-        color: #000000;
-        white-space: pre;
-        margin: 0;
-      }
-    }
-  </style>
-  <style id="page-style">
-    @page { size: 80mm auto; margin: 0mm; }
   </style>
 </head>
 <body class="paper-texture min-h-screen font-body text-on-surface">
@@ -579,13 +537,6 @@
         <button id="config-resumen" class="w-full bg-sky-600 text-white px-4 py-3 rounded-xl font-bold hover:bg-sky-700 text-left flex items-center gap-2">
           <span class="material-symbols-outlined">bar_chart</span> Resumen del Día
         </button>
-        <div class="bg-white/70 rounded-xl px-4 py-3 flex items-center justify-between gap-3">
-          <span class="font-bold text-sm">Ancho del papel térmico</span>
-          <select id="config-papel" class="rounded-lg border-outline-variant bg-white text-sm px-2 py-1">
-            <option value="80">80 mm</option>
-            <option value="58">58 mm</option>
-          </select>
-        </div>
         <div id="config-precios-panel" class="hidden bg-white/70 rounded-xl p-4 max-h-80 overflow-y-auto space-y-2"></div>
       </div>
     </div>
@@ -598,9 +549,6 @@
 
   <div id="toast-container" class="fixed inset-0 z-[70] flex items-center justify-center pointer-events-none p-6"></div>
 
-  <!-- Área oculta que solo se muestra al imprimir -->
-  <div id="print-area"><pre id="ticket-print-pre"></pre></div>
-
   <script>
     // =====================================================================
     // CONSTANTES Y ALMACENAMIENTO
@@ -608,8 +556,12 @@
     const WAITER_NAME_KEY = "dona_susy_mesera_nombre";
     const PRECIOS_KEY = "pdv_precios_v1";
     const CLAVE_KEY = "pdv_clave_v1";
-    const PAPEL_KEY = "pdv_papel_v1";
     const BORRADOR_KEY = "pdv_borrador_v1";
+    const PRINT_PROVIDER = "supabase"; // "supabase" | "local-api"
+    const PRINT_API_URL = "http://192.168.1.171:8000/api/impresiones";
+    const SUPABASE_URL = "https://zazifirbccucazaottlo.supabase.co";
+    const SUPABASE_ANON_KEY = "sb_publishable_vhGMCD4ML10ssk46sxBH_w_C-x1lR97";
+    const SUPABASE_TABLE = "impresiones_queue";
     const CLIENTES_OVERLAY_KEY = "pdv_clientes_overlay_v1";
     const HISTORIAL_PREFIX = "pdv_historial_";
     const CLIENTES_DB_URL = "../../../clientes.db"; // clientes.db en la raíz del proyecto
@@ -773,53 +725,8 @@
     }
 
     // =====================================================================
-    // UTILIDADES DE FORMATO DE TICKET (portadas 1:1 del PDV de escritorio)
+    // UTILIDADES DEL PEDIDO (agrupado por cliente y resumen de bebidas)
     // =====================================================================
-    function centrar(texto, ancho = 32) {
-      texto = String(texto);
-      if (texto.length >= ancho) return texto;
-      const marg = ancho - texto.length;
-      const izq = Math.floor(marg / 2);
-      return " ".repeat(izq) + texto + " ".repeat(marg - izq);
-    }
-
-    function envolverConPrefijo(texto, prefijo, anchoMax = 32) {
-      const palabras = String(texto || "").split(/\s+/).filter(Boolean);
-      if (!palabras.length) return null;
-      const lineas = [];
-      const indent = " ".repeat(prefijo.length);
-      let lineaActual = [];
-      let longitudActual = 0;
-      for (const palabra of palabras) {
-        const ancho = lineas.length === 0 ? anchoMax - prefijo.length : anchoMax;
-        const espacio = lineaActual.length ? 1 : 0;
-        if (longitudActual + palabra.length + espacio <= ancho) {
-          lineaActual.push(palabra);
-          longitudActual += palabra.length + espacio;
-        } else {
-          if (lineaActual.length) {
-            lineas.push((lineas.length === 0 ? prefijo : indent) + lineaActual.join(" "));
-          }
-          lineaActual = [palabra];
-          longitudActual = palabra.length;
-        }
-      }
-      if (lineaActual.length) {
-        lineas.push((lineas.length === 0 ? prefijo : indent) + lineaActual.join(" "));
-      }
-      return lineas.join("\n");
-    }
-
-    function dividirTexto(texto, anchoMax = 32, prefijo = "Nota: ") {
-      if (!texto) return "";
-      return envolverConPrefijo(texto, prefijo, anchoMax) || "";
-    }
-
-    function dividirCampo(texto, prefijo, anchoMax = 32) {
-      if (!texto) return prefijo;
-      return envolverConPrefijo(texto, prefijo, anchoMax) || prefijo;
-    }
-
     function agruparItems(items) {
       const agrupados = {};
       for (const item of items) {
@@ -891,80 +798,82 @@
       return { refrescos, aguas };
     }
 
-    // Construye el texto del ticket con EXACTAMENTE el mismo formato
-    // que imprimir_ticket_personalizado() del PDV de escritorio.
-    function construirTicket(pedido) {
-      let t = "";
-      t += centrar("TORTAS AHOGADAS") + "\n";
-      t += centrar("DOÑA SUSY") + "\n";
-      t += centrar("Geranio #869A") + "\n";
-      t += centrar("Col.Tulipanes CP:45647") + "\n";
-      t += centrar("33-3684-4525") + "\n";
-      t += "=".repeat(32) + "\n";
-      t += dividirCampo(pedido.domicilio, "Domicilio: ") + "\n";
-      if (pedido.telefono) t += dividirCampo(pedido.telefono, "Telefono: ") + "\n";
-      t += dividirCampo(pedido.cruces, "Cruces: ") + "\n";
-      t += `Fecha: ${pedido.fechaHora}\n`;
-      if (pedido.horaEspecifica) t += `Hora especifica: ${pedido.horaEspecifica}\n`;
-      t += "=".repeat(32) + "\n";
-      t += "Prod          | Cant | Precio\n";
-      t += "-".repeat(32) + "\n";
-      const agrupados = agruparItems(pedido.items);
-      for (const grupo of ordenarGrupos(Object.keys(agrupados))) {
-        t += `Cliente: ${grupo.toUpperCase()}\n`;
-        for (const item of agrupados[grupo]) {
-          const prod = String(item.nombre).slice(0, 14).padEnd(14);
-          const cant = centrar(String(item.cantidad), 6);
-          const precio = ("$" + Number(item.precio).toFixed(2)).padStart(10);
-          t += `${prod}|${cant}|${precio}\n`;
-          if (item.anotacion) t += dividirTexto(item.anotacion) + "\n";
-        }
-        t += "=================================\n";
-      }
-      t += "=".repeat(32) + "\n";
-      t += centrar(`TOTAL: $${Number(pedido.total).toFixed(2)}`) + "\n";
-      t += "=".repeat(32) + "\n";
-      const { refrescos, aguas } = resumenBebidas(pedido.items);
-      if (Object.keys(refrescos).length || Object.keys(aguas).length) {
-        if (Object.keys(refrescos).length) {
-          t += centrar("RESUMEN DE REFRESCOS:") + "\n";
-          for (const [tipo, cant] of Object.entries(refrescos)) t += centrar(`${tipo}: ${cant}`) + "\n";
-        }
-        if (Object.keys(aguas).length) {
-          t += centrar("RESUMEN DE AGUAS FRESCAS:") + "\n";
-          for (const [sabor, cant] of Object.entries(aguas)) t += centrar(`${sabor}: ${cant}`) + "\n";
-        }
-        t += "=".repeat(32) + "\n";
-      }
-      t += centrar(`N. PEDIDO: ${pedido.numeroPedido}`) + "\n";
-      t += "=".repeat(32) + "\n";
-      t += centrar("Gracias por su pedido") + "\n";
-      t += "=".repeat(32) + "\n";
-      return t;
+    // =====================================================================
+    // COLA DE IMPRESIÓN REMOTA (Supabase -> impresiones_poller.py)
+    // Mismo flujo que el gestor de mesas: el ticket se encola en Supabase
+    // y el worker de la PC conectada a la impresora lo imprime.
+    // =====================================================================
+    function supabaseConfigured() {
+      return (
+        SUPABASE_URL.includes(".supabase.co")
+        && !SUPABASE_URL.includes("TU-PROYECTO")
+        && SUPABASE_ANON_KEY
+        && !SUPABASE_ANON_KEY.includes("TU_SUPABASE_ANON_KEY")
+      );
     }
 
-    // =====================================================================
-    // IMPRESIÓN LOCAL (window.print + @media print)
-    // =====================================================================
-    function aplicarPapel() {
-      const papel = localStorage.getItem(PAPEL_KEY) || "80";
-      const pageStyle = document.getElementById("page-style");
-      if (papel === "58") {
-        pageStyle.textContent = "@page { size: 58mm auto; margin: 0mm; }";
-        document.documentElement.style.setProperty("--ticket-ancho", "48mm");
-        document.documentElement.style.setProperty("--ticket-font", "2.45mm");
-      } else {
-        pageStyle.textContent = "@page { size: 80mm auto; margin: 0mm; }";
-        document.documentElement.style.setProperty("--ticket-ancho", "70mm");
-        document.documentElement.style.setProperty("--ticket-font", "3.5mm");
-      }
-      const select = document.getElementById("config-papel");
-      if (select) select.value = papel;
+    function toSupabaseRow(ticket) {
+      return {
+        id: ticket.id,
+        type: ticket.type,
+        table_id: ticket.tableId,
+        table_number: ticket.tableNumber,
+        mesera: ticket.mesera,
+        created_at: ticket.createdAt,
+        printed: false,
+        payload: ticket
+      };
     }
 
-    function imprimirTexto(texto) {
-      document.getElementById("ticket-print-pre").textContent = texto;
-      window.print();
+    async function enqueueRemote(ticket) {
+      if (PRINT_PROVIDER === "supabase" && supabaseConfigured()) {
+        const response = await fetch(`${SUPABASE_URL}/rest/v1/${SUPABASE_TABLE}`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "apikey": SUPABASE_ANON_KEY,
+            "Authorization": `Bearer ${SUPABASE_ANON_KEY}`,
+            "Prefer": "return=minimal"
+          },
+          body: JSON.stringify(toSupabaseRow(ticket))
+        });
+        if (!response.ok) {
+          throw new Error(`Supabase error ${response.status}`);
+        }
+        return;
+      }
+
+      const response = await fetch(PRINT_API_URL, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(ticket)
+      });
+      if (!response.ok) {
+        throw new Error(`API local error ${response.status}`);
+      }
+    }
+
+    // Payload del ticket PDV: items + total como el gestor de mesas, más los
+    // datos del cliente (domicilio, teléfono, cruces, hora) y el resumen de
+    // bebidas ya calculado para que el poller lo imprima tal cual.
+    function crearTicketPDV(pedido) {
+      return {
+        id: `pdv_ticket_${Date.now()}`,
+        type: "pdv",
+        tableId: "pdv",
+        tableNumber: 0,
+        mesera: pedido.mesera || state.meseraNombre,
+        createdAt: new Date().toISOString(),
+        domicilio: pedido.domicilio || "",
+        telefono: pedido.telefono || "",
+        cruces: pedido.cruces || "",
+        fechaHora: pedido.fechaHora || "",
+        horaEspecifica: pedido.horaEspecifica || "",
+        numeroPedido: pedido.numeroPedido || "",
+        items: JSON.parse(JSON.stringify(pedido.items || [])),
+        total: Number(pedido.total) || 0,
+        resumenBebidas: resumenBebidas(pedido.items || [])
+      };
     }
 
     // =====================================================================
@@ -2231,7 +2140,7 @@
     }
 
     // =====================================================================
-    // IMPRIMIR TICKET (guardar en historial + impresión local)
+    // IMPRIMIR TICKET (guardar en historial + cola remota de impresión)
     // =====================================================================
     async function imprimirTicket() {
       const domicilio = document.getElementById("input-domicilio").value.trim();
@@ -2280,8 +2189,12 @@
         guardarHistorialHoy(historial);
       }
 
-      imprimirTexto(construirTicket(pedido));
-      showToast(`Ticket N. ${pedido.numeroPedido} enviado a la impresora.`);
+      try {
+        await enqueueRemote(crearTicketPDV(pedido));
+        showToast(`Ticket N. ${pedido.numeroPedido} enviado a la cola de impresión.`);
+      } catch (_) {
+        showToast("No se pudo enviar el ticket a la cola de impresión.", "error");
+      }
     }
 
     // =====================================================================
@@ -2333,9 +2246,15 @@
         : `<p class="text-sm italic text-on-surface-variant p-3">Sin pedidos con hora</p>`;
 
       modal.querySelectorAll("[data-reimprimir]").forEach((btn) => {
-        btn.addEventListener("click", () => {
+        btn.addEventListener("click", async () => {
           const p = historial[Number(btn.dataset.reimprimir)];
-          if (p) imprimirTexto(construirTicket(p));
+          if (!p) return;
+          try {
+            await enqueueRemote(crearTicketPDV(p));
+            showToast(`Ticket N. ${p.numeroPedido} enviado a la cola de impresión.`);
+          } catch (_) {
+            showToast("No se pudo enviar el ticket a la cola de impresión.", "error");
+          }
         });
       });
 
@@ -2447,7 +2366,7 @@
       document.getElementById("resumen-modal").classList.remove("hidden");
     }
 
-    function imprimirResumenDia() {
+    async function imprimirResumenDia() {
       const historial = cargarHistorialHoy();
       if (!historial.length) {
         showToast("No hay pedidos para imprimir.", "error");
@@ -2455,27 +2374,26 @@
       }
       const totalGeneral = historial.reduce((s, p) => s + Number(p.total), 0);
       const todosItems = historial.flatMap((p) => p.items);
-      const { refrescos, aguas } = resumenBebidas(todosItems);
-      let r = "=============================\n";
-      r += "Resumen del Día\n";
-      r += "=============================\n";
-      for (const p of historial) {
-        r += `| ${String(p.domicilio).slice(0, 20).padEnd(20)} | $${Math.trunc(Number(p.total))}\n`;
+      const resumen = {
+        id: `pdv_resumen_${Date.now()}`,
+        type: "pdv_resumen",
+        tableId: "pdv_resumen",
+        tableNumber: 0,
+        mesera: state.meseraNombre,
+        createdAt: new Date().toISOString(),
+        pedidos: historial.map((p) => ({
+          domicilio: p.domicilio || "-",
+          total: Number(p.total) || 0
+        })),
+        resumenBebidas: resumenBebidas(todosItems),
+        totalGeneral: Math.round(totalGeneral * 100) / 100
+      };
+      try {
+        await enqueueRemote(resumen);
+        showToast("Resumen del día enviado a la cola de impresión.");
+      } catch (_) {
+        showToast("No se pudo enviar el resumen a la cola de impresión.", "error");
       }
-      r += "=============================\n";
-      if (Object.keys(refrescos).length) {
-        r += "REFRESCOS VENDIDOS:\n";
-        for (const [tipo, cant] of Object.entries(refrescos).sort()) r += `  ${tipo}: ${cant}\n`;
-        r += "=============================\n";
-      }
-      if (Object.keys(aguas).length) {
-        r += "AGUAS FRESCAS VENDIDAS:\n";
-        for (const [tipo, cant] of Object.entries(aguas).sort()) r += `  ${tipo}: ${cant}\n`;
-        r += "=============================\n";
-      }
-      r += `TOTAL GENERAL: $${Math.trunc(totalGeneral)}\n`;
-      r += "=============================\n";
-      imprimirTexto(r);
     }
 
     // =====================================================================
@@ -2569,12 +2487,6 @@
         document.getElementById("config-modal").classList.add("hidden");
         abrirResumenDia();
       });
-      document.getElementById("config-papel").addEventListener("change", (e) => {
-        localStorage.setItem(PAPEL_KEY, e.target.value);
-        aplicarPapel();
-        showToast(`Papel configurado a ${e.target.value} mm.`);
-      });
-
       document.getElementById("resumen-cerrar").addEventListener("click", () => {
         document.getElementById("resumen-modal").classList.add("hidden");
       });
@@ -2590,7 +2502,6 @@
     // INICIO
     // =====================================================================
     document.getElementById("current-user-label").textContent = `Usuario: ${state.meseraNombre}`;
-    aplicarPapel();
     initHoraSelects();
     setupEvents();
     restaurarBorrador();

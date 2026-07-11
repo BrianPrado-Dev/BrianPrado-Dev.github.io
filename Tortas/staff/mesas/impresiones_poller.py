@@ -83,8 +83,133 @@ def format_with_right(left: str, right: str, width: int = LINE_WIDTH) -> list[st
     return lines
 
 
+def drinks_summary_lines(ticket: dict[str, Any]) -> list[str]:
+    """Resumen de bebidas del PDV (ya viene calculado en el payload)."""
+    resumen = ticket.get("resumenBebidas")
+    if not isinstance(resumen, dict):
+        return []
+    refrescos = resumen.get("refrescos")
+    aguas = resumen.get("aguas")
+    lines: list[str] = []
+    if isinstance(refrescos, dict) and refrescos:
+        lines.extend(wrap_line("RESUMEN DE REFRESCOS:"))
+        for tipo, cant in refrescos.items():
+            lines.extend(wrap_line(f"- {tipo}: {cant}"))
+    if isinstance(aguas, dict) and aguas:
+        lines.extend(wrap_line("RESUMEN DE AGUAS FRESCAS:"))
+        for sabor, cant in aguas.items():
+            lines.extend(wrap_line(f"- {sabor}: {cant}"))
+    return lines
+
+
+def build_pdv_ticket_text(ticket: dict[str, Any]) -> str:
+    """Ticket del PDV (domicilio): mismo formato que el ticket de mesas,
+    agregando datos del cliente, resumen de bebidas y numero de pedido."""
+    lines: list[str] = []
+    lines.append("Tortas Ahogadas Dona Susy")
+    lines.append("Geranio #869")
+    lines.append("+52 3336844525")
+    lines.append("=" * LINE_WIDTH)
+    lines.extend(wrap_line(f"Domicilio: {ticket.get('domicilio', '')}"))
+    telefono = str(ticket.get("telefono") or "").strip()
+    if telefono:
+        lines.extend(wrap_line(f"Telefono: {telefono}"))
+    lines.extend(wrap_line(f"Cruces: {ticket.get('cruces', '')}"))
+    fecha = str(ticket.get("fechaHora") or "").strip() or current_date_text()
+    lines.extend(wrap_line(f"Fecha: {fecha}"))
+    hora = str(ticket.get("horaEspecifica") or "").strip()
+    if hora:
+        lines.extend(wrap_line(f"Hora especifica: {hora}"))
+    lines.append("=" * LINE_WIDTH)
+    lines.append("")
+
+    items = ticket.get("items", [])
+    if not isinstance(items, list):
+        items = []
+    groups: dict[str, list[dict[str, Any]]] = {}
+    for item in items:
+        if not isinstance(item, dict):
+            continue
+        group = str(item.get("grupo") or "General")
+        groups.setdefault(group, []).append(item)
+    # General va al final; el resto en orden alfabetico (igual que el PDV web)
+    group_names = sorted(groups.keys(), key=lambda name: (1 if name == "General" else 0, name))
+
+    if not group_names:
+        lines.extend(wrap_line("- Sin productos"))
+    for group_idx, group in enumerate(group_names):
+        if group_idx > 0:
+            lines.append("=" * LINE_WIDTH)
+        lines.extend(wrap_line(f"Cliente: {group.upper()}"))
+        group_items = groups[group]
+        for item_idx, item in enumerate(group_items):
+            qty = item.get("cantidad", 1)
+            name = item.get("nombre", "Item")
+            precio = item.get("precio", 0)
+            lines.extend(format_with_right(f"{qty}x {name}", f"${precio}"))
+            nota = str(item.get("anotacion") or "").strip()
+            if nota:
+                lines.extend(wrap_line(f"({nota})"))
+            if item_idx < len(group_items) - 1:
+                lines.append("-" * LINE_WIDTH)
+        lines.append("")
+
+    lines.append("-" * LINE_WIDTH)
+    lines.extend(format_with_right("TOTAL:", f"${ticket.get('total', 0)}"))
+
+    drinks = drinks_summary_lines(ticket)
+    if drinks:
+        lines.append("=" * LINE_WIDTH)
+        lines.extend(drinks)
+
+    lines.append("=" * LINE_WIDTH)
+    numero = str(ticket.get("numeroPedido") or "").strip()
+    if numero:
+        lines.extend(wrap_line(f"N. PEDIDO: {numero}"))
+    lines.append("Gracias por su pedido")
+    lines.extend(wrap_line(f"Mesera: {ticket.get('mesera', 'Sin nombre')}"))
+    lines.append("")
+    return "\n".join(lines)
+
+
+def build_pdv_resumen_text(ticket: dict[str, Any]) -> str:
+    """Resumen del dia del PDV: domicilios con total, bebidas y total general."""
+    lines: list[str] = []
+    lines.append("RESUMEN DEL DIA PDV")
+    lines.append("=" * LINE_WIDTH)
+    lines.extend(wrap_line(f"Fecha: {current_date_text()}"))
+    lines.append("")
+
+    pedidos = ticket.get("pedidos", [])
+    if not isinstance(pedidos, list) or not pedidos:
+        lines.append("Sin pedidos")
+    else:
+        for pedido in pedidos:
+            if not isinstance(pedido, dict):
+                continue
+            domicilio = pedido.get("domicilio", "-")
+            total = pedido.get("total", 0)
+            lines.extend(format_with_right(str(domicilio), f"${total}"))
+            lines.append("-" * LINE_WIDTH)
+
+    drinks = drinks_summary_lines(ticket)
+    if drinks:
+        lines.extend(drinks)
+        lines.append("-" * LINE_WIDTH)
+
+    lines.append("=" * LINE_WIDTH)
+    lines.extend(format_with_right("TOTAL GENERAL:", f"${ticket.get('totalGeneral', 0)}"))
+    lines.extend(wrap_line(f"Mesera: {ticket.get('mesera', 'Sin nombre')}"))
+    lines.append("")
+    return "\n".join(lines)
+
+
 def build_ticket_text(ticket: dict[str, Any]) -> str:
     ticket_type = str(ticket.get("type", "ticket")).strip().lower()
+    if ticket_type == "pdv":
+        return build_pdv_ticket_text(ticket)
+    if ticket_type == "pdv_resumen":
+        return build_pdv_resumen_text(ticket)
     if ticket_type == "historial":
         lines: list[str] = []
         lines.append("HISTORIAL MESAS")
