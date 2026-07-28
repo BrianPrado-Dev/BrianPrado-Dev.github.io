@@ -311,6 +311,69 @@
       box-shadow: inset 0 0 0 100px rgba(0, 0, 0, 0.18);
     }
 
+    /* === MODAL DE PAQUETES 1 y 2 (layout horizontal para 1280x720) === */
+    .paquete-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1.15fr;
+      gap: 12px;
+      align-items: start;
+    }
+
+    @media (max-width: 899px) {
+      .paquete-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .paquete-seccion {
+      background: rgba(255, 255, 255, 0.72);
+      border: 2px solid rgba(91, 64, 61, 0.14);
+      border-radius: 14px;
+      padding: 10px;
+    }
+
+    .paquete-seccion-titulo {
+      font-size: 12px;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      margin-bottom: 8px;
+      padding-bottom: 6px;
+      border-bottom: 2px dashed rgba(91, 64, 61, 0.2);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      flex-wrap: wrap;
+    }
+
+    .paquete-subtitulo {
+      font-size: 10px;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: #5b403d;
+      opacity: 0.75;
+      margin: 7px 0 4px;
+    }
+
+    .paquete-subtitulo:first-of-type {
+      margin-top: 0;
+    }
+
+    .opcion-btn.compacta {
+      min-height: 46px;
+      padding: 10px 8px;
+      font-size: 14px;
+    }
+
+    .opcion-btn.mini {
+      min-height: 38px;
+      padding: 6px;
+      font-size: 12px;
+      border-radius: 10px;
+      box-shadow: 0 2px 6px rgba(27, 29, 14, 0.12);
+    }
+
   </style>
 </head>
 <body class="paper-texture min-h-screen font-body text-on-surface">
@@ -324,7 +387,8 @@
     </div>
     <div class="flex items-center gap-2">
       <p id="current-user-label" class="hidden sm:block text-xs uppercase tracking-widest text-on-surface-variant">Usuario: -</p>
-      <a href="../mesas/index.html" class="flex items-center gap-1 bg-surface-container-highest hover:bg-primary hover:text-white transition-colors rounded-xl px-3 py-2 text-xs font-semibold">
+      <select id="profile-switch-select" class="hidden rounded-lg border-outline-variant bg-white/90 text-xs px-2 py-1 min-w-[110px]"></select>
+      <a href="../mesas/index.html" class="flex items-center gap-1 bg-surface-container-highest hover:bg-primary hover:text-white transition-colors rounded-xl px-3 py-2 text-xs font-semibold" title="Volver a Gestión de Mesas">
         <span class="material-symbols-outlined" style="font-size: 16px;">table_restaurant</span>
         <span>Mesas</span>
       </a>
@@ -562,6 +626,25 @@
     const SUPABASE_URL = "https://zazifirbccucazaottlo.supabase.co";
     const SUPABASE_ANON_KEY = "sb_publishable_vhGMCD4ML10ssk46sxBH_w_C-x1lR97";
     const SUPABASE_TABLE = "impresiones_queue";
+
+    // --- Sincronización multi-dispositivo (tabla app_state en Supabase) ---
+    const SYNC_TABLE = "app_state";
+    const SYNC_KEY_BORRADOR = "pdv_borrador";
+    const SYNC_SEEN_PREFIX = "dona_susy_sync_seen_";
+    const SYNC_POLL_MS = 4000;
+    const DEVICE_ID = (() => {
+      let id = localStorage.getItem("dona_susy_device_id");
+      if (!id) {
+        id = `dev_${Math.random().toString(36).slice(2, 10)}${Date.now().toString(36)}`;
+        localStorage.setItem("dona_susy_device_id", id);
+      }
+      return id;
+    })();
+
+    // --- Registro de ventas (para el apartado "Ventas" del gestor de mesas) ---
+    const VENTAS_TABLE = "ventas";
+    const VENTAS_CACHE_KEY = "dona_susy_ventas_v1";
+
     const CLIENTES_OVERLAY_KEY = "pdv_clientes_overlay_v1";
     const HISTORIAL_PREFIX = "pdv_historial_";
     const CLIENTES_DB_URL = "../../../clientes.db"; // clientes.db en la raíz del proyecto
@@ -687,11 +770,57 @@
       grupoActual: "General",
       platoCounter: 0,
       categoriaActiva: "comida",
-      meseraNombre: localStorage.getItem(WAITER_NAME_KEY) || "Sin nombre"
+      meseraNombre: localStorage.getItem(WAITER_NAME_KEY) || "Sin nombre",
+      switchableProfiles: [],
+      startedAsBrian: String(localStorage.getItem(WAITER_NAME_KEY) || "").trim().toLowerCase() === "brian",
+      brianReentryBlocked: false
     };
 
+    const USERS_FILE_PATH = "../users.json";
+
+    // =====================================================================
+    // CAMBIO DE USUARIO (mismo selector que el gestor de mesas)
+    // =====================================================================
+    function renderLoggedUser() {
+      document.getElementById("current-user-label").textContent = `Usuario: ${state.meseraNombre}`;
+      renderProfileSwitcher();
+    }
+
+    function renderProfileSwitcher() {
+      const select = document.getElementById("profile-switch-select");
+      if (!select) return;
+      const options = state.switchableProfiles;
+      if (!options.length) {
+        select.classList.add("hidden");
+        select.innerHTML = "";
+        return;
+      }
+      select.innerHTML = options
+        .map((name) => `<option value="${escapeHtml(name)}" ${name === state.meseraNombre ? "selected" : ""}>${escapeHtml(name)}</option>`)
+        .join("");
+      select.classList.remove("hidden");
+    }
+
+    async function loadSwitchableProfiles() {
+      try {
+        const response = await fetch(USERS_FILE_PATH, { cache: "no-store" });
+        if (!response.ok) return;
+        const data = await response.json();
+        const users = Array.isArray(data.users) ? data.users : [];
+        const allNames = users
+          .map((u) => String(u.username || "").trim())
+          .filter((name) => name);
+        state.switchableProfiles = allNames.filter((name) => {
+          if (name.toLowerCase() !== "brian") return true;
+          return state.startedAsBrian;
+        });
+        renderProfileSwitcher();
+      } catch (_) {
+      }
+    }
+
     function guardarBorrador() {
-      localStorage.setItem(BORRADOR_KEY, JSON.stringify({
+      const borrador = {
         pedidoActual: state.pedidoActual,
         grupos: state.grupos,
         grupoActual: state.grupoActual,
@@ -702,7 +831,16 @@
         cruces: document.getElementById("input-cruces").value,
         horaActiva: horaActiva(),
         hora: horaSeleccionada()
-      }));
+      };
+      localStorage.setItem(BORRADOR_KEY, JSON.stringify(borrador));
+      lastLocalEditAt = Date.now();
+      scheduleSyncPush(SYNC_KEY_BORRADOR, () => {
+        try {
+          return JSON.parse(localStorage.getItem(BORRADOR_KEY) || "null");
+        } catch (_) {
+          return null;
+        }
+      });
     }
 
     function restaurarBorrador() {
@@ -851,6 +989,213 @@
       if (!response.ok) {
         throw new Error(`API local error ${response.status}`);
       }
+    }
+
+    // =====================================================================
+    // SINCRONIZACIÓN MULTI-DISPOSITIVO (tabla app_state en Supabase)
+    // El borrador del pedido y la lista de pedidos del día se comparten
+    // entre todos los dispositivos; cada 4s se revisan cambios remotos.
+    // =====================================================================
+    let syncBooting = true;
+    let syncTablesAvailable = true;
+    let lastLocalEditAt = 0;
+    const syncPushTimers = {};
+    const syncPendingData = {};
+
+    function supabaseHeaders(extra = {}) {
+      return {
+        "Content-Type": "application/json",
+        "apikey": SUPABASE_ANON_KEY,
+        "Authorization": `Bearer ${SUPABASE_ANON_KEY}`,
+        ...extra
+      };
+    }
+
+    function tsMs(value) {
+      const t = Date.parse(value || "");
+      return Number.isFinite(t) ? t : 0;
+    }
+
+    function syncKeyHistorial() {
+      return `pdv_historial_${hoyKey()}`;
+    }
+
+    function getSyncSeen(key) {
+      return localStorage.getItem(SYNC_SEEN_PREFIX + key) || "";
+    }
+
+    function setSyncSeen(key, iso) {
+      localStorage.setItem(SYNC_SEEN_PREFIX + key, iso);
+    }
+
+    function scheduleSyncPush(key, buildData) {
+      if (syncBooting) return;
+      syncPendingData[key] = buildData;
+      clearTimeout(syncPushTimers[key]);
+      syncPushTimers[key] = setTimeout(() => flushSyncPush(key), 600);
+    }
+
+    async function flushSyncPush(key) {
+      const build = syncPendingData[key];
+      if (!build || !supabaseConfigured() || !syncTablesAvailable) return;
+      delete syncPendingData[key];
+      const row = { key, data: build(), updated_at: new Date().toISOString(), device: DEVICE_ID };
+      try {
+        const response = await fetch(`${SUPABASE_URL}/rest/v1/${SYNC_TABLE}?on_conflict=key`, {
+          method: "POST",
+          headers: supabaseHeaders({ "Prefer": "resolution=merge-duplicates,return=minimal" }),
+          body: JSON.stringify(row)
+        });
+        if (response.status === 404) {
+          syncTablesAvailable = false;
+          return;
+        }
+        if (response.ok) setSyncSeen(key, row.updated_at);
+      } catch (_) {
+      }
+    }
+
+    async function syncPull() {
+      if (!supabaseConfigured() || !syncTablesAvailable) return;
+      try {
+        const filtro = encodeURIComponent(`in.("${syncKeyHistorial()}","${SYNC_KEY_BORRADOR}")`);
+        const response = await fetch(
+          `${SUPABASE_URL}/rest/v1/${SYNC_TABLE}?select=key,data,updated_at,device&key=${filtro}`,
+          { headers: supabaseHeaders(), cache: "no-store" }
+        );
+        if (response.status === 404) {
+          syncTablesAvailable = false;
+          return;
+        }
+        if (!response.ok) return;
+        const rows = await response.json();
+        if (!Array.isArray(rows)) return;
+        rows.forEach((row) => {
+          if (!row || !row.key) return;
+          if (tsMs(row.updated_at) <= tsMs(getSyncSeen(row.key))) return;
+          if (row.device === DEVICE_ID) {
+            setSyncSeen(row.key, row.updated_at);
+            return;
+          }
+          const adopted = adoptRemoteState(row.key, row.data);
+          if (adopted !== false) setSyncSeen(row.key, row.updated_at);
+        });
+      } catch (_) {
+      }
+    }
+
+    function modalAbierto() {
+      return !document.getElementById("pdv-modal").classList.contains("hidden")
+        || !document.getElementById("dialog-modal").classList.contains("hidden");
+    }
+
+    function adoptRemoteState(key, data) {
+      if (key === syncKeyHistorial()) {
+        clearTimeout(syncPushTimers[key]);
+        delete syncPendingData[key];
+        const lista = Array.isArray(data) ? data : [];
+        localStorage.setItem(HISTORIAL_PREFIX + hoyKey(), JSON.stringify(lista));
+        const listaModalVisible = !document.getElementById("lista-modal").classList.contains("hidden");
+        if (listaModalVisible) abrirListaPedidos();
+        return true;
+      }
+
+      if (key === SYNC_KEY_BORRADOR) {
+        // No interrumpir a quien está capturando en este dispositivo:
+        // se adopta el borrador remoto solo si aquí no hay actividad reciente.
+        if (modalAbierto() || Date.now() - lastLocalEditAt < 8000) return false;
+        clearTimeout(syncPushTimers[key]);
+        delete syncPendingData[key];
+        if (data && typeof data === "object") {
+          localStorage.setItem(BORRADOR_KEY, JSON.stringify(data));
+        } else {
+          localStorage.removeItem(BORRADOR_KEY);
+        }
+        restaurarBorrador();
+        renderPedido();
+        return true;
+      }
+      return true;
+    }
+
+    async function initSync() {
+      await syncPull();
+      syncBooting = false;
+      setInterval(syncPull, SYNC_POLL_MS);
+      document.addEventListener("visibilitychange", () => {
+        if (document.visibilityState === "visible") syncPull();
+      });
+    }
+
+    // =====================================================================
+    // REGISTRO DE VENTAS DEL PDV (alimenta "Ventas" del gestor de mesas)
+    // =====================================================================
+    let ventasTableAvailable = true;
+
+    function loadVentasCache() {
+      try {
+        const parsed = JSON.parse(localStorage.getItem(VENTAS_CACHE_KEY) || "[]");
+        return Array.isArray(parsed) ? parsed : [];
+      } catch (_) {
+        return [];
+      }
+    }
+
+    function saveVentasCache(list) {
+      const cutoff = Date.now() - 8 * 86400000;
+      const trimmed = list
+        .filter((v) => v && v.id && tsMs(v.fecha) >= cutoff)
+        .slice(0, 800);
+      localStorage.setItem(VENTAS_CACHE_KEY, JSON.stringify(trimmed));
+    }
+
+    function upsertVentaCache(venta) {
+      const list = loadVentasCache();
+      const index = list.findIndex((v) => v.id === venta.id);
+      if (index >= 0) list[index] = venta;
+      else list.unshift(venta);
+      saveVentasCache(list);
+    }
+
+    async function pushVentaRemote(venta) {
+      if (!supabaseConfigured() || !ventasTableAvailable) return;
+      try {
+        const response = await fetch(`${SUPABASE_URL}/rest/v1/${VENTAS_TABLE}?on_conflict=id`, {
+          method: "POST",
+          headers: supabaseHeaders({ "Prefer": "resolution=merge-duplicates,return=minimal" }),
+          body: JSON.stringify(venta)
+        });
+        if (response.status === 404) ventasTableAvailable = false;
+      } catch (_) {
+      }
+    }
+
+    function eliminarVenta(ventaId) {
+      if (!ventaId) return;
+      saveVentasCache(loadVentasCache().filter((v) => v.id !== ventaId));
+      if (!supabaseConfigured() || !ventasTableAvailable) return;
+      fetch(`${SUPABASE_URL}/rest/v1/${VENTAS_TABLE}?id=eq.${encodeURIComponent(ventaId)}`, {
+        method: "DELETE",
+        headers: supabaseHeaders()
+      }).catch(() => {});
+    }
+
+    function registrarVentaPdv(pedido) {
+      const venta = {
+        id: `venta_pdv_${hoyKey()}_${pedido.numeroPedido}_${Date.now().toString(36)}`,
+        fecha: new Date().toISOString(),
+        source: "pdv",
+        mesa: 0,
+        mesera: pedido.mesera || state.meseraNombre,
+        total: Number(pedido.total) || 0,
+        tarjeta: (pedido.items || []).some((i) => String(i.nombre || "").toLowerCase().includes("tarjeta")),
+        items: (pedido.items || [])
+          .filter((i) => i.nombre !== "Envío")
+          .map((i) => `${i.cantidad}x ${i.nombre}`)
+      };
+      pedido.ventaId = venta.id;
+      upsertVentaCache(venta);
+      pushVentaRemote(venta);
     }
 
     // Payload del ticket PDV: items + total como el gestor de mesas, más los
@@ -1357,6 +1702,7 @@
 
     function guardarHistorialHoy(lista) {
       localStorage.setItem(HISTORIAL_PREFIX + hoyKey(), JSON.stringify(lista));
+      scheduleSyncPush(syncKeyHistorial(), () => cargarHistorialHoy());
     }
 
     function siguienteNumeroPedido() {
@@ -1731,7 +2077,9 @@
     function cerrarModal() {
       const modal = document.getElementById("pdv-modal");
       modal.classList.add("hidden");
-      document.getElementById("pdv-modal-card").innerHTML = "";
+      const cardEl = document.getElementById("pdv-modal-card");
+      cardEl.innerHTML = "";
+      cardEl.style.maxWidth = "";
     }
 
     function htmlCantidad(valorInicial = 1) {
@@ -1952,30 +2300,61 @@
       });
     }
 
-    // Paquete 1 / Paquete 2: carne + taco + bebida (corona +$5)
+    // Paquete 1 / Paquete 2: carne + taco + bebida (corona +$5).
+    // Layout horizontal en 3 secciones para que quepa completo en 1280x720.
     function modalPaqueteBebida(producto) {
       const card = abrirModal(`
-        <h3 class="font-headline font-bold text-2xl mb-1">${producto.emoji} ${escapeHtml(producto.nombre)}</h3>
-        <p class="text-sm text-on-surface-variant mb-4">$${precios[producto.key]} c/u · Se agrega a: <strong>${escapeHtml(state.grupoActual || "General")}</strong></p>
-        ${htmlSeccionCarnes()}
-        ${htmlSeccionTacos()}
-        <div class="mb-3">
-          <p class="text-sm font-bold mb-2">Selecciona la bebida <span class="font-normal text-on-surface-variant">(Corona +$${CORONA_EXTRA})</span></p>
-          <div class="grid grid-cols-2 sm:grid-cols-3 gap-2 mb-2">
-            ${REFRESCOS.map((r) => `<button data-bebida="refresco|${r}" class="opcion-btn text-white" style="background:${COLORES_REFRESCO[r]};">${r}</button>`).join("")}
+        <div class="flex items-center justify-between gap-3 mb-3 flex-wrap">
+          <h3 class="font-headline font-bold text-2xl">${producto.emoji} ${escapeHtml(producto.nombre)}</h3>
+          <p class="text-sm text-on-surface-variant">$${precios[producto.key]} c/u · Se agrega a: <strong>${escapeHtml(state.grupoActual || "General")}</strong></p>
+        </div>
+        <div class="paquete-grid mb-3">
+          <div class="paquete-seccion" style="border-top: 4px solid #8B2500;">
+            <p class="paquete-seccion-titulo" style="color:#8B2500;">🥩 Carne de la torta <span class="normal-case font-semibold opacity-70">(máx 2)</span></p>
+            <div class="grid grid-cols-2 gap-2">
+              ${CARNES.map((c) => `<button data-carne="${c}" class="opcion-btn compacta text-white" style="background:${COLORES_CARNE[c]};">${c}</button>`).join("")}
+            </div>
           </div>
-          <div class="grid grid-cols-2 gap-2 mb-2">
-            ${AGUAS.map((a) => `<button data-bebida="agua|${a}" class="opcion-btn" style="background:${COLORES_AGUA[a].bg};color:${COLORES_AGUA[a].fg};">${a.toUpperCase()}</button>`).join("")}
+          <div class="paquete-seccion" style="border-top: 4px solid #BF6B00;">
+            <p class="paquete-seccion-titulo" style="color:#BF6B00;">🌮 Tacos dorados</p>
+            <div class="grid grid-cols-2 gap-2">
+              ${TACOS.map((t) => `<button data-taco="${t}" class="opcion-btn compacta" style="background:${COLORES_TACO[t].bg};color:${COLORES_TACO[t].fg};">${t}</button>`).join("")}
+            </div>
           </div>
-          <div class="grid grid-cols-2 gap-2">
-            <button data-bebida="cerveza|Corona Clara" class="opcion-btn text-white" style="background:#f9a825;">👑 CORONA CLARA (+$${CORONA_EXTRA})</button>
-            <button data-bebida="cerveza|Corona Oscura" class="opcion-btn text-white" style="background:#5d4037;">👑 CORONA OSCURA (+$${CORONA_EXTRA})</button>
+          <div class="paquete-seccion" style="border-top: 4px solid #0277bd;">
+            <p class="paquete-seccion-titulo" style="color:#0277bd;">🥤 Bebida del paquete</p>
+            <p class="paquete-subtitulo">Refrescos</p>
+            <div class="grid grid-cols-2 gap-1.5">
+              ${REFRESCOS.map((r) => `<button data-bebida="refresco|${r}" class="opcion-btn mini text-white" style="background:${COLORES_REFRESCO[r]};">${r}</button>`).join("")}
+            </div>
+            <p class="paquete-subtitulo">Aguas frescas</p>
+            <div class="grid grid-cols-2 gap-1.5">
+              ${AGUAS.map((a) => `<button data-bebida="agua|${a}" class="opcion-btn mini" style="background:${COLORES_AGUA[a].bg};color:${COLORES_AGUA[a].fg};">${a.toUpperCase()}</button>`).join("")}
+            </div>
+            <p class="paquete-subtitulo">Cerveza (+$${CORONA_EXTRA})</p>
+            <div class="grid grid-cols-2 gap-1.5">
+              <button data-bebida="cerveza|Corona Clara" class="opcion-btn mini text-white" style="background:#f9a825;">👑 CORONA CLARA</button>
+              <button data-bebida="cerveza|Corona Oscura" class="opcion-btn mini text-white" style="background:#5d4037;">👑 CORONA OSCURA</button>
+            </div>
           </div>
         </div>
-        ${htmlCantidad()}
-        ${htmlNota()}
+        <div class="grid grid-cols-1 sm:grid-cols-[210px_1fr] gap-3 mb-3 items-stretch">
+          <div class="bg-white/70 rounded-2xl p-3">
+            <p class="text-sm font-semibold mb-2">Cantidad</p>
+            <div class="flex items-center gap-2">
+              <button data-qty-dec class="w-12 h-11 rounded-xl bg-red-100 text-red-700 font-black text-xl hover:bg-red-200">-</button>
+              <span data-qty-value class="flex-1 text-center text-2xl font-black">1</span>
+              <button data-qty-inc class="w-12 h-11 rounded-xl bg-green-100 text-green-700 font-black text-xl hover:bg-green-200">+</button>
+            </div>
+          </div>
+          <div class="bg-white/70 rounded-2xl p-3">
+            <label class="block text-sm font-semibold mb-2">Nota (opcional)</label>
+            <input data-nota type="text" class="w-full px-4 py-2.5 rounded-xl border border-outline-variant bg-white/90 text-base" placeholder="Ej. sin cebolla, bien dorada..." />
+          </div>
+        </div>
         ${pieModal("Agregar paquete")}
       `);
+      card.style.maxWidth = "1060px";
 
       const getCarnes = conectarCarnes(card);
       const getTacos = conectarTacos(card);
@@ -2184,6 +2563,7 @@
 
       pedido.numeroPedido = siguienteNumeroPedido();
       if (!duplicado) {
+        registrarVentaPdv(pedido);
         const historial = cargarHistorialHoy();
         historial.push(pedido);
         guardarHistorialHoy(historial);
@@ -2269,6 +2649,7 @@
             { textoOk: "Sí, editar", tono: "verde" }
           );
           if (!seguir) return;
+          eliminarVenta(p.ventaId);
           historial.splice(idx, 1);
           guardarHistorialHoy(historial);
           cargarPedidoEnPrincipal(p);
@@ -2282,6 +2663,7 @@
           const idx = Number(btn.dataset.borrar);
           const ok = await modalConfirmar("🗑️ Eliminar pedido", "¿Eliminar este pedido del historial del día?", { textoOk: "Sí, eliminar" });
           if (!ok) return;
+          eliminarVenta(historial[idx] && historial[idx].ventaId);
           historial.splice(idx, 1);
           guardarHistorialHoy(historial);
           abrirListaPedidos();
@@ -2434,6 +2816,24 @@
         window.location.replace("../index.html");
       });
 
+      document.getElementById("profile-switch-select").addEventListener("change", (event) => {
+        const selected = String(event.target.value || "").trim();
+        if (!selected) return;
+        const currentIsBrian = String(state.meseraNombre).trim().toLowerCase() === "brian";
+        const selectedIsBrian = selected.toLowerCase() === "brian";
+        if (currentIsBrian && !selectedIsBrian && state.startedAsBrian) {
+          state.brianReentryBlocked = true;
+        }
+        if (selectedIsBrian && state.brianReentryBlocked) {
+          renderProfileSwitcher();
+          showToast("No tienes permisos para acceder a ese perfil.", "error");
+          return;
+        }
+        state.meseraNombre = selected;
+        localStorage.setItem(WAITER_NAME_KEY, selected);
+        renderLoggedUser();
+      });
+
       document.getElementById("input-telefono").addEventListener("input", onTelefonoInput);
       document.addEventListener("click", (e) => {
         if (!e.target.closest("#telefono-sugerencias") && e.target.id !== "input-telefono") {
@@ -2501,13 +2901,15 @@
     // =====================================================================
     // INICIO
     // =====================================================================
-    document.getElementById("current-user-label").textContent = `Usuario: ${state.meseraNombre}`;
+    renderLoggedUser();
+    loadSwitchableProfiles();
     initHoraSelects();
     setupEvents();
     restaurarBorrador();
     renderMenu();
     renderPedido();
     initClientesDB();
+    initSync();
     document.getElementById("input-telefono").focus();
   </script>
 </body>

@@ -807,6 +807,123 @@
       }
     }
 
+    /* === VISTA DE VENTAS (solo Brian) === */
+    .venta-stat {
+      background: linear-gradient(145deg, #fbfbe2 0%, #f5f5dc 100%);
+      border-radius: 20px;
+      padding: 16px 18px;
+      box-shadow: 0 8px 24px rgba(27, 29, 14, 0.1);
+    }
+
+    .venta-stat-label {
+      font-size: 11px;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: #5b403d;
+      margin-bottom: 6px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .venta-stat-value {
+      font-family: 'Epilogue', sans-serif;
+      font-size: 2rem;
+      font-weight: 900;
+      color: #1b1d0e;
+      line-height: 1.05;
+    }
+
+    .venta-stat-sub {
+      font-size: 12px;
+      font-weight: 600;
+      color: #5b403d;
+      margin-top: 4px;
+    }
+
+    .venta-row {
+      background: #ffffff;
+      border: 1px solid rgba(122, 31, 31, 0.14);
+      border-radius: 14px;
+      padding: 10px 12px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+    }
+
+    .venta-row-title {
+      font-size: 14px;
+      font-weight: 800;
+      color: #1b1d0e;
+    }
+
+    .venta-row-sub {
+      font-size: 11px;
+      color: #5b403d;
+      margin-top: 1px;
+    }
+
+    .venta-row-total {
+      font-family: 'Epilogue', sans-serif;
+      font-size: 1.05rem;
+      font-weight: 800;
+      color: #1b1d0e;
+      white-space: nowrap;
+    }
+
+    .venta-badge-tarjeta {
+      font-size: 10px;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      background: #e0f2fe;
+      color: #075985;
+      border: 1px solid #7dd3fc;
+      border-radius: 999px;
+      padding: 3px 8px;
+      white-space: nowrap;
+      display: inline-flex;
+      align-items: center;
+      gap: 3px;
+    }
+
+    .venta-badge-source {
+      font-size: 10px;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      border-radius: 999px;
+      padding: 3px 8px;
+      white-space: nowrap;
+    }
+
+    .venta-badge-mesas {
+      background: rgba(185, 29, 32, 0.1);
+      color: #7a1f1f;
+    }
+
+    .venta-badge-pdv {
+      background: rgba(0, 110, 157, 0.12);
+      color: #004c6e;
+    }
+
+    #ventas-chart-tooltip {
+      position: absolute;
+      pointer-events: none;
+      background: #ffffff;
+      border: 1px solid rgba(27, 29, 14, 0.15);
+      border-radius: 10px;
+      box-shadow: 0 8px 20px rgba(27, 29, 14, 0.2);
+      padding: 8px 10px;
+      font-size: 12px;
+      color: #1b1d0e;
+      z-index: 30;
+      display: none;
+      white-space: nowrap;
+    }
+
   </style>
 </head>
 <body class="paper-texture min-h-screen font-body text-on-surface">
@@ -837,12 +954,12 @@
         <div>
           <h2 class="font-headline font-black text-4xl tracking-tighter mb-2">Gestión de Mesas</h2>
           <p class="text-on-surface-variant uppercase tracking-widest text-xs font-semibold">Salón principal</p>
-          <a href="../index.html" class="mt-3 inline-flex items-center gap-2 bg-surface-container-highest hover:bg-primary hover:text-white transition-colors px-4 py-2 rounded-xl text-sm font-semibold">
-            <span class="material-symbols-outlined text-base">arrow_back</span>
-            Volver al Login
-          </a>
         </div>
         <div class="flex gap-3">
+          <button id="open-ventas-button" class="hidden bg-emerald-700 text-white px-4 py-3 rounded-2xl items-center gap-2 hover:bg-emerald-800 transition-colors">
+            <span class="material-symbols-outlined">monitoring</span>
+            <span class="font-semibold">Ventas</span>
+          </button>
           <button id="open-history-button" class="bg-surface-container-highest px-4 py-3 rounded-2xl flex items-center gap-2 hover:bg-primary hover:text-white transition-colors">
             <span class="material-symbols-outlined">history</span>
             <span class="font-semibold">Historial</span>
@@ -916,6 +1033,48 @@
           </button>
         </div>
         <div id="history-list" class="space-y-3"></div>
+      </div>
+    </section>
+
+    <section id="ventas-view" class="hidden">
+      <div class="mb-6 flex items-center justify-between gap-3 flex-wrap">
+        <button id="back-from-ventas-button" class="bg-surface-container-highest hover:bg-primary hover:text-white transition-colors px-4 py-2 rounded-xl flex items-center gap-2">
+          <span class="material-symbols-outlined">arrow_back</span>
+          Volver a mesas
+        </button>
+        <h2 class="font-headline font-black text-3xl">Ventas</h2>
+        <button id="refresh-ventas-button" class="bg-surface-container-highest hover:bg-primary hover:text-white transition-colors px-4 py-2 rounded-xl flex items-center gap-2">
+          <span class="material-symbols-outlined">refresh</span>
+          Actualizar
+        </button>
+      </div>
+      <div id="ventas-sync-warning" class="hidden mb-4 bg-amber-100 border-2 border-amber-300 text-amber-900 rounded-2xl px-4 py-3 text-sm font-semibold"></div>
+      <div id="ventas-stats" class="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6"></div>
+      <div class="bg-surface-container-low rounded-3xl p-5 mb-6">
+        <div class="flex items-center justify-between gap-3 flex-wrap mb-1">
+          <h3 class="font-headline font-bold text-xl">Ventas por día</h3>
+          <div class="flex items-center gap-4 text-sm font-semibold text-on-surface-variant">
+            <span class="flex items-center gap-2"><span style="width:12px;height:12px;border-radius:4px;background:#b91d20;display:inline-block;"></span>Mesas</span>
+            <span class="flex items-center gap-2"><span style="width:12px;height:12px;border-radius:4px;background:#006e9d;display:inline-block;"></span>PDV</span>
+          </div>
+        </div>
+        <p class="text-xs text-on-surface-variant mb-3">Últimos 7 días</p>
+        <div id="ventas-chart" class="relative"></div>
+      </div>
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 items-start">
+        <div class="bg-surface-container-low rounded-3xl p-5">
+          <h3 class="font-headline font-bold text-xl mb-1">Desglose de hoy</h3>
+          <p class="text-xs text-on-surface-variant mb-3">Cada mesa cerrada y pedido de PDV del día.</p>
+          <div id="ventas-hoy-lista" class="space-y-2 max-h-[420px] overflow-y-auto pr-1"></div>
+        </div>
+        <div class="bg-surface-container-low rounded-3xl p-5 border-2 border-sky-200">
+          <h3 class="font-headline font-bold text-xl mb-1 flex items-center gap-2">
+            <span class="material-symbols-outlined text-sky-700">credit_card</span>
+            Pagos con tarjeta
+          </h3>
+          <p class="text-xs text-on-surface-variant mb-3">Mesas impresas con el item "Pgo con Tarjeta" (últimos 7 días).</p>
+          <div id="ventas-tarjeta-lista" class="space-y-2 max-h-[420px] overflow-y-auto pr-1"></div>
+        </div>
       </div>
     </section>
   </main>
@@ -1010,6 +1169,25 @@
     const SUPABASE_ANON_KEY = "sb_publishable_vhGMCD4ML10ssk46sxBH_w_C-x1lR97";
     const SUPABASE_TABLE = "impresiones_queue";
     const FIXED_TABLES = [1, 2, 3, 4];
+
+    // --- Sincronización multi-dispositivo (tabla app_state en Supabase) ---
+    const SYNC_TABLE = "app_state";
+    const SYNC_KEY_TABLES = "mesas_tables";
+    const SYNC_KEY_HISTORY = "mesas_history";
+    const SYNC_SEEN_PREFIX = "dona_susy_sync_seen_";
+    const SYNC_POLL_MS = 4000;
+    const DEVICE_ID = (() => {
+      let id = localStorage.getItem("dona_susy_device_id");
+      if (!id) {
+        id = `dev_${Math.random().toString(36).slice(2, 10)}${Date.now().toString(36)}`;
+        localStorage.setItem("dona_susy_device_id", id);
+      }
+      return id;
+    })();
+
+    // --- Registro de ventas (tabla ventas en Supabase + respaldo local) ---
+    const VENTAS_TABLE = "ventas";
+    const VENTAS_CACHE_KEY = "dona_susy_ventas_v1";
 
     const MENU = {
       comida: [
@@ -1176,6 +1354,462 @@
       }
     }
 
+    // =====================================================================
+    // SINCRONIZACIÓN MULTI-DISPOSITIVO (tabla app_state en Supabase)
+    // Todos los dispositivos comparten mesas e historial: cada cambio se
+    // sube a Supabase y cada 4s se revisa si otro dispositivo cambió algo.
+    // =====================================================================
+    let syncBooting = true;
+    let syncTablesAvailable = true;
+    const syncPushTimers = {};
+    const syncPendingData = {};
+
+    function supabaseHeaders(extra = {}) {
+      return {
+        "Content-Type": "application/json",
+        "apikey": SUPABASE_ANON_KEY,
+        "Authorization": `Bearer ${SUPABASE_ANON_KEY}`,
+        ...extra
+      };
+    }
+
+    function tsMs(value) {
+      const t = Date.parse(value || "");
+      return Number.isFinite(t) ? t : 0;
+    }
+
+    function getSyncSeen(key) {
+      return localStorage.getItem(SYNC_SEEN_PREFIX + key) || "";
+    }
+
+    function setSyncSeen(key, iso) {
+      localStorage.setItem(SYNC_SEEN_PREFIX + key, iso);
+    }
+
+    function scheduleSyncPush(key, buildData) {
+      if (syncBooting) return;
+      syncPendingData[key] = buildData;
+      clearTimeout(syncPushTimers[key]);
+      syncPushTimers[key] = setTimeout(() => flushSyncPush(key), 600);
+    }
+
+    async function flushSyncPush(key) {
+      const build = syncPendingData[key];
+      if (!build || !supabaseConfigured() || !syncTablesAvailable) return;
+      delete syncPendingData[key];
+      const row = { key, data: build(), updated_at: new Date().toISOString(), device: DEVICE_ID };
+      try {
+        const response = await fetch(`${SUPABASE_URL}/rest/v1/${SYNC_TABLE}?on_conflict=key`, {
+          method: "POST",
+          headers: supabaseHeaders({ "Prefer": "resolution=merge-duplicates,return=minimal" }),
+          body: JSON.stringify(row)
+        });
+        if (response.status === 404) {
+          syncTablesAvailable = false;
+          return;
+        }
+        if (response.ok) setSyncSeen(key, row.updated_at);
+      } catch (_) {
+      }
+    }
+
+    async function syncPull() {
+      if (!supabaseConfigured() || !syncTablesAvailable) return;
+      try {
+        const filtro = encodeURIComponent(`in.("${SYNC_KEY_TABLES}","${SYNC_KEY_HISTORY}")`);
+        const response = await fetch(
+          `${SUPABASE_URL}/rest/v1/${SYNC_TABLE}?select=key,data,updated_at,device&key=${filtro}`,
+          { headers: supabaseHeaders(), cache: "no-store" }
+        );
+        if (response.status === 404) {
+          syncTablesAvailable = false;
+          return;
+        }
+        if (!response.ok) return;
+        const rows = await response.json();
+        if (!Array.isArray(rows)) return;
+        rows.forEach((row) => {
+          if (!row || !row.key) return;
+          if (tsMs(row.updated_at) <= tsMs(getSyncSeen(row.key))) return;
+          setSyncSeen(row.key, row.updated_at);
+          if (row.device === DEVICE_ID) return;
+          adoptRemoteState(row.key, row.data);
+        });
+      } catch (_) {
+      }
+    }
+
+    function adoptRemoteState(key, data) {
+      clearTimeout(syncPushTimers[key]);
+      delete syncPendingData[key];
+
+      if (key === SYNC_KEY_TABLES) {
+        state.tables = normalizeTablesList(data && data.tables);
+        localStorage.setItem(STORAGE_KEY, JSON.stringify({ tables: state.tables }));
+        renderTables();
+        const detailVisible = !document.getElementById("detail-view").classList.contains("hidden");
+        if (detailVisible) {
+          if (!getTableById(state.selectedTableId)) {
+            closeTableDetail();
+          } else {
+            renderDetail();
+          }
+        }
+        return;
+      }
+
+      if (key === SYNC_KEY_HISTORY) {
+        const remoteHistory = data && Array.isArray(data.history) ? data.history : [];
+        const today = todayKey();
+        state.history = remoteHistory.filter((record) => record && record.cleanedAt && dateKeyFrom(record.cleanedAt) === today);
+        localStorage.setItem(HISTORY_KEY, JSON.stringify({ history: state.history }));
+        const historyVisible = !document.getElementById("history-view").classList.contains("hidden");
+        if (historyVisible) renderHistory();
+      }
+    }
+
+    async function initSync() {
+      await syncPull();
+      syncBooting = false;
+      setInterval(syncPull, SYNC_POLL_MS);
+      document.addEventListener("visibilitychange", () => {
+        if (document.visibilityState === "visible") syncPull();
+      });
+    }
+
+    // =====================================================================
+    // REGISTRO DE VENTAS (alimenta el apartado "Ventas", solo Brian lo ve)
+    // Cada mesa que se imprime o se limpia registra/actualiza su venta
+    // (misma "sesión" de mesa = un solo registro, sin duplicados).
+    // =====================================================================
+    let ventasTableAvailable = true;
+
+    function loadVentasCache() {
+      try {
+        const parsed = JSON.parse(localStorage.getItem(VENTAS_CACHE_KEY) || "[]");
+        return Array.isArray(parsed) ? parsed : [];
+      } catch (_) {
+        return [];
+      }
+    }
+
+    function saveVentasCache(list) {
+      const cutoff = Date.now() - 8 * 86400000;
+      const trimmed = list
+        .filter((v) => v && v.id && tsMs(v.fecha) >= cutoff)
+        .slice(0, 800);
+      localStorage.setItem(VENTAS_CACHE_KEY, JSON.stringify(trimmed));
+    }
+
+    function upsertVentaCache(venta) {
+      const list = loadVentasCache();
+      const index = list.findIndex((v) => v.id === venta.id);
+      if (index >= 0) list[index] = venta;
+      else list.unshift(venta);
+      saveVentasCache(list);
+    }
+
+    async function pushVentaRemote(venta) {
+      if (!supabaseConfigured() || !ventasTableAvailable) return;
+      try {
+        const response = await fetch(`${SUPABASE_URL}/rest/v1/${VENTAS_TABLE}?on_conflict=id`, {
+          method: "POST",
+          headers: supabaseHeaders({ "Prefer": "resolution=merge-duplicates,return=minimal" }),
+          body: JSON.stringify(venta)
+        });
+        if (response.status === 404) ventasTableAvailable = false;
+      } catch (_) {
+      }
+    }
+
+    function tableHasCardPayment(table) {
+      return table.plates.some((plate) => getPlateLineItems(plate).some((line) => line.itemId === "pgo_tarjeta"));
+    }
+
+    function ensureTableSession(table) {
+      if (!table.sessionId) {
+        table.sessionId = `${table.id}_${Date.now()}_${Math.random().toString(36).slice(2, 7)}`;
+      }
+    }
+
+    function recordTableVenta(table) {
+      if (!table || !tableHasItems(table)) return;
+      ensureTableSession(table);
+      const venta = {
+        id: `venta_${table.sessionId}`,
+        fecha: new Date().toISOString(),
+        source: "mesas",
+        mesa: table.number,
+        mesera: state.meseraNombre,
+        total: Math.round(tableTotal(table) * 100) / 100,
+        tarjeta: tableHasCardPayment(table),
+        items: tableItemsSummary(table)
+      };
+      upsertVentaCache(venta);
+      pushVentaRemote(venta);
+    }
+
+    // =====================================================================
+    // VISTA DE VENTAS (solo Brian): resumen del día/semana + gráfico
+    // =====================================================================
+    const VENTAS_COLOR_MESAS = "#b91d20";
+    const VENTAS_COLOR_PDV = "#006e9d";
+
+    function isBrian() {
+      return String(state.meseraNombre || "").trim().toLowerCase() === "brian";
+    }
+
+    function updateVentasAccess() {
+      const btn = document.getElementById("open-ventas-button");
+      if (btn) {
+        btn.classList.toggle("hidden", !isBrian());
+        btn.classList.toggle("flex", isBrian());
+      }
+      const ventasVisible = !document.getElementById("ventas-view").classList.contains("hidden");
+      if (!isBrian() && ventasVisible) {
+        showView("tables");
+        renderTables();
+      }
+    }
+
+    function ventasWeekDays() {
+      const days = [];
+      const base = new Date();
+      base.setHours(0, 0, 0, 0);
+      for (let i = 6; i >= 0; i -= 1) {
+        const d = new Date(base);
+        d.setDate(base.getDate() - i);
+        days.push(d);
+      }
+      return days;
+    }
+
+    async function fetchVentasSemana() {
+      const desde = ventasWeekDays()[0];
+      let remote = null;
+      if (supabaseConfigured() && ventasTableAvailable) {
+        try {
+          const response = await fetch(
+            `${SUPABASE_URL}/rest/v1/${VENTAS_TABLE}?select=*&fecha=gte.${encodeURIComponent(desde.toISOString())}&order=fecha.desc&limit=1000`,
+            { headers: supabaseHeaders(), cache: "no-store" }
+          );
+          if (response.status === 404) {
+            ventasTableAvailable = false;
+          } else if (response.ok) {
+            const rows = await response.json();
+            if (Array.isArray(rows)) remote = rows;
+          }
+        } catch (_) {
+        }
+      }
+      const cache = loadVentasCache().filter((v) => tsMs(v.fecha) >= desde.getTime());
+      const porId = {};
+      cache.forEach((v) => { if (v && v.id) porId[v.id] = v; });
+      (remote || []).forEach((v) => { if (v && v.id) porId[v.id] = v; });
+      const list = Object.values(porId).sort((a, b) => tsMs(b.fecha) - tsMs(a.fecha));
+      return { list, remoteOk: remote !== null };
+    }
+
+    function sumaVentas(list) {
+      return list.reduce((sum, v) => sum + (Number(v.total) || 0), 0);
+    }
+
+    function formatVentaHora(v) {
+      return new Date(v.fecha).toLocaleTimeString("es-MX", { hour: "2-digit", minute: "2-digit" });
+    }
+
+    function formatVentaDia(v) {
+      return new Date(v.fecha).toLocaleDateString("es-MX", { weekday: "short", day: "numeric", month: "short" });
+    }
+
+    function ventaRowHtml(v, conDia) {
+      const esPdv = v.source === "pdv";
+      const titulo = esPdv ? "PDV (a domicilio)" : `Mesa ${v.mesa}`;
+      const cuando = conDia ? `${formatVentaDia(v)} · ${formatVentaHora(v)}` : formatVentaHora(v);
+      const badgeTarjeta = v.tarjeta ? `<span class="venta-badge-tarjeta">💳 Tarjeta</span>` : "";
+      const badgeSource = `<span class="venta-badge-source ${esPdv ? "venta-badge-pdv" : "venta-badge-mesas"}">${esPdv ? "PDV" : "Mesa"}</span>`;
+      return `
+        <div class="venta-row">
+          <div class="min-w-0">
+            <p class="venta-row-title">${escapeHtml(titulo)}</p>
+            <p class="venta-row-sub">${escapeHtml(cuando)}${v.mesera ? " · " + escapeHtml(v.mesera) : ""}</p>
+          </div>
+          <div class="flex items-center gap-2 shrink-0">
+            ${badgeTarjeta}
+            ${badgeSource}
+            <span class="venta-row-total">${formatMoney(Math.round(Number(v.total) || 0))}</span>
+          </div>
+        </div>
+      `;
+    }
+
+    function renderVentasStats(ventas) {
+      const hoy = todayKey();
+      const deHoy = ventas.filter((v) => dateKeyFrom(v.fecha) === hoy);
+      const hoyMesas = sumaVentas(deHoy.filter((v) => v.source !== "pdv"));
+      const hoyPdv = sumaVentas(deHoy.filter((v) => v.source === "pdv"));
+      const tarjeta = ventas.filter((v) => v.tarjeta);
+      const statsEl = document.getElementById("ventas-stats");
+      statsEl.innerHTML = `
+        <div class="venta-stat">
+          <p class="venta-stat-label"><span class="material-symbols-outlined" style="font-size:16px;">today</span>Ventas de hoy</p>
+          <p class="venta-stat-value">${formatMoney(Math.round(hoyMesas + hoyPdv))}</p>
+          <p class="venta-stat-sub">${deHoy.length} ventas · Mesas ${formatMoney(Math.round(hoyMesas))} · PDV ${formatMoney(Math.round(hoyPdv))}</p>
+        </div>
+        <div class="venta-stat">
+          <p class="venta-stat-label"><span class="material-symbols-outlined" style="font-size:16px;">date_range</span>Ventas de la semana</p>
+          <p class="venta-stat-value">${formatMoney(Math.round(sumaVentas(ventas)))}</p>
+          <p class="venta-stat-sub">${ventas.length} ventas en los últimos 7 días</p>
+        </div>
+        <div class="venta-stat" style="border: 2px solid #7dd3fc;">
+          <p class="venta-stat-label" style="color:#075985;"><span class="material-symbols-outlined" style="font-size:16px;">credit_card</span>Pagos con tarjeta</p>
+          <p class="venta-stat-value">${formatMoney(Math.round(sumaVentas(tarjeta)))}</p>
+          <p class="venta-stat-sub">${tarjeta.length} ventas con tarjeta esta semana</p>
+        </div>
+      `;
+    }
+
+    function niceCeil(value) {
+      if (value <= 0) return 1;
+      const pow = Math.pow(10, Math.floor(Math.log10(value)));
+      const n = value / pow;
+      const step = n <= 1 ? 1 : n <= 2 ? 2 : n <= 2.5 ? 2.5 : n <= 5 ? 5 : 10;
+      return step * pow;
+    }
+
+    function roundedTopRect(x, yTop, w, h, r) {
+      const radius = Math.max(0, Math.min(r, h / 2, w / 2));
+      const yBottom = yTop + h;
+      return `M${x},${yBottom} L${x},${yTop + radius} Q${x},${yTop} ${x + radius},${yTop} L${x + w - radius},${yTop} Q${x + w},${yTop} ${x + w},${yTop + radius} L${x + w},${yBottom} Z`;
+    }
+
+    function renderVentasChart(ventas) {
+      const container = document.getElementById("ventas-chart");
+      const days = ventasWeekDays();
+      const hoy = todayKey();
+      const porDia = days.map((day) => {
+        const key = dateKeyFrom(day);
+        let mesas = 0;
+        let pdv = 0;
+        ventas.forEach((v) => {
+          if (dateKeyFrom(v.fecha) !== key) return;
+          if (v.source === "pdv") pdv += Number(v.total) || 0;
+          else mesas += Number(v.total) || 0;
+        });
+        return { day, key, mesas, pdv, total: mesas + pdv };
+      });
+
+      if (!porDia.some((d) => d.total > 0)) {
+        container.innerHTML = `<p class="text-sm text-on-surface-variant py-8 text-center">Aún no hay ventas registradas esta semana.<br/>Se registran al imprimir el ticket de una mesa, al limpiarla o al imprimir un pedido del PDV.</p>`;
+        return;
+      }
+
+      const width = 680;
+      const height = 260;
+      const margin = { top: 28, right: 8, bottom: 34, left: 56 };
+      const plotW = width - margin.left - margin.right;
+      const plotH = height - margin.top - margin.bottom;
+      const maxVal = niceCeil(Math.max(...porDia.map((d) => d.total)));
+      const yPos = (v) => margin.top + plotH - (v / maxVal) * plotH;
+      const band = plotW / 7;
+      const barW = Math.min(24, Math.round(band * 0.5));
+      const gap = 2;
+
+      const gridTicks = [0, 0.25, 0.5, 0.75, 1].map((f) => f * maxVal);
+      const gridHtml = gridTicks.map((t) => `
+        <line x1="${margin.left}" y1="${yPos(t)}" x2="${width - margin.right}" y2="${yPos(t)}" stroke="rgba(27,29,14,0.1)" stroke-width="1" />
+        <text x="${margin.left - 8}" y="${yPos(t) + 4}" text-anchor="end" font-size="10" fill="#5b403d">${formatMoney(Math.round(t))}</text>
+      `).join("");
+
+      const barsHtml = porDia.map((d, i) => {
+        const x = margin.left + band * i + (band - barW) / 2;
+        const baseY = yPos(0);
+        let segments = "";
+        const mesasH = (d.mesas / maxVal) * plotH;
+        const pdvH = (d.pdv / maxVal) * plotH;
+        if (d.mesas > 0 && d.pdv > 0) {
+          const pdvTop = yPos(d.total);
+          const pdvDrawH = Math.max(1, pdvH - gap);
+          segments += `<path d="${roundedTopRect(x, pdvTop, barW, pdvDrawH, 4)}" fill="${VENTAS_COLOR_PDV}" />`;
+          segments += `<rect x="${x}" y="${yPos(d.mesas)}" width="${barW}" height="${Math.max(1, mesasH)}" fill="${VENTAS_COLOR_MESAS}" />`;
+        } else if (d.mesas > 0) {
+          segments += `<path d="${roundedTopRect(x, yPos(d.mesas), barW, Math.max(1, mesasH), 4)}" fill="${VENTAS_COLOR_MESAS}" />`;
+        } else if (d.pdv > 0) {
+          segments += `<path d="${roundedTopRect(x, yPos(d.pdv), barW, Math.max(1, pdvH), 4)}" fill="${VENTAS_COLOR_PDV}" />`;
+        }
+        const label = d.total > 0
+          ? `<text x="${x + barW / 2}" y="${yPos(d.total) - 8}" text-anchor="middle" font-size="11" font-weight="700" fill="#1b1d0e">${formatMoney(Math.round(d.total))}</text>`
+          : "";
+        const esHoy = d.key === hoy;
+        const dayLabel = esHoy ? "Hoy" : d.day.toLocaleDateString("es-MX", { weekday: "short", day: "numeric" });
+        const dayText = `<text x="${margin.left + band * i + band / 2}" y="${height - 12}" text-anchor="middle" font-size="11" font-weight="${esHoy ? "800" : "500"}" fill="${esHoy ? "#1b1d0e" : "#5b403d"}">${dayLabel}</text>`;
+        const hover = `<rect data-venta-col="${i}" x="${margin.left + band * i}" y="${margin.top - 16}" width="${band}" height="${plotH + 16}" fill="transparent" />`;
+        return `<g>${segments}${label}${dayText}${hover}</g>`;
+      }).join("");
+
+      container.innerHTML = `
+        <svg viewBox="0 0 ${width} ${height}" width="100%" role="img" aria-label="Ventas por día de los últimos 7 días" style="display:block;">
+          ${gridHtml}
+          <line x1="${margin.left}" y1="${yPos(0)}" x2="${width - margin.right}" y2="${yPos(0)}" stroke="rgba(27,29,14,0.35)" stroke-width="1" />
+          ${barsHtml}
+        </svg>
+        <div id="ventas-chart-tooltip"></div>
+      `;
+
+      const tooltip = document.getElementById("ventas-chart-tooltip");
+      container.querySelectorAll("[data-venta-col]").forEach((hit) => {
+        const d = porDia[Number(hit.dataset.ventaCol)];
+        const move = (event) => {
+          const rect = container.getBoundingClientRect();
+          tooltip.style.display = "block";
+          tooltip.innerHTML = `
+            <p style="font-weight:800;margin-bottom:2px;">${d.day.toLocaleDateString("es-MX", { weekday: "long", day: "numeric", month: "short" })}</p>
+            <p><span style="display:inline-block;width:9px;height:9px;border-radius:3px;background:${VENTAS_COLOR_MESAS};margin-right:5px;"></span>Mesas: <b>${formatMoney(Math.round(d.mesas))}</b></p>
+            <p><span style="display:inline-block;width:9px;height:9px;border-radius:3px;background:${VENTAS_COLOR_PDV};margin-right:5px;"></span>PDV: <b>${formatMoney(Math.round(d.pdv))}</b></p>
+            <p style="border-top:1px dashed rgba(27,29,14,0.2);margin-top:3px;padding-top:3px;">Total: <b>${formatMoney(Math.round(d.total))}</b></p>
+          `;
+          const left = Math.min(event.clientX - rect.left + 14, rect.width - tooltip.offsetWidth - 4);
+          const top = Math.max(0, event.clientY - rect.top - tooltip.offsetHeight - 10);
+          tooltip.style.left = `${Math.max(0, left)}px`;
+          tooltip.style.top = `${top}px`;
+        };
+        hit.addEventListener("mouseenter", move);
+        hit.addEventListener("mousemove", move);
+        hit.addEventListener("mouseleave", () => { tooltip.style.display = "none"; });
+      });
+    }
+
+    function renderVentasListas(ventas) {
+      const hoy = todayKey();
+      const deHoy = ventas.filter((v) => dateKeyFrom(v.fecha) === hoy);
+      const hoyEl = document.getElementById("ventas-hoy-lista");
+      hoyEl.innerHTML = deHoy.length
+        ? deHoy.map((v) => ventaRowHtml(v, false)).join("")
+        : `<p class="text-sm text-on-surface-variant py-4 text-center">Sin ventas registradas hoy.</p>`;
+
+      const tarjeta = ventas.filter((v) => v.tarjeta);
+      const tarjetaEl = document.getElementById("ventas-tarjeta-lista");
+      tarjetaEl.innerHTML = tarjeta.length
+        ? tarjeta.map((v) => ventaRowHtml(v, true)).join("")
+        : `<p class="text-sm text-on-surface-variant py-4 text-center">Sin pagos con tarjeta esta semana.</p>`;
+    }
+
+    async function renderVentasView() {
+      const statsEl = document.getElementById("ventas-stats");
+      statsEl.innerHTML = `<div class="venta-stat sm:col-span-3"><p class="venta-stat-sub">Cargando ventas...</p></div>`;
+      const { list, remoteOk } = await fetchVentasSemana();
+      const warning = document.getElementById("ventas-sync-warning");
+      if (!remoteOk) {
+        warning.textContent = "⚠ Sin conexión con la nube: se muestran solo las ventas registradas en este dispositivo. Ejecuta supabase_setup.sql en Supabase para ver las de todos los dispositivos.";
+        warning.classList.remove("hidden");
+      } else {
+        warning.classList.add("hidden");
+      }
+      renderVentasStats(list);
+      renderVentasChart(list);
+      renderVentasListas(list);
+    }
+
     function loadHistory() {
       const raw = localStorage.getItem(HISTORY_KEY);
       if (!raw) {
@@ -1194,6 +1828,7 @@
 
     function persistHistory() {
       localStorage.setItem(HISTORY_KEY, JSON.stringify({ history: state.history }));
+      scheduleSyncPush(SYNC_KEY_HISTORY, () => ({ history: state.history }));
     }
 
     function userCanAccessHistory() {
@@ -1224,6 +1859,23 @@
       persistHistory();
     }
 
+    function normalizeTablesList(parsedTables) {
+      const list = Array.isArray(parsedTables) ? parsedTables : [];
+      const fixed = FIXED_TABLES.map((n) => {
+        const existing = list.find((t) => t && t.number === n);
+        return existing
+          ? normalizeTable({ ...existing, isDefault: true, createdOn: "fixed" })
+          : createTable(n, true, "fixed");
+      });
+
+      const extras = list.filter((t) => t && !FIXED_TABLES.includes(t.number) && !t.isDefault);
+      const cleanedExtras = extras
+        .filter((t) => t.createdOn === todayKey())
+        .map((t) => normalizeTable({ ...t, isDefault: false }));
+
+      return [...fixed, ...cleanedExtras].sort((a, b) => a.number - b.number);
+    }
+
     function loadState() {
       const raw = localStorage.getItem(STORAGE_KEY);
       if (!raw) {
@@ -1233,25 +1885,13 @@
       }
 
       const parsed = JSON.parse(raw);
-      const parsedTables = Array.isArray(parsed.tables) ? parsed.tables : [];
-      const fixed = FIXED_TABLES.map((n) => {
-        const existing = parsedTables.find((t) => t.number === n);
-        return existing
-          ? normalizeTable({ ...existing, isDefault: true, createdOn: "fixed" })
-          : createTable(n, true, "fixed");
-      });
-
-      const extras = parsedTables.filter((t) => !FIXED_TABLES.includes(t.number) && !t.isDefault);
-      const cleanedExtras = extras
-        .filter((t) => t.createdOn === todayKey())
-        .map((t) => normalizeTable({ ...t, isDefault: false }));
-
-      state.tables = [...fixed, ...cleanedExtras].sort((a, b) => a.number - b.number);
+      state.tables = normalizeTablesList(parsed.tables);
       persistState();
     }
 
     function persistState() {
       localStorage.setItem(STORAGE_KEY, JSON.stringify({ tables: state.tables }));
+      scheduleSyncPush(SYNC_KEY_TABLES, () => ({ tables: state.tables }));
     }
 
     function getTableById(id) {
@@ -2114,8 +2754,10 @@
       const confirmed = window.confirm(`¿Seguro que quieres limpiar ${getTableDisplayName(table)}? Se borrará todo el pedido.`);
       if (!confirmed) return;
       pushHistoryRecord(table);
+      recordTableVenta(table);
       table.plates = [createPlate(1)];
       table.customName = "";
+      delete table.sessionId;
       if (state.selectedTableId === tableId) {
         state.selectedPlateId = table.plates[0].id;
       }
@@ -2278,6 +2920,7 @@
         } else {
           plate.order[lineKey] = { itemId, qty, variant };
         }
+        ensureTableSession(table);
         persistState();
         renderDetail();
         renderTables();
@@ -2286,18 +2929,28 @@
 
       const selection = await askItemSelection(itemId);
       if (!selection) return;
+      // La mesa pudo cambiar (sincronización remota) mientras el modal estaba
+      // abierto: se vuelve a resolver por id para no escribir en objetos viejos.
+      const freshTable = getTableById(tableId);
+      if (!freshTable) {
+        showToast("La mesa ya no existe.", "error");
+        return;
+      }
+      const freshPlate = getPlateById(freshTable, plateId) || freshTable.plates[0];
+      if (!freshPlate) return;
       const { variant, qty } = selection;
       const lineKey = makeLineKey(itemId, variant);
-      const current = plate.order[lineKey];
+      const current = freshPlate.order[lineKey];
       if (typeof current === "number") {
-        plate.order[lineKey] = { itemId, qty: current + qty, variant };
+        freshPlate.order[lineKey] = { itemId, qty: current + qty, variant };
       } else if (current && typeof current === "object") {
         current.qty = (Number(current.qty) || 0) + qty;
         current.itemId = itemId;
         current.variant = variant;
       } else {
-        plate.order[lineKey] = { itemId, qty, variant };
+        freshPlate.order[lineKey] = { itemId, qty, variant };
       }
+      ensureTableSession(freshTable);
       persistState();
       renderDetail();
       renderTables();
@@ -2370,6 +3023,8 @@
       const ticket = createTicketData(table, "ticket");
       state.printQueue.unshift(ticket);
       persistPrintQueue();
+      recordTableVenta(table);
+      persistState();
       try {
         await enqueueRemote(ticket);
         playNotificationSound("ticket");
@@ -2405,6 +3060,8 @@
       const ticket = createPlateTicketData(table, plate, "ticket");
       state.printQueue.unshift(ticket);
       persistPrintQueue();
+      recordTableVenta(table);
+      persistState();
       try {
         await enqueueRemote(ticket);
         playNotificationSound("ticket");
@@ -2416,6 +3073,7 @@
       const tables = document.getElementById("tables-view");
       const detail = document.getElementById("detail-view");
       const history = document.getElementById("history-view");
+      const ventas = document.getElementById("ventas-view");
       const addTableButton = document.getElementById("add-table-button");
       const addTableHint = document.getElementById("add-table-hint");
       const detailActionsBar = document.getElementById("detail-actions-bar");
@@ -2424,6 +3082,7 @@
       tables.classList.add("hidden");
       detail.classList.add("hidden");
       history.classList.add("hidden");
+      ventas.classList.add("hidden");
       addTableButton.classList.add("hidden");
       addTableHint.classList.add("hidden");
       detailActionsBar.classList.add("hidden");
@@ -2440,6 +3099,8 @@
         headerPlateWrapper.classList.add("flex");
       } else if (view === "history") {
         history.classList.remove("hidden");
+      } else if (view === "ventas") {
+        ventas.classList.remove("hidden");
       }
     }
 
@@ -3015,6 +3676,7 @@
       const userLabel = document.getElementById("current-user-label");
       userLabel.textContent = `Usuario: ${state.meseraNombre}`;
       renderProfileSwitcher();
+      updateVentasAccess();
     }
 
     function renderProfileSwitcher() {
@@ -3106,6 +3768,22 @@
         renderHistory();
         showView("history");
       });
+      document.getElementById("open-ventas-button").addEventListener("click", () => {
+        if (!isBrian()) {
+          playNotificationSound("forbidden");
+          showToast("No tienes permisos para acceder a Ventas.", "error");
+          return;
+        }
+        showView("ventas");
+        renderVentasView();
+      });
+      document.getElementById("back-from-ventas-button").addEventListener("click", () => {
+        showView("tables");
+        renderTables();
+      });
+      document.getElementById("refresh-ventas-button").addEventListener("click", () => {
+        renderVentasView();
+      });
       document.getElementById("back-from-history-button").addEventListener("click", () => {
         showView("tables");
         renderTables();
@@ -3153,6 +3831,7 @@
     loadSwitchableProfiles();
     renderTables();
     showView("tables");
+    initSync();
   </script>
 </body>
 </html>

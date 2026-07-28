@@ -15,6 +15,10 @@
     {
       "username": "Ceci",
       "passwordSha256": "4c8fb0a9296bf02f659965ff0652258ebbcda4cc5826e13cea1b28e0a92aa337"
+    },
+    {
+      "username": "Tristan",
+      "passwordSha256": "bf8ead0b33e40d01a3d93f0442c2e85e131bdb303187e7dfeacb2e5c4690f94b"
     }
   ]
 }
