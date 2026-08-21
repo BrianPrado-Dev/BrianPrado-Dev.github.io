@@ -1987,6 +1987,20 @@
       return ITEM_INDEX[line.itemId].name;
     }
 
+    // El cobro por pago con tarjeta se imprime al cliente como "Cargo por
+    // servicio"; en pantalla el personal lo sigue viendo como "Pgo con
+    // Tarjeta 4%" para reconocer el botón que está usando.
+    const TICKET_SERVICE_CHARGE_NAME = "Cargo por servicio";
+
+    function getTicketLineName(line) {
+      if (line && line.itemId === "pgo_tarjeta") return TICKET_SERVICE_CHARGE_NAME;
+      return getLineDisplayName(line);
+    }
+
+    function toTicketItemName(name) {
+      return String(name).trim() === ITEM_INDEX.pgo_tarjeta.name ? TICKET_SERVICE_CHARGE_NAME : name;
+    }
+
     const PAQUETE_CERVEZA_EXTRA = 5;
 
     function getPaqueteCervezaSurcharge(itemId, variant) {
@@ -2596,7 +2610,7 @@
         history: state.history.map((record) => {
           const items = summarizeHistoryRecordItems(record).map((entry) => {
             const parsed = parseHistoryItem(entry);
-            return { name: parsed.name, qty: parsed.qty };
+            return { name: toTicketItemName(parsed.name), qty: parsed.qty };
           });
           return {
             tableNumber: record.tableNumber,
@@ -2660,7 +2674,7 @@
                 const subtotal = Number.isFinite(Number(line.subtotal)) ? Number(line.subtotal) : price * qty;
                 return {
                   id: `hist_item_${index + 1}_${itemIndex + 1}`,
-                  name: String(line.name || "Item"),
+                  name: toTicketItemName(String(line.name || "Item")),
                   variant: String(line.variant || ""),
                   qty,
                   price,
@@ -2679,7 +2693,7 @@
               const price = resolveHistoryLineUnitPrice(name, variant);
               return {
                 id: `hist_item_${index + 1}_${itemIndex + 1}`,
-                name,
+                name: toTicketItemName(name),
                 variant,
                 qty,
                 price,
@@ -2972,7 +2986,7 @@
           items: getPlateLineItems(plate)
             .map((line) => ({
               id: line.itemId,
-              name: getLineDisplayName(line),
+              name: getTicketLineName(line),
               variant: line.variant,
               qty: line.qty,
               price: getLineUnitPrice(line),
@@ -3001,7 +3015,7 @@
           name: plateName,
           items: getPlateLineItems(plate).map((line) => ({
             id: line.itemId,
-            name: getLineDisplayName(line),
+            name: getTicketLineName(line),
             variant: line.variant,
             qty: line.qty,
             price: getLineUnitPrice(line),
