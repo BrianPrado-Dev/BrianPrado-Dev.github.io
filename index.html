@@ -4,11 +4,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Brian Prado | Ingeniería Mecatrónica & Software</title>
-    <meta name="description"
-        content="Portafolio de Brian Prado — Estudiante de Ingeniería Mecatrónica en CETI Colomos. Desarrollo de software, manufactura y proyectos de ingeniería.">
+    <title>Brian Prado | Ingeniería Mecatrónica &amp; Software</title>
+    <meta name="description" content="Portafolio de Brian Prado — Estudiante de Ingeniería Mecatrónica en CETI Colomos. Desarrollo de software, manufactura y proyectos de ingeniería.">
     <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="">
     <link
         href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600&display=swap"
         rel="stylesheet">
@@ -1238,13 +1237,189 @@
         .gs-hidden {
             visibility: hidden;
         }
+
+        /* ============================================
+           ANIMACIONES v2 — AÑADIDOS
+           ============================================ */
+        .scroll-progress {
+            position: fixed;
+            top: 0; left: 0; right: 0;
+            height: 2px;
+            z-index: 900;
+            background: linear-gradient(90deg, var(--accent), var(--accent-lime));
+            transform: scaleX(0);
+            transform-origin: 0 50%;
+            box-shadow: 0 0 12px var(--accent-glow);
+            pointer-events: none;
+        }
+
+        .cursor-dot {
+            position: fixed;
+            top: 0; left: 0;
+            width: 8px; height: 8px;
+            border-radius: 50%;
+            background: var(--accent);
+            pointer-events: none;
+            z-index: 9998;
+            opacity: 0;
+            will-change: transform;
+        }
+
+        .cursor-ring {
+            position: fixed;
+            top: 0; left: 0;
+            width: 34px; height: 34px;
+            border-radius: 50%;
+            border: 1px solid rgba(0, 255, 200, 0.35);
+            pointer-events: none;
+            z-index: 9998;
+            opacity: 0;
+            will-change: transform;
+        }
+
+        @media (max-width: 900px) {
+            .cursor-dot, .cursor-ring { display: none; }
+        }
+
+        /* Logo mark reacciona al scroll */
+        .logo-mark { will-change: transform; }
+
+        /* Subrayado que se dibuja en el nav */
+        .nav-links a { position: relative; }
+
+        .nav-links a::after {
+            content: '';
+            position: absolute;
+            left: 0.85rem; right: 0.85rem;
+            bottom: 0.25rem;
+            height: 1px;
+            background: var(--accent);
+            transform: scaleX(0);
+            transform-origin: 0 50%;
+            transition: transform 0.35s var(--ease-out);
+        }
+
+        .nav-links a:hover::after,
+        .nav-links a.active::after { transform: scaleX(1); }
+
+        /* Regla que se dibuja junto a cada etiqueta de sección */
+        .label-rule {
+            display: block;
+            height: 1px;
+            width: 100%;
+            max-width: 260px;
+            margin: 0 auto 1.5rem;
+            background: linear-gradient(90deg, var(--accent), transparent);
+            transform: scaleX(0);
+            transform-origin: 0 50%;
+        }
+
+        .label-rule.center { transform-origin: 50% 50%; }
+
+        /* Título revelado carácter por carácter */
+        .char {
+            display: inline-block;
+            will-change: transform, opacity;
+        }
+
+        .char-word { display: inline-block; white-space: nowrap; }
+
+        /* Contadores */
+        .stats-row {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 1px;
+            max-width: 700px;
+            margin: 0 auto 4rem;
+            background: var(--border);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-lg);
+            overflow: hidden;
+        }
+
+        .stat {
+            background: var(--bg-card);
+            padding: 1.75rem 1.25rem;
+            text-align: center;
+            transition: background 0.3s;
+        }
+
+        .stat:hover { background: var(--bg-card-hover); }
+
+        .stat-num {
+            font-family: var(--font-mono);
+            font-size: clamp(1.9rem, 4vw, 2.6rem);
+            font-weight: 700;
+            line-height: 1;
+            background: linear-gradient(135deg, var(--accent), var(--accent-lime));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .stat-label {
+            display: block;
+            margin-top: 0.6rem;
+            font-size: 0.75rem;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            font-weight: 600;
+        }
+
+        @media (max-width: 600px) {
+            .stats-row { grid-template-columns: 1fr; margin-bottom: 3rem; }
+            .stat { padding: 1.25rem; }
+        }
+
+        /* Línea de la trayectoria que se dibuja con el scroll */
+        .timeline-progress {
+            position: absolute;
+            top: 0; left: 50%;
+            width: 2px;
+            height: 100%;
+            margin-left: -1px;
+            background: linear-gradient(to bottom, var(--accent), var(--accent-lime));
+            box-shadow: 0 0 14px var(--accent-glow);
+            transform: scaleY(0);
+            transform-origin: 50% 0;
+            z-index: 1;
+        }
+
+        @media (max-width: 900px) {
+            .timeline-progress { left: 8px; }
+        }
+
+        /* Divisor que se dibuja entre secciones */
+        .section-rule {
+            max-width: 1200px;
+            margin: 0 auto;
+            height: 1px;
+            background: linear-gradient(90deg, transparent, var(--border-hover) 20%, var(--border-hover) 80%, transparent);
+            transform: scaleX(0);
+        }
+
+        /* Parallax */
+        .hero-grid-bg, .ambient-glow { will-change: transform; }
+
+        .project-card-inner { will-change: transform; }
+
+        @media (prefers-reduced-motion: reduce) {
+            .scroll-progress, .cursor-dot, .cursor-ring { display: none; }
+            .label-rule, .timeline-progress, .section-rule { transform: none; }
+        }
+
     </style>
+    
 </head>
 
 <body>
     <div class="noise-overlay"></div>
     <div class="ambient-glow"></div>
     <div class="cursor-glow" id="cursorGlow"></div>
+    <div class="scroll-progress" id="scrollProgress"></div>
+    <div class="cursor-ring" id="cursorRing"></div>
+    <div class="cursor-dot" id="cursorDot"></div>
 
     <!-- ============ NAVIGATION ============ -->
     <nav id="navbar">
@@ -1308,24 +1483,16 @@
                         <span class="t-title">brian_prado.py</span>
                     </div>
                     <div class="terminal-body">
-                        <div class="t-line"><span class="t-num">1</span><span><span class="t-kw">class</span> <span
-                                    class="t-fn">Engineer</span>:</span></div>
+                        <div class="t-line"><span class="t-num">1</span><span><span class="t-kw">class</span> <span class="t-fn">Engineer</span>:</span></div>
                         <div class="t-line"><span class="t-num">2</span><span>&nbsp;&nbsp;<span class="t-kw">def</span>
                                 <span class="t-fn">__init__</span>(<span class="t-var">self</span>):</span></div>
-                        <div class="t-line"><span class="t-num">3</span><span>&nbsp;&nbsp;&nbsp;&nbsp;<span
-                                    class="t-var">self</span>.name <span class="t-op">=</span> <span
-                                    class="t-str">"Brian Prado"</span></span></div>
-                        <div class="t-line"><span class="t-num">4</span><span>&nbsp;&nbsp;&nbsp;&nbsp;<span
-                                    class="t-var">self</span>.field <span class="t-op">=</span> <span
-                                    class="t-str">"Mechatronics"</span></span></div>
-                        <div class="t-line"><span class="t-num">5</span><span>&nbsp;&nbsp;&nbsp;&nbsp;<span
-                                    class="t-var">self</span>.semester <span class="t-op">=</span> <span
-                                    class="t-str">6</span></span></div>
+                        <div class="t-line"><span class="t-num">3</span><span>&nbsp;&nbsp;&nbsp;&nbsp;<span class="t-var">self</span>.name <span class="t-op">=</span> <span class="t-str">"Brian Prado"</span></span></div>
+                        <div class="t-line"><span class="t-num">4</span><span>&nbsp;&nbsp;&nbsp;&nbsp;<span class="t-var">self</span>.field <span class="t-op">=</span> <span class="t-str">"Mechatronics"</span></span></div>
+                        <div class="t-line"><span class="t-num">5</span><span>&nbsp;&nbsp;&nbsp;&nbsp;<span class="t-var">self</span>.semester <span class="t-op">=</span> <span class="t-str">6</span></span></div>
                         <div class="t-line"><span class="t-num">6</span><span></span></div>
                         <div class="t-line"><span class="t-num">7</span><span>&nbsp;&nbsp;<span class="t-kw">def</span>
                                 <span class="t-fn">build</span>(<span class="t-var">self</span>, idea):</span></div>
-                        <div class="t-line"><span class="t-num">8</span><span>&nbsp;&nbsp;&nbsp;&nbsp;<span
-                                    class="t-kw">return</span> idea.to_reality() <span class="t-cm"># 🚀</span></span>
+                        <div class="t-line"><span class="t-num">8</span><span>&nbsp;&nbsp;&nbsp;&nbsp;<span class="t-kw">return</span> idea.to_reality() <span class="t-cm"># 🚀</span></span>
                         </div>
                     </div>
                 </div>
@@ -1339,13 +1506,30 @@
         <div class="experience-container">
             <div class="experience-header gs-hidden">
                 <span class="section-label">// Experiencia</span>
-                <h2 class="section-title">Trayectoria profesional</h2>
+                <span class="label-rule center"></span>
+                <h2 class="section-title" data-split="">Trayectoria profesional</h2>
                 <p class="section-desc" style="margin-left:auto;margin-right:auto;">
                     Mi camino en la industria, combinando conocimiento académico con experiencia práctica.
                 </p>
             </div>
 
+            <div class="stats-row">
+                <div class="stat">
+                    <span class="stat-num" data-count="6" data-suffix="to">0</span>
+                    <span class="stat-label">Semestre en Mecatrónica</span>
+                </div>
+                <div class="stat">
+                    <span class="stat-num" data-count="4" data-prefix="+">0</span>
+                    <span class="stat-label">Proyectos construidos</span>
+                </div>
+                <div class="stat">
+                    <span class="stat-num" data-count="3">0</span>
+                    <span class="stat-label">Lenguajes principales</span>
+                </div>
+            </div>
+
             <div class="timeline gs-hidden">
+                <div class="timeline-progress" id="timelineProgress"></div>
                 <div class="timeline-item">
                     <div class="timeline-date">
                         Oct 2025<br>— Actualidad
@@ -1380,11 +1564,14 @@
         </div>
     </section>
 
+    <div class="section-rule"></div>
+
     <!-- ============ PROYECTOS ============ -->
     <section id="proyectos">
         <div class="projects-header gs-hidden">
             <span class="section-label">// Portafolio</span>
-            <h2 class="section-title">Proyectos destacados</h2>
+            <span class="label-rule center"></span>
+            <h2 class="section-title" data-split="">Proyectos destacados</h2>
             <p class="section-desc">
                 Cada proyecto es una oportunidad de resolver problemas reales con ingeniería y código.
             </p>
@@ -1411,8 +1598,7 @@
                         <span>Responsive</span>
                     </div>
                     <div class="project-actions">
-                        <a href="https://brianprado.me/Tortas/index.html" target="_blank" rel="noopener noreferrer"
-                            class="project-btn primary">
+                        <a href="https://brianprado.me/Tortas/index.html" target="_blank" rel="noopener noreferrer" class="project-btn primary">
                             Ver sitio →
                         </a>
                     </div>
@@ -1440,8 +1626,7 @@
                         <span>Tickets</span>
                     </div>
                     <div class="project-actions">
-                        <a href="https://github.com/BrianPrado-Dev/TortasAhogadas" target="_blank"
-                            rel="noopener noreferrer" class="project-btn primary">
+                        <a href="https://github.com/BrianPrado-Dev/TortasAhogadas" target="_blank" rel="noopener noreferrer" class="project-btn primary">
                             Ver código →
                         </a>
                     </div>
@@ -1469,8 +1654,7 @@
                         <span>Game Dev</span>
                     </div>
                     <div class="project-actions">
-                        <a href="https://github.com/BrianPrado-Dev/Tetrix" target="_blank" rel="noopener noreferrer"
-                            class="project-btn primary">
+                        <a href="https://github.com/BrianPrado-Dev/Tetrix" target="_blank" rel="noopener noreferrer" class="project-btn primary">
                             Ver código →
                         </a>
                     </div>
@@ -1480,6 +1664,8 @@
         </div>
 
     </section>
+
+    <div class="section-rule"></div>
 
     <!-- ============ CONTACTO ============ -->
     <section id="contacto">
@@ -1502,8 +1688,7 @@
                         </div>
                         <span class="contact-arrow">→</span>
                     </a>
-                    <a href="https://github.com/BrianPrado-Dev" target="_blank" rel="noopener noreferrer"
-                        class="contact-link">
+                    <a href="https://github.com/BrianPrado-Dev" target="_blank" rel="noopener noreferrer" class="contact-link">
                         <div class="contact-icon">💻</div>
                         <div class="contact-text">
                             <span class="contact-label">GitHub</span>
@@ -1662,8 +1847,7 @@
 
                 expTl
                     .from(".experience-header .section-label", { autoAlpha: 0, y: 20 })
-                    .from(".experience-header .section-title", { autoAlpha: 0, y: 30 }, "<0.1")
-                    .from(".experience-header .section-desc", { autoAlpha: 0, y: 20 }, "<0.1");
+                    .from(".experience-header .section-desc", { autoAlpha: 0, y: 20 }, "<0.15");
 
                 // Timeline items
                 gsap.utils.toArray(".timeline-item").forEach((item, i) => {
@@ -1708,8 +1892,7 @@
                     }
                 })
                     .from(".projects-header .section-label", { autoAlpha: 0, y: 20 })
-                    .from(".projects-header .section-title", { autoAlpha: 0, y: 30 }, "<0.1")
-                    .from(".projects-header .section-desc", { autoAlpha: 0, y: 20 }, "<0.1");
+                    .from(".projects-header .section-desc", { autoAlpha: 0, y: 20 }, "<0.15");
 
                 // ------------------------------------------
                 // STACKING CARDS (Desktop: pin, Mobile: scroll-triggered)
@@ -1887,6 +2070,249 @@
             });
         });
     </script>
+
+    <!-- ============ ANIMACIONES v2 ============ -->
+    <script>
+    (() => {
+        const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+        const desktop = () => window.matchMedia("(min-width: 901px)").matches;
+
+        // ------------------------------------------
+        // BARRA DE PROGRESO DE SCROLL
+        // ------------------------------------------
+        if (!reduce) {
+            gsap.to("#scrollProgress", {
+                scaleX: 1,
+                ease: "none",
+                scrollTrigger: { start: 0, end: "max", scrub: 0.3 }
+            });
+        } else {
+            gsap.set("#scrollProgress", { scaleX: 1 });
+        }
+
+        // ------------------------------------------
+        // NAVBAR: logo que gira + nav que se esconde al bajar
+        // ------------------------------------------
+        if (!reduce) {
+            gsap.to(".logo-mark", {
+                rotate: 360,
+                ease: "none",
+                scrollTrigger: { start: 0, end: "max", scrub: 1 }
+            });
+
+            let lastY = 0;
+            const navTo = gsap.quickTo("#navbar", "yPercent", { duration: 0.45, ease: "power3.out" });
+            ScrollTrigger.create({
+                start: 0, end: "max",
+                onUpdate: (self) => {
+                    const y = self.scroll();
+                    if (y < 120) { navTo(0); lastY = y; return; }
+                    if (y > lastY + 8) navTo(-110);
+                    else if (y < lastY - 8) navTo(0);
+                    lastY = y;
+                }
+            });
+        }
+
+        // ------------------------------------------
+        // TÍTULOS: reveal carácter por carácter
+        // ------------------------------------------
+        document.querySelectorAll("[data-split]").forEach((el) => {
+            const words = el.textContent.trim().split(/\s+/);
+            el.textContent = "";
+            words.forEach((word, wi) => {
+                const w = document.createElement("span");
+                w.className = "char-word";
+                [...word].forEach((ch) => {
+                    const c = document.createElement("span");
+                    c.className = "char";
+                    c.textContent = ch;
+                    w.appendChild(c);
+                });
+                el.appendChild(w);
+                if (wi < words.length - 1) el.appendChild(document.createTextNode(" "));
+            });
+
+            if (reduce) return;
+            gsap.from(el.querySelectorAll(".char"), {
+                yPercent: 110,
+                autoAlpha: 0,
+                rotate: 4,
+                duration: 0.7,
+                ease: "power3.out",
+                stagger: { each: 0.024, from: "start" },
+                scrollTrigger: { trigger: el, start: "top 85%", toggleActions: "play none none none" }
+            });
+        });
+
+        // ------------------------------------------
+        // LÍNEAS QUE SE DIBUJAN
+        // ------------------------------------------
+        if (!reduce) {
+            document.querySelectorAll(".label-rule").forEach((rule) => {
+                gsap.to(rule, {
+                    scaleX: 1,
+                    duration: 1.1,
+                    ease: "power3.inOut",
+                    scrollTrigger: { trigger: rule, start: "top 88%", toggleActions: "play none none none" }
+                });
+            });
+
+            document.querySelectorAll(".section-rule").forEach((rule) => {
+                gsap.fromTo(rule, { scaleX: 0 }, {
+                    scaleX: 1,
+                    duration: 1.4,
+                    ease: "power2.out",
+                    scrollTrigger: { trigger: rule, start: "top 92%", toggleActions: "play none none none" }
+                });
+            });
+
+            // Línea de la trayectoria: se dibuja con el scroll
+            const tlProgress = document.getElementById("timelineProgress");
+            const timelineEl = document.querySelector(".timeline");
+            if (tlProgress && timelineEl) {
+                gsap.to(tlProgress, {
+                    scaleY: 1,
+                    ease: "none",
+                    scrollTrigger: {
+                        trigger: timelineEl,
+                        start: "top 75%",
+                        end: "bottom 70%",
+                        scrub: 0.6
+                    }
+                });
+            }
+        }
+
+        // ------------------------------------------
+        // CONTADORES NUMÉRICOS
+        // ------------------------------------------
+        document.querySelectorAll("[data-count]").forEach((el) => {
+            const target = parseFloat(el.dataset.count);
+            const prefix = el.dataset.prefix || "";
+            const suffix = el.dataset.suffix || "";
+            if (reduce) { el.textContent = prefix + target + suffix; return; }
+
+            const obj = { v: 0 };
+            gsap.to(obj, {
+                v: target,
+                duration: 1.6,
+                ease: "power2.out",
+                onUpdate: () => { el.textContent = prefix + Math.round(obj.v) + suffix; },
+                scrollTrigger: { trigger: el, start: "top 88%", toggleActions: "play none none none" }
+            });
+        });
+
+        gsap.from(".stat", {
+            autoAlpha: 0,
+            y: 28,
+            duration: 0.8,
+            ease: "power3.out",
+            stagger: 0.1,
+            scrollTrigger: { trigger: ".stats-row", start: "top 88%", toggleActions: "play none none none" }
+        });
+
+        // ------------------------------------------
+        // PARALLAX AL SCROLL
+        // ------------------------------------------
+        if (!reduce) {
+            gsap.to(".hero-grid-bg", {
+                yPercent: 18,
+                ease: "none",
+                scrollTrigger: { trigger: "#hero", start: "top top", end: "bottom top", scrub: true }
+            });
+
+            gsap.to(".terminal-window", {
+                yPercent: -12,
+                ease: "none",
+                scrollTrigger: { trigger: "#hero", start: "top top", end: "bottom top", scrub: 0.5 }
+            });
+
+            gsap.to(".ambient-glow", {
+                yPercent: 8,
+                ease: "none",
+                scrollTrigger: { start: 0, end: "max", scrub: 1.2 }
+            });
+
+            gsap.to(".timeline-content", {
+                yPercent: -6,
+                ease: "none",
+                stagger: 0.1,
+                scrollTrigger: { trigger: ".timeline", start: "top bottom", end: "bottom top", scrub: 1 }
+            });
+
+            gsap.to(".contact-right", {
+                yPercent: -10,
+                ease: "none",
+                scrollTrigger: { trigger: "#contacto", start: "top bottom", end: "bottom top", scrub: 1 }
+            });
+        }
+
+        // ------------------------------------------
+        // CURSOR: punto + anillo con retardo
+        // ------------------------------------------
+        if (!reduce && desktop() && window.matchMedia("(pointer: fine)").matches) {
+            const dot = document.getElementById("cursorDot");
+            const ring = document.getElementById("cursorRing");
+            const dx = gsap.quickTo(dot, "x", { duration: 0.08, ease: "power2" });
+            const dy = gsap.quickTo(dot, "y", { duration: 0.08, ease: "power2" });
+            const rx = gsap.quickTo(ring, "x", { duration: 0.45, ease: "power3" });
+            const ry = gsap.quickTo(ring, "y", { duration: 0.45, ease: "power3" });
+            let shown = false;
+
+            document.addEventListener("mousemove", (e) => {
+                if (!shown) {
+                    shown = true;
+                    gsap.to([dot, ring], { autoAlpha: 1, duration: 0.3 });
+                }
+                dx(e.clientX - 4);
+                dy(e.clientY - 4);
+                rx(e.clientX - 17);
+                ry(e.clientY - 17);
+            });
+
+            document.querySelectorAll("a, button, .hero-tag, .stat, .timeline-content").forEach((el) => {
+                el.addEventListener("mouseenter", () => {
+                    gsap.to(ring, { scale: 1.9, borderColor: "rgba(184,255,87,0.5)", duration: 0.3, ease: "power3.out" });
+                    gsap.to(dot, { scale: 0.4, duration: 0.3 });
+                });
+                el.addEventListener("mouseleave", () => {
+                    gsap.to(ring, { scale: 1, borderColor: "rgba(0,255,200,0.35)", duration: 0.3, ease: "power3.out" });
+                    gsap.to(dot, { scale: 1, duration: 0.3 });
+                });
+            });
+
+            // Botones magnéticos
+            document.querySelectorAll(".btn, .project-btn").forEach((btn) => {
+                const bx = gsap.quickTo(btn, "x", { duration: 0.4, ease: "power3.out" });
+                const by = gsap.quickTo(btn, "y", { duration: 0.4, ease: "power3.out" });
+                btn.addEventListener("mousemove", (e) => {
+                    const r = btn.getBoundingClientRect();
+                    bx((e.clientX - (r.left + r.width / 2)) * 0.28);
+                    by((e.clientY - (r.top + r.height / 2)) * 0.28);
+                });
+                btn.addEventListener("mouseleave", () => { bx(0); by(0); });
+            });
+
+            // Tilt en tarjetas de proyecto
+            document.querySelectorAll(".project-card-inner").forEach((card) => {
+                const rx2 = gsap.quickTo(card, "rotateX", { duration: 0.6, ease: "power3.out" });
+                const ry2 = gsap.quickTo(card, "rotateY", { duration: 0.6, ease: "power3.out" });
+                gsap.set(card, { transformPerspective: 1200 });
+                card.addEventListener("mousemove", (e) => {
+                    const r = card.getBoundingClientRect();
+                    ry2(((e.clientX - (r.left + r.width / 2)) / r.width) * 7);
+                    rx2(((r.top + r.height / 2 - e.clientY) / r.height) * 7);
+                });
+                card.addEventListener("mouseleave", () => { rx2(0); ry2(0); });
+            });
+        }
+
+        ScrollTrigger.refresh();
+    })();
+    </script>
+
+
 </body>
 
 </html>
