@@ -2,17 +2,18 @@
 <html lang="es">
 
 <head>
-    <meta charset="utf-8" />
-    <meta content="width=device-width, initial-scale=1.0" name="viewport" />
-    <meta name="theme-color" content="#faf8f3" />
+    <meta charset="utf-8">
+    <meta content="width=device-width, initial-scale=1.0" name="viewport">
+    <meta name="theme-color" content="#faf8f3">
     <title>Tortas Ahogadas Doña Susy - Tradición Tapatía desde 2004</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="">
     <link
         href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;600;700;800;900&family=Inter:wght@300;400;500;600;700&display=swap"
-        rel="stylesheet" />
-    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap"
-        rel="stylesheet" />
+        rel="stylesheet">
+    <link
+        href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap"
+        rel="stylesheet">
     <style>
         :root {
             --color-cream: #faf8f3;
@@ -534,7 +535,7 @@
             bottom: -30px;
             width: 180px;
             height: 180px;
-            background-image: url('https://upload.wikimedia.org/wikipedia/commons/6/6b/WhatsApp.svg');
+            background-image: url("whatsapp.svg");
             background-size: contain;
             background-repeat: no-repeat;
             opacity: 0.15;
@@ -619,7 +620,7 @@
             bottom: -20px;
             width: 160px;
             height: 160px;
-            background-image: url('https://upload.wikimedia.org/wikipedia/commons/a/aa/Google_Maps_icon_%282020%29.svg');
+            background-image: url("maps.svg");
             background-size: contain;
             background-repeat: no-repeat;
             opacity: 0.15;
@@ -963,6 +964,101 @@
         main {
             padding-bottom: 100px;
         }
+
+
+        /* === ANIMACIONES: BASE COMPARTIDA (index + menu) === */
+        @media (prefers-reduced-motion: reduce) {
+            *, *::before, *::after {
+                animation-duration: .001ms !important;
+                animation-iteration-count: 1 !important;
+                transition-duration: .001ms !important;
+                scroll-behavior: auto !important;
+            }
+        }
+
+        /* Transicion nativa entre paginas (Chrome/Android): el header, la barra
+           inferior y el logo se quedan en su sitio y solo cruza el contenido. */
+        @view-transition { navigation: auto; }
+
+        ::view-transition-old(root) { animation: vt-out .26s cubic-bezier(0.4, 0, 1, 1) both; }
+        ::view-transition-new(root) { animation: vt-in .42s cubic-bezier(0.22, 1, 0.36, 1) both; }
+
+        @keyframes vt-out { to { opacity: 0; transform: translateY(-10px) scale(.99); } }
+        @keyframes vt-in { from { opacity: 0; transform: translateY(22px) scale(.99); } }
+
+        header { view-transition-name: site-header; }
+        .logo-img { view-transition-name: brand-logo; }
+        .bottom-nav { view-transition-name: site-bottom-nav; }
+
+        /* Fallback para navegadores sin View Transitions */
+        .page-veil {
+            position: fixed;
+            inset: 0;
+            background: var(--color-cream);
+            z-index: 9998;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity .25s ease;
+        }
+
+        html.veil-on .page-veil { opacity: 1; pointer-events: auto; }
+
+        html.no-vt body { animation: page-enter .55s cubic-bezier(0.22, 1, 0.36, 1) both; }
+
+        @keyframes page-enter { from { opacity: 0; transform: translateY(18px); } }
+
+        /* El elemento tocado responde antes de salir: el cambio se siente causado por el tap */
+        .tap-out { animation: tap-out .26s ease both; }
+
+        @keyframes tap-out { to { transform: scale(.96); opacity: .75; } }
+
+        /* Entradas escalonadas */
+        .rise { opacity: 0; transform: translateY(22px); animation: rise .8s cubic-bezier(0.22, 1, 0.36, 1) var(--d, 0s) forwards; }
+
+        @keyframes rise { to { opacity: 1; transform: none; } }
+
+        /* Header compacto al hacer scroll */
+        header.scrolled { padding: .6rem 1.5rem; }
+
+        header.scrolled .logo-img { width: 46px; height: 46px; }
+
+        /* Escalonado del bento y del info strip */
+        .fade-up { transition-delay: calc(var(--i, 0) * 70ms); }
+
+        .bento-card.fade-up { transform: translateY(40px) scale(.985); }
+
+        .bento-card.fade-up.visible { transform: translateY(0) scale(1); }
+
+        /* La imagen principal nunca queda del todo quieta */
+        .featured-card img { animation: kenburns 20s ease-in-out infinite alternate; }
+
+        @keyframes kenburns {
+            from { transform: scale(1) translate3d(0, 0, 0); }
+            to { transform: scale(1.07) translate3d(0, -1.5%, 0); }
+        }
+
+        /* Parallax muy suave del fondo decorativo */
+        .decorative-pattern { transform: translate3d(0, var(--py, 0px), 0); will-change: transform; }
+
+        /* La flecha del bento invita a tocar */
+        .bento-arrow .material-symbols-outlined { transition: transform .3s cubic-bezier(0.22, 1, 0.36, 1); }
+
+        .bento-card:hover .bento-arrow .material-symbols-outlined,
+        .bento-card:active .bento-arrow .material-symbols-outlined { transform: translateX(6px); }
+
+        /* La tarjeta de menu late apenas para senalar el siguiente paso */
+        .bento-card.menu .bento-icon { animation: menu-nudge 6s ease-in-out 2s infinite; }
+
+        @keyframes menu-nudge {
+            0%, 84%, 100% { transform: translateY(0) rotate(0deg); }
+            89% { transform: translateY(-6px) rotate(-4deg); }
+            95% { transform: translateY(0) rotate(3deg); }
+        }
+
+        /* Barra inferior: entra al final y queda como ancla fija */
+        .bottom-nav { animation: nav-in .5s cubic-bezier(0.22, 1, 0.36, 1) .5s both; }
+
+        @keyframes nav-in { from { transform: translateY(100%); } }
 
         /* === MOBILE OPTIMIZATIONS === */
         @media (max-width: 480px) {
@@ -1335,6 +1431,7 @@
             }
         }
     </style>
+
 </head>
 
 <body>
@@ -1364,20 +1461,20 @@
                 <div class="decorative-pattern"></div>
             </div>
             <div class="hero-content">
-                <div class="hero-text fade-up">
-                    <div class="hero-badge">
+                <div class="hero-text">
+                    <div class="hero-badge rise" style="--d: .06s">
                         <span class="material-symbols-outlined" style="font-size: 1rem;">verified</span>
                         Desde 2004
                     </div>
-                    <h1 class="hero-title">
+                    <h1 class="hero-title rise" style="--d: .16s">
                         El sabor auténtico de
                         <span>Guadalajara</span>
                     </h1>
-                    <p class="hero-description">
+                    <p class="hero-description rise" style="--d: .26s">
                         Más de 20 años preparando las tortas ahogadas más tradicionales de la ciudad.
                         Receta familiar, ingredientes frescos y ese toque picante que nos hace únicos.
                     </p>
-                    <div class="hero-cta">
+                    <div class="hero-cta rise" style="--d: .36s">
                         <a href="https://wa.me/message/VBNRTP6HAEZVO1" target="_blank" class="btn btn-primary">
                             <span class="material-symbols-outlined">chat</span>
                             Ordenar ahora
@@ -1385,14 +1482,13 @@
                         <a href="menu/index.html" class="btn btn-secondary">
                             Ver menú
                         </a>
-                        <a href="https://www.google.com/maps/place/Tortas+Ahogadas+Do%C3%B1a+Susi/@20.5878147,-103.4337628,20z/data=!4m6!3m5!1s0x8428acbe0911040b:0xb53274947027523b!8m2!3d20.5879506!4d-103.4336501!16s%2Fg%2F1q2w9dfz3"
-                            target="_blank" class="btn btn-secondary">
+                        <a href="https://www.google.com/maps/place/Tortas+Ahogadas+Do%C3%B1a+Susi/@20.5878147,-103.4337628,20z/data=!4m6!3m5!1s0x8428acbe0911040b:0xb53274947027523b!8m2!3d20.5879506!4d-103.4336501!16s%2Fg%2F1q2w9dfz3" target="_blank" class="btn btn-secondary">
                             <span class="material-symbols-outlined">pin_drop</span>
                             Ubicación
                         </a>
                     </div>
                 </div>
-                <div class="hero-visual fade-up">
+                <div class="hero-visual rise" style="--d: .44s">
                     <div class="floating-element top-left">
                         <div class="floating-icon">
                             <span class="material-symbols-outlined">local_fire_department</span>
@@ -1403,8 +1499,7 @@
                         </div>
                     </div>
                     <div class="featured-card">
-                        <img src="https://www.informador.mx/__export/1694137196616/sites/elinformador/img/2023/09/07/rs1243873_1929822-tortas_ahog_el_moreno_02_crop1694137152346.jpg_423682103.jpg"
-                            alt="Tortas Ahogadas Doña Susy" loading="lazy" decoding="async">
+                        <img src="https://www.informador.mx/__export/1694137196616/sites/elinformador/img/2023/09/07/rs1243873_1929822-tortas_ahog_el_moreno_02_crop1694137152346.jpg_423682103.jpg" alt="Tortas Ahogadas Doña Susy" loading="lazy" decoding="async">
                         <div class="featured-card-overlay">
                             <div class="featured-card-badge">
                                 <span class="material-symbols-outlined" style="font-size: 1rem;">star</span>
@@ -1436,8 +1531,7 @@
 
             <div class="bento-grid">
                 <!-- WhatsApp Card -->
-                <a href="https://wa.me/message/VBNRTP6HAEZVO1" target="_blank"
-                    class="bento-card whatsapp large fade-up">
+                <a href="https://wa.me/message/VBNRTP6HAEZVO1" target="_blank" class="bento-card whatsapp large fade-up">
                     <div class="bento-card-header">
                         <span class="bento-badge">Pedidos directos</span>
                         <div class="bento-icon">
@@ -1455,8 +1549,7 @@
                 </a>
 
                 <!-- Location Card -->
-                <a href="https://www.google.com/maps/place/Tortas+Ahogadas+Do%C3%B1a+Susi/@20.5878147,-103.4337628,20z/data=!4m6!3m5!1s0x8428acbe0911040b:0xb53274947027523b!8m2!3d20.5879506!4d-103.4336501!16s%2Fg%2F1q2w9dfz3?entry=ttu"
-                    target="_blank" class="bento-card location fade-up">
+                <a href="https://www.google.com/maps/place/Tortas+Ahogadas+Do%C3%B1a+Susi/@20.5878147,-103.4337628,20z/data=!4m6!3m5!1s0x8428acbe0911040b:0xb53274947027523b!8m2!3d20.5879506!4d-103.4336501!16s%2Fg%2F1q2w9dfz3?entry=ttu" target="_blank" class="bento-card location fade-up">
                     <div class="bento-card-header">
                         <span class="bento-badge">Visítanos</span>
                         <div class="bento-icon">
@@ -1544,8 +1637,7 @@
                     <h5>Dirección</h5>
                     <ul>
                         <li>
-                            <a href="https://www.google.com/maps/place/Tortas+Ahogadas+Do%C3%B1a+Susi/@20.5878147,-103.4337628,20z"
-                                target="_blank">
+                            <a href="https://www.google.com/maps/place/Tortas+Ahogadas+Do%C3%B1a+Susi/@20.5878147,-103.4337628,20z" target="_blank">
                                 <span class="material-symbols-outlined">location_on</span>
                                 Geranio 869a, GDL
                             </a>
@@ -1554,7 +1646,7 @@
                 </div>
             </div>
             <div class="footer-bottom">
-                <span class="footer-copyright">© 2024 Tortas Doña Susy. Heritage & Heat.</span>
+                <span class="footer-copyright">© 2024 Tortas Doña Susy. Heritage &amp; Heat.</span>
                 <div class="footer-social">
                     <a href="#" title="Facebook">FB</a>
                     <a href="#" title="Instagram">IG</a>
@@ -1579,6 +1671,59 @@
     </nav>
 
     <script>
+
+        // === TRANSICION ENTRE PAGINAS (igual en index y en menu) ===
+        (function () {
+            var reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+            var hasVT = !reduce && ('CSSViewTransitionRule' in window);
+            if (hasVT) return; // el navegador anima la navegacion por si mismo
+
+            document.documentElement.classList.add('no-vt');
+            var veil = document.createElement('div');
+            veil.className = 'page-veil';
+            document.body.appendChild(veil);
+
+            document.addEventListener('click', function (e) {
+                var a = e.target.closest && e.target.closest('a[href]');
+                if (!a || a.target === '_blank') return;
+                var href = a.getAttribute('href');
+                if (!href || href.charAt(0) === '#' || /^(https?:|tel:|mailto:|javascript:)/i.test(href)) return;
+                if (e.metaKey || e.ctrlKey || e.shiftKey) return;
+                e.preventDefault();
+                a.classList.add('tap-out');
+                document.documentElement.classList.add('veil-on');
+                setTimeout(function () { window.location.href = href; }, 250);
+            });
+
+            window.addEventListener('pageshow', function () {
+                document.documentElement.classList.remove('veil-on');
+            });
+        })();
+
+        // Escalonado de las tarjetas
+        document.querySelectorAll('.bento-grid .fade-up').forEach(function (el, i) {
+            el.style.setProperty('--i', i);
+        });
+        document.querySelectorAll('.info-strip .fade-up').forEach(function (el, i) {
+            el.style.setProperty('--i', i);
+        });
+
+        // Parallax suave del fondo del hero
+        (function () {
+            var pattern = document.querySelector('.decorative-pattern');
+            if (!pattern) return;
+            var ticking = false;
+            window.addEventListener('scroll', function () {
+                if (ticking) return;
+                ticking = true;
+                requestAnimationFrame(function () {
+                    var y = Math.min(window.scrollY, 700);
+                    pattern.style.setProperty('--py', (y * 0.12) + 'px');
+                    ticking = false;
+                });
+            }, { passive: true });
+        })();
+
         // Header scroll effect
         const header = document.getElementById('header');
         window.addEventListener('scroll', () => {
@@ -1618,6 +1763,8 @@
             });
         });
     </script>
+
+
 </body>
 
 </html>
