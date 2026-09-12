@@ -7,20 +7,30 @@ Requisitos:
 Uso:
 1) Configura SUPABASE_URL y SUPABASE_SERVICE_KEY.
 2) Ejecuta: python impresiones_poller.py
+
+Notas:
+- Solo puede haber UNA instancia abierta a la vez (candado por mutex de
+  Windows). Si se intenta abrir otra copia, avisa y se cierra sola.
+- Cada ticket se "reclama" en Supabase antes de imprimirse, asi que aunque
+  hubiera dos workers (dos PCs, por ejemplo) nunca se imprime dos veces.
 """
 
 from __future__ import annotations
 
 import os
+import sys
 import time
 import textwrap
 from datetime import datetime, timezone
 from typing import Any
 
 import requests
+import win32api
+import win32event
 import win32print
 import win32ui
-from win32con import FW_NORMAL
+import winerror
+from win32con import FW_NORMAL, MB_ICONWARNING, MB_OK
 
 SUPABASE_URL = os.getenv("SUPABASE_URL", "https://TU-PROYECTO.supabase.co")
 SUPABASE_SERVICE_KEY = os.getenv("SUPABASE_SERVICE_KEY", "")
@@ -28,6 +38,19 @@ SUPABASE_TABLE = "impresiones_queue"
 POLL_SECONDS = 2
 MAX_AGE_SECONDS = 120
 LINE_WIDTH = 25
+# Nombre unico del candado: cualquier copia del programa (aunque el archivo se
+# llame "impresiones_poller (1).py") comparte este mismo nombre.
+MUTEX_NAME = "Global\\DonaSusyImpresionesPoller"
+
+# Se guarda en global para que el candado viva mientras el proceso viva.
+_instance_mutex = None
+
+
+def acquire_single_instance() -> bool:
+    """Devuelve True si somos la unica instancia; False si ya hay otra abierta."""
+    global _instance_mutex
+    _instance_mutex = win32event.CreateMutex(None, False, MUTEX_NAME)
+    return win32api.GetLastError() != winerror.ERROR_ALREADY_EXISTS
 
 
 def now_utc() -> datetime:
@@ -334,9 +357,36 @@ def fetch_pending_rows() -> list[dict[str, Any]]:
     return rows if isinstance(rows, list) else []
 
 
+def claim_row(row_id: str) -> bool:
+    """Marca printed=true SOLO si todavia estaba en false (operacion atomica).
+
+    Devuelve True si este worker gano el ticket. Si otro worker ya lo reclamo,
+    Supabase no actualiza ninguna fila y devuelve [] -> False.
+    """
+    url = f"{SUPABASE_URL}/rest/v1/{SUPABASE_TABLE}"
+    params = {"id": f"eq.{row_id}", "printed": "eq.false"}
+    response = requests.patch(
+        url,
+        headers={**headers(), "Prefer": "return=representation"},
+        params=params,
+        json={"printed": True},
+        timeout=15,
+    )
+    response.raise_for_status()
+    updated = response.json()
+    return isinstance(updated, list) and len(updated) > 0
+
+
 def mark_row_printed(row_id: str) -> None:
-    url = f"{SUPABASE_URL}/rest/v1/{SUPABASE_TABLE}?id=eq.{row_id}"
-    response = requests.patch(url, headers=headers(), json={"printed": True}, timeout=15)
+    url = f"{SUPABASE_URL}/rest/v1/{SUPABASE_TABLE}"
+    response = requests.patch(url, headers=headers(), params={"id": f"eq.{row_id}"}, json={"printed": True}, timeout=15)
+    response.raise_for_status()
+
+
+def release_row(row_id: str) -> None:
+    """Regresa el ticket a la cola (printed=false) si fallo la impresion."""
+    url = f"{SUPABASE_URL}/rest/v1/{SUPABASE_TABLE}"
+    response = requests.patch(url, headers=headers(), params={"id": f"eq.{row_id}"}, json={"printed": False}, timeout=15)
     response.raise_for_status()
 
 
@@ -348,29 +398,64 @@ def should_print(ticket: dict[str, Any]) -> bool:
     return 0 <= age <= MAX_AGE_SECONDS
 
 
-def main() -> None:
-    if not configured():
-        print("[ERROR] Configura SUPABASE_URL y SUPABASE_SERVICE_KEY antes de ejecutar.")
+def process_row(row: dict[str, Any]) -> None:
+    row_id = str(row.get("id", "")).strip()
+    payload = row.get("payload")
+    if not row_id or not isinstance(payload, dict):
         return
-
-    print("[OK] Worker de impresion conectado a Supabase.")
-    while True:
+    if not should_print(payload):
+        mark_row_printed(row_id)
+        return
+    # Reclamar ANTES de imprimir: si otro worker ya lo tomo, no se imprime.
+    if not claim_row(row_id):
+        print(f"[SKIP] Ticket ya tomado por otro worker: {row_id}")
+        return
+    try:
+        print_text_windows(build_ticket_text(payload))
+    except Exception:
+        # Fallo la impresora: regresar el ticket a la cola para reintentar.
         try:
-            rows = fetch_pending_rows()
-            for row in rows:
-                row_id = str(row.get("id", "")).strip()
-                payload = row.get("payload")
-                if not row_id or not isinstance(payload, dict):
-                    continue
-                if not should_print(payload):
-                    mark_row_printed(row_id)
-                    continue
-                print_text_windows(build_ticket_text(payload))
-                mark_row_printed(row_id)
-                print(f"[PRINT] Ticket impreso: {row_id}")
-        except Exception as err:
-            print(f"[WARN] Error en worker: {err}")
-        time.sleep(POLL_SECONDS)
+            release_row(row_id)
+        except Exception as release_err:
+            print(f"[WARN] No se pudo regresar el ticket {row_id} a la cola: {release_err}")
+        raise
+    print(f"[PRINT] Ticket impreso: {row_id}")
+
+
+def main() -> None:
+    if not acquire_single_instance():
+        msg = (
+            "El programa de impresiones YA esta abierto.\n\n"
+            "Esta ventana se cerrara para no imprimir tickets duplicados."
+        )
+        print(f"[ERROR] {msg}")
+        win32api.MessageBox(0, msg, "Impresiones Dona Susy", MB_OK | MB_ICONWARNING)
+        sys.exit(0)
+
+    if not configured():
+        msg = "Configura SUPABASE_URL y SUPABASE_SERVICE_KEY antes de ejecutar."
+        print(f"[ERROR] {msg}")
+        win32api.MessageBox(0, msg, "Impresiones Dona Susy", MB_OK | MB_ICONWARNING)
+        sys.exit(1)
+
+    try:
+        printer_name = win32print.GetDefaultPrinter()
+    except Exception:
+        printer_name = "(sin impresora predeterminada)"
+    print("[OK] Worker de impresion conectado a Supabase.")
+    print(f"[OK] Impresora: {printer_name}")
+    print("[OK] Deja esta ventana abierta. Para cerrar: Ctrl+C o cierra la ventana.")
+
+    try:
+        while True:
+            try:
+                for row in fetch_pending_rows():
+                    process_row(row)
+            except Exception as err:
+                print(f"[WARN] Error en worker: {err}")
+            time.sleep(POLL_SECONDS)
+    except KeyboardInterrupt:
+        print("[OK] Worker detenido.")
 
 
 if __name__ == "__main__":
