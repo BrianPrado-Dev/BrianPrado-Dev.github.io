@@ -1191,19 +1191,20 @@
 
     const MENU = {
       comida: [
-        { id: "torta_ahogada", name: "Torta Ahogada", price: 60, note: "Carnitas, Buche, Lengua, Mixta" },
+        { id: "torta_ahogada", name: "Torta Ahogada", price: 65, note: "Carnitas, Buche, Lengua, Mixta" },
         { id: "torta_mini", name: "Torta Mini", price: 30, note: "Carnitas, Buche, Lengua, Mixta" },
         { id: "taco_dorado_sencillo", name: "Taco Dorado Sencillo", price: 10, note: "Papa, Frijol, Requesón y Picadillo" },
         { id: "taco_dorado_carne", name: "Taco Dorado con Carne", price: 25, note: "Carnitas, Buche, Lengua, Mixta" },
         { id: "taco_blandito", name: "Taco Blandito", price: 25, note: "Carnitas, Buche, Lengua, Mixta" },
+        { id: "orden_carne", name: "Orden de Carne", price: 100, note: "Carnitas, Buche, Lengua, Mixta" },
         { id: "kilo_carne", name: "Kilo de Carne", price: 300, note: "Carnitas, Buche, Lengua, Mixta" }
       ],
       paquetes: [
-        { id: "paquete_1", name: "Paquete #1", price: 90, note: "1 Torta + 1 Taco Dorado Sencillo + 1 Refresco (o Agua Fresca; con Cerveza +$5)" },
-        { id: "paquete_2", name: "Paquete #2", price: 95, note: "1 Torta + 2 Tacos Dorados Sencillos + 1 Refresco (o Agua Fresca; con Cerveza +$5)" },
-        { id: "paquete_3", name: "Paquete #3", price: 220, note: "3 Tortas + 5 Tacos Dorados Sencillos" },
-        { id: "paquete_4", name: "Paquete #4", price: 345, note: "5 Tortas + 6 Tacos Dorados Sencillos" },
-        { id: "paquete_5", name: "Paquete #5", price: 680, note: "10 Tortas + 10 Tacos Dorados Sencillos" }
+        { id: "paquete_1", name: "Paquete #1", price: 95, note: "1 Torta + 1 Taco Dorado Sencillo + 1 Refresco (o Agua Fresca; con Cerveza +$5)" },
+        { id: "paquete_2", name: "Paquete #2", price: 100, note: "1 Torta + 2 Tacos Dorados Sencillos + 1 Refresco (o Agua Fresca; con Cerveza +$5)" },
+        { id: "paquete_3", name: "Paquete #3", price: 235, note: "3 Tortas + 5 Tacos Dorados Sencillos" },
+        { id: "paquete_4", name: "Paquete #4", price: 395, note: "5 Tortas + 6 Tacos Dorados Sencillos" },
+        { id: "paquete_5", name: "Paquete #5", price: 730, note: "10 Tortas + 10 Tacos Dorados Sencillos" }
       ],
       bebidas: [
         { id: "refresco_taparosca", name: "Refresco Taparosca", price: 30 },
@@ -2340,7 +2341,7 @@
       const aguas = ["Horchata", "Jamaica"];
       const cerveza = ["Clara", "Oscura"];
 
-      if (["torta_ahogada", "torta_mini", "taco_blandito"].includes(itemId)) {
+      if (["torta_ahogada", "torta_mini", "taco_blandito", "orden_carne"].includes(itemId)) {
         return await chooseOption("Selecciona tipo", carne, quantityState);
       }
       if (itemId === "kilo_carne") {
@@ -3345,6 +3346,7 @@
         taco_dorado_sencillo: "https://i.pinimg.com/474x/66/e8/62/66e862a60d77a5936a5a45b47345c474.jpg",
         taco_dorado_carne: "https://live.staticflickr.com/5493/11908135565_1c710b0ab2_b.jpg",
         taco_blandito: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQqfkb1nq8K3jtL1VjPLTMLRX_LuNdnZgd0og&s",
+        orden_carne: "https://www.cocinadelirante.com/sites/default/files/images/2023/08/carnitas-sin-freir-para-tortas-ahogadas.jpg",
         kilo_carne: "https://www.cocinadelirante.com/sites/default/files/images/2023/08/carnitas-sin-freir-para-tortas-ahogadas.jpg"
       };
 

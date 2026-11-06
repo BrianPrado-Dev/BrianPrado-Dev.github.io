@@ -618,7 +618,8 @@
     // CONSTANTES Y ALMACENAMIENTO
     // =====================================================================
     const WAITER_NAME_KEY = "dona_susy_mesera_nombre";
-    const PRECIOS_KEY = "pdv_precios_v1";
+    const PRECIOS_KEY = "pdv_precios_v2";
+    const PRECIOS_KEY_ANTERIOR = "pdv_precios_v1";
     const CLAVE_KEY = "pdv_clave_v1";
     const BORRADOR_KEY = "pdv_borrador_v1";
     const PRINT_PROVIDER = "supabase"; // "supabase" | "local-api"
@@ -653,28 +654,37 @@
     const PRECIO_POR_GRAMO = 0.3;
     const CORONA_EXTRA = 5;
 
-    // Precios por defecto (idénticos al PDV de escritorio)
+    // Precios por defecto (lista de precios vigente del local)
     const PRECIOS_DEFAULT = {
-      "Torta": 55,
+      "Torta": 65,
       "Torta Mini": 28,
       "Taco Dorado": 10,
       "Taco con Carne": 25,
       "Taco Blandito": 25,
+      "Orden de Carne": 100,
       "Refresco": 25,
       "Agua Chica": 15,
       "Agua Grande": 25,
       "Caguama": 70,
       "Cerveza": 25,
-      "Paquete 1": 80,
-      "Paquete 2": 85,
-      "Paquete 3": 205,
-      "Paquete 4": 320,
-      "Paquete 5": 630
+      "Paquete 1": 95,
+      "Paquete 2": 100,
+      "Paquete 3": 235,
+      "Paquete 4": 395,
+      "Paquete 5": 730
     };
+
+    // Precios que cambiaron con la lista nueva: lo que se guardó antes (v1) para estos ya no aplica
+    const PRECIOS_ACTUALIZADOS_V2 = ["Torta", "Paquete 1", "Paquete 2", "Paquete 3", "Paquete 4", "Paquete 5"];
 
     let precios = { ...PRECIOS_DEFAULT };
     try {
-      const guardados = JSON.parse(localStorage.getItem(PRECIOS_KEY) || "{}");
+      let guardados = JSON.parse(localStorage.getItem(PRECIOS_KEY) || "null");
+      if (!guardados) {
+        // Conserva los demás precios que se hayan modificado desde Configuración
+        guardados = JSON.parse(localStorage.getItem(PRECIOS_KEY_ANTERIOR) || "{}");
+        PRECIOS_ACTUALIZADOS_V2.forEach((key) => delete guardados[key]);
+      }
       precios = { ...PRECIOS_DEFAULT, ...guardados };
     } catch (_) {}
 
@@ -698,6 +708,7 @@
         { key: "Taco Dorado", nombre: "Taco Sencillo", tipo: "taco", emoji: "🌮", color: "#BF6B00", desc: "Papa, Frijol, Requesón, Picadillo" },
         { key: "Taco con Carne", nombre: "Taco Dorado c/Carne", tipo: "carne_taco", emoji: "🌮", color: "#8B0000", desc: "Carne + sabor de taco" },
         { key: "Taco Blandito", nombre: "Taco Blandito", tipo: "carne", emoji: "🌮", color: "#A52A2A", desc: "Carne, Buche, Lengua, Mixta" },
+        { key: "Orden de Carne", nombre: "Orden de Carne", tipo: "carne", emoji: "🥩", color: "#7B3F00", desc: "Carne, Buche, Lengua, Mixta" },
         { key: "Carne(Gramos)", nombre: "Carne por Gramos", tipo: "gramos", emoji: "🥩", color: "#6D4C41", desc: "Por gramos o por monto", precioTexto: "$$$" },
         { key: "__nuevo__", nombre: "Nuevo Ítem", tipo: "nuevo", emoji: "➕", color: "#ff8f00", desc: "Producto personalizado", precioTexto: "Custom" },
         { key: "__descuento__", nombre: "Descuento", tipo: "descuento", emoji: "💲", color: "#ff6f00", desc: "Aplica un descuento", precioTexto: "- $" }
@@ -725,6 +736,7 @@
       "Taco Dorado": "https://i.pinimg.com/474x/66/e8/62/66e862a60d77a5936a5a45b47345c474.jpg",
       "Taco con Carne": "https://live.staticflickr.com/5493/11908135565_1c710b0ab2_b.jpg",
       "Taco Blandito": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQqfkb1nq8K3jtL1VjPLTMLRX_LuNdnZgd0og&s",
+      "Orden de Carne": "https://www.cocinadelirante.com/sites/default/files/images/2023/08/carnitas-sin-freir-para-tortas-ahogadas.jpg",
       "Carne(Gramos)": "https://www.cocinadelirante.com/sites/default/files/images/2023/08/carnitas-sin-freir-para-tortas-ahogadas.jpg",
       "Refresco": "https://photos.tryotter.com/cdn-cgi/image/fit=crop,width=492,height=267,quality=60,format=auto/menu-photos/f547ac6c-fc51-4e7f-a279-0ffe24487e8f.jpeg",
       "Agua Chica": "https://mercadofacil.mx/wp-content/uploads/2023/03/IMG-20230322-WA0014.jpg",

@@ -651,6 +651,24 @@
             margin-top: 1rem;
         }
 
+        .package-extra {
+            display: flex;
+            align-items: center;
+            gap: 0.35rem;
+            margin-top: 0.5rem;
+            font-size: 0.8rem;
+            font-weight: 600;
+            color: var(--color-red);
+        }
+
+        .package-extra .material-symbols-outlined {
+            font-size: 1.05rem;
+        }
+
+        .package-card.popular .package-extra {
+            color: var(--color-gold-light);
+        }
+
         /* === DRINKS SECTION === */
         .drinks-grid {
             display: grid;
@@ -1062,7 +1080,7 @@
                             <div class="carousel-content">
                                 <h2>Paquete #1</h2>
                                 <p>1 Torta + 1 Taco Dorado + Refresco</p>
-                                <span class="carousel-price">$90</span>
+                                <span class="carousel-price">$95</span>
                             </div>
                         </div>
                     </div>
@@ -1076,7 +1094,7 @@
                             <div class="carousel-content">
                                 <h2>Paquete #2</h2>
                                 <p>1 Torta + 2 Tacos + Refresco</p>
-                                <span class="carousel-price">$95</span>
+                                <span class="carousel-price">$100</span>
                             </div>
                         </div>
                     </div>
@@ -1090,7 +1108,7 @@
                             <div class="carousel-content">
                                 <h2>Paquete #3</h2>
                                 <p>3 Tortas + 5 Tacos Dorados</p>
-                                <span class="carousel-price">$220</span>
+                                <span class="carousel-price">$235</span>
                             </div>
                         </div>
                     </div>
@@ -1104,7 +1122,7 @@
                             <div class="carousel-content">
                                 <h2>Paquete #4</h2>
                                 <p>5 Tortas + 6 Tacos Dorados</p>
-                                <span class="carousel-price">$345</span>
+                                <span class="carousel-price">$395</span>
                             </div>
                         </div>
                     </div>
@@ -1118,7 +1136,7 @@
                             <div class="carousel-content">
                                 <h2>Paquete #5</h2>
                                 <p>10 Tortas + 10 Tacos Dorados</p>
-                                <span class="carousel-price">$680</span>
+                                <span class="carousel-price">$730</span>
                             </div>
                         </div>
                     </div>
@@ -1160,7 +1178,7 @@
                         <h4 class="menu-item-name">Torta Ahogada</h4>
                         <p class="menu-item-description">Elige: Carnitas, Buche o Lengua</p>
                     </div>
-                    <span class="menu-item-price">$60</span>
+                    <span class="menu-item-price">$65</span>
                 </div>
                 <div class="menu-item">
                     <div class="menu-item-info">
@@ -1168,6 +1186,13 @@
                         <p class="menu-item-description">Elige: Carnitas, Buche, Lengua o Mixta</p>
                     </div>
                     <span class="menu-item-price">$30</span>
+                </div>
+                <div class="menu-item">
+                    <div class="menu-item-info">
+                        <h4 class="menu-item-name">Orden de Carne</h4>
+                        <p class="menu-item-description">Elige: Carnitas, Buche, Lengua o Mixta</p>
+                    </div>
+                    <span class="menu-item-price">$100</span>
                 </div>
                 <div class="menu-item">
                     <div class="menu-item-info">
@@ -1241,16 +1266,16 @@
                             <span class="package-number">Paquete #1</span>
                             <span class="package-badge">Popular</span>
                         </div>
-                        <p class="package-description">1 Torta + 1 Taco Dorado + Refresco</p>
-                        <span class="package-price">$90</span>
+                        <p class="package-description">1 Torta + 1 Taco Dorado + Refresco <span class="package-extra"><span class="material-symbols-outlined">sports_bar</span>Con Corona clara u oscura +$5</span></p>
+                        <span class="package-price">$95</span>
                     </div>
                     <div class="package-card popular">
                         <div class="package-header">
                             <span class="package-number">Paquete #2</span>
                             <span class="package-badge">Popular</span>
                         </div>
-                        <p class="package-description">1 Torta + 2 Tacos + Refresco</p>
-                        <span class="package-price">$95</span>
+                        <p class="package-description">1 Torta + 2 Tacos + Refresco <span class="package-extra"><span class="material-symbols-outlined">sports_bar</span>Con Corona clara u oscura +$5</span></p>
+                        <span class="package-price">$100</span>
                     </div>
                 </div>
             </div>
@@ -1267,14 +1292,14 @@
                             <span class="package-number">Paquete #3</span>
                         </div>
                         <p class="package-description">3 Tortas + 5 Tacos Dorados</p>
-                        <span class="package-price">$220</span>
+                        <span class="package-price">$235</span>
                     </div>
                     <div class="package-card">
                         <div class="package-header">
                             <span class="package-number">Paquete #4</span>
                         </div>
                         <p class="package-description">5 Tortas + 6 Tacos Dorados</p>
-                        <span class="package-price">$345</span>
+                        <span class="package-price">$395</span>
                     </div>
                     <div class="package-card family">
                         <div class="package-header">
@@ -1282,7 +1307,7 @@
                             <span class="package-badge">Mejor valor</span>
                         </div>
                         <p class="package-description">10 Tortas + 10 Tacos Dorados — Ideal para fiestas y eventos</p>
-                        <span class="package-price">$680</span>
+                        <span class="package-price">$730</span>
                     </div>
                 </div>
             </div>
