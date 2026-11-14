@@ -402,6 +402,14 @@
     </div>
   </header>
 
+  <!-- Regresar a Gestión de Mesas (debajo del logo) -->
+  <div class="px-4 md:px-6 pt-5">
+    <a href="../mesas/index.html" class="inline-flex items-center gap-2 bg-surface-container-highest hover:bg-primary hover:text-white transition-colors px-4 py-2 rounded-xl font-semibold" title="Volver a Gestión de Mesas">
+      <span class="material-symbols-outlined" aria-hidden="true">arrow_back</span>
+      Regresar
+    </a>
+  </div>
+
   <main class="px-4 md:px-6 pt-6 pb-32 max-w-[1400px] mx-auto">
     <div class="grid grid-cols-1 lg:grid-cols-5 gap-6 items-start">
 
@@ -618,8 +626,6 @@
     // CONSTANTES Y ALMACENAMIENTO
     // =====================================================================
     const WAITER_NAME_KEY = "dona_susy_mesera_nombre";
-    const PRECIOS_KEY = "pdv_precios_v2";
-    const PRECIOS_KEY_ANTERIOR = "pdv_precios_v1";
     const CLAVE_KEY = "pdv_clave_v1";
     const BORRADOR_KEY = "pdv_borrador_v1";
     const PRINT_PROVIDER = "supabase"; // "supabase" | "local-api"
@@ -657,7 +663,7 @@
     // Precios por defecto (lista de precios vigente del local)
     const PRECIOS_DEFAULT = {
       "Torta": 65,
-      "Torta Mini": 28,
+      "Torta Mini": 35,
       "Taco Dorado": 10,
       "Taco con Carne": 25,
       "Taco Blandito": 25,
@@ -674,18 +680,27 @@
       "Paquete 5": 730
     };
 
-    // Precios que cambiaron con la lista nueva: lo que se guardó antes (v1) para estos ya no aplica
-    const PRECIOS_ACTUALIZADOS_V2 = ["Torta", "Paquete 1", "Paquete 2", "Paquete 3", "Paquete 4", "Paquete 5"];
+    // Versiones de la lista de precios que guarda cada dispositivo (Configuración). Al cambiar un
+    // precio por defecto se agrega una versión con esos productos: lo que se guardó antes para
+    // ellos ya no aplica y el dispositivo toma el precio nuevo.
+    const PRECIOS_VERSIONES = [
+      { key: "pdv_precios_v1", cambiados: [] },
+      { key: "pdv_precios_v2", cambiados: ["Torta", "Paquete 1", "Paquete 2", "Paquete 3", "Paquete 4", "Paquete 5"] },
+      { key: "pdv_precios_v3", cambiados: ["Torta Mini"] }
+    ];
+    const PRECIOS_KEY = PRECIOS_VERSIONES[PRECIOS_VERSIONES.length - 1].key;
 
     let precios = { ...PRECIOS_DEFAULT };
     try {
-      let guardados = JSON.parse(localStorage.getItem(PRECIOS_KEY) || "null");
-      if (!guardados) {
-        // Conserva los demás precios que se hayan modificado desde Configuración
-        guardados = JSON.parse(localStorage.getItem(PRECIOS_KEY_ANTERIOR) || "{}");
-        PRECIOS_ACTUALIZADOS_V2.forEach((key) => delete guardados[key]);
+      // Usa la versión guardada más reciente sin los precios que cambiaron después de ella
+      // (conserva los demás que se hayan modificado desde Configuración)
+      for (let i = PRECIOS_VERSIONES.length - 1; i >= 0; i--) {
+        const guardados = JSON.parse(localStorage.getItem(PRECIOS_VERSIONES[i].key) || "null");
+        if (!guardados) continue;
+        PRECIOS_VERSIONES.slice(i + 1).forEach((v) => v.cambiados.forEach((key) => delete guardados[key]));
+        precios = { ...PRECIOS_DEFAULT, ...guardados };
+        break;
       }
-      precios = { ...PRECIOS_DEFAULT, ...guardados };
     } catch (_) {}
 
     function guardarPrecios() {
